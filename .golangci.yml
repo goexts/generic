@@ -1,0 +1,69 @@
+run:
+  go: '1.18.10'
+  timeout: 5m
+
+linters-settings:
+  errcheck:
+    # List of functions to exclude from checking, where each entry is a single function to exclude.
+    # See https://github.com/kisielk/errcheck#excluding-functions for details.
+    exclude-functions:
+      - ioutil.ReadFile
+      - io.ReadFile
+      - io.Copy(*bytes.Buffer)
+      - io.Copy(os.Stdout)
+      - fmt.Read
+      - fmt.Write
+      - fmt.Close
+      - fmt.Exec
+  #  dupl:
+  #    threshold: 100
+  funlen:
+    lines: 140
+    statements: 140
+  #  goheader:
+  #    template: |-
+  #      Copyright (c) 2024 OrigAdmin. All rights reserved.
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - dogsled
+    #    - dupl
+    - errcheck
+    - funlen
+    - gocritic
+    #    - gofmt; Enable back when upgrading CI to Go 1.20.
+    #    - goheader
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - stylecheck
+    #    - typecheck
+    - unconvert
+    - unused
+    - whitespace
+  fast: true
+
+issues:
+  exclude-rules:
+#    - path: _test\.go
+#      linters:
+#        - goheader
+    - path: _test\.go
+      linters:
+        - dupl
+        - funlen
+        - gosec
+        - gocritic
+    - linters:
+        - unused
+      source: ent.Schema
+  exclude-dirs:
+    - example
+  exclude-files:
+    - _default\.go
+
