@@ -11,9 +11,9 @@ func Must[T any](v T, err error) T {
 
 // MustOrZero is a utility function that ensures a value is not nil and returns it.
 // If the error is not nil, it returns a zero value.
-func MustOrZero[T any](v *T, err error) *T {
+func MustOrZero[T any](v T, err error) T {
 	if err != nil {
-		return new(T)
+		return *new(T)
 	}
 	return v
 }
