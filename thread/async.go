@@ -11,3 +11,18 @@ func Async[T any](f func() T) <-chan T {
 	}()
 	return ch
 }
+
+func AsyncOrErr[T any](f func() (T, error)) (<-chan T, <-chan error) {
+	ch := make(chan T)
+	err := make(chan error)
+	go func() {
+		defer close(ch)
+		v, e := f()
+		if e != nil {
+			err <- e
+			return
+		}
+		ch <- v
+	}()
+	return ch, err
+}
