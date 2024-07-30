@@ -1,0 +1,42 @@
+package trans
+
+// Cast attempts to convert a value to the specified type.
+// If the conversion is successful, it returns the converted value and true.
+// If the conversion fails, it returns the original value and false.
+func Cast[T any](v any) (ret T, ok bool) {
+	if ret, ok = v.(T); ok {
+		return ret, true
+	}
+	return ret, false
+}
+
+// CastOr attempts to convert a value to the specified type.
+// If the conversion is successful, it returns the converted value.
+// If the conversion fails, it returns the default value.
+func CastOr[T any](v any, def T) T {
+	if ret, ok := v.(T); ok {
+		return ret
+	}
+	return def
+}
+
+// CastOrZero attempts to convert a value to the specified type.
+// If the conversion is successful, it returns the converted value.
+// If the conversion fails, it returns a zero value of the specified type.
+func CastOrZero[T comparable](v any) T {
+	if ret, ok := v.(T); ok {
+		return ret
+	}
+	var zero T
+	return zero
+}
+
+// MustCast attempts to convert a value to the specified type.
+// If the conversion is successful, it returns the converted value.
+// If the conversion fails, it panics with the message "cast failed".
+func MustCast[T any](v any) T {
+	if ret, ok := v.(T); ok {
+		return ret
+	}
+	panic("cast failed")
+}
