@@ -1,5 +1,9 @@
+// Package types provides type definitions for various data types.
 package types
 
+// Boolean is an interface that represents a boolean type.
+// It is implemented by the built-in bool type.
 type Boolean interface {
+	// ~bool is a type constraint that specifies that the type must be a boolean.
 	~bool
 }
