@@ -1,4 +1,4 @@
-package check
+package cmp
 
 // Excludes returns the elements in src that are not in ts.
 func Excludes[T comparable](src []T, ts ...T) []T {

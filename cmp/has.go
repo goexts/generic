@@ -1,4 +1,4 @@
-package check
+package cmp
 
 // Has checks whether a value is in a slice.
 func Has[T comparable](s []T, e T) bool {

@@ -1,4 +1,4 @@
-package check
+package cmp
 
 // Includes returns the elements in src that are in ts.
 func Includes[T comparable](src []T, ts ...T) []T {

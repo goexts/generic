@@ -1,4 +1,4 @@
-package check
+package generic
 
 // Must is a utility function that ensures a value is not nil and returns it.
 // If the error is not nil, it panics with the error message.
