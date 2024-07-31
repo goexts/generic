@@ -9,6 +9,15 @@ func Must[T any](v T, err error) T {
 	return v
 }
 
+// MustOr is a utility function that ensures a value is not nil and returns it.
+// If the error is not nil, it returns the default value.
+func MustOr[T any](def T, v T, err error) T {
+	if err != nil {
+		return def
+	}
+	return v
+}
+
 // MustOrZero is a utility function that ensures a value is not nil and returns it.
 // If the error is not nil, it returns a zero value.
 func MustOrZero[T any](v T, err error) T {
@@ -23,15 +32,6 @@ func MustOrZero[T any](v T, err error) T {
 func MustOrNil[T any](v *T, err error) *T {
 	if err != nil {
 		return nil
-	}
-	return v
-}
-
-// MustOr is a utility function that ensures a value is not nil and returns it.
-// If the error is not nil, it returns the default value.
-func MustOr[T any](def T, v T, err error) T {
-	if err != nil {
-		return def
 	}
 	return v
 }
