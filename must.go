@@ -27,9 +27,9 @@ func MustOrNil[T any](v *T, err error) *T {
 	return v
 }
 
-// MustOrDefault is a utility function that ensures a value is not nil and returns it.
+// MustOr is a utility function that ensures a value is not nil and returns it.
 // If the error is not nil, it returns the default value.
-func MustOrDefault[T any](v T, err error, def T) T {
+func MustOr[T any](def T, v T, err error) T {
 	if err != nil {
 		return def
 	}
