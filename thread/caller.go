@@ -8,23 +8,23 @@ import (
 // Caller is an interface that represents a function call that can be run in a goroutine.
 // It allows for error handling and chaining of functions to be called after the function call completes.
 type Caller[T any] interface {
+	// Then sets a function to be called after the function call completes successfully.
+	// The result of the function call is passed as an argument to the function.
+	Then(func(T)) Caller[T]
+
 	// Catch sets a function to be called if an error occurs during the function call.
 	// The error is passed as an argument to the function.
 	Catch(func(error)) Caller[T]
 
 	// Finally sets a function to be called after the function call completes, regardless of whether an error occurred or not.
-	Finally(func()) Caller[T]
-
-	// Then sets a function to be called after the function call completes successfully.
-	// The result of the function call is passed as an argument to the function.
-	Then(func(T)) Caller[T]
+	Finally(func())
 }
 
 // caller is a struct that represents a function call to be run in a goroutine.
 type caller[T any] struct {
 	ctx     context.Context   // The context to use for the function call.
 	f       func() (T, error) // The function to be called.
-	then    func(T)           // The function to be called after the function call completes successfully.
+	then    []func(T)         // The function to be called after the function call completes successfully.
 	catch   func(error)       // The function to be called if an error occurs during the function call.
 	finally func()            // The function to be called after the function call completes, regardless of whether an error occurred or not.
 }
@@ -32,7 +32,7 @@ type caller[T any] struct {
 // Then sets the function to be called after the function call completes successfully.
 // The result of the function call is passed as an argument to the function.
 func (c *caller[T]) Then(f func(T)) Caller[T] {
-	c.then = f
+	c.then = append(c.then, f)
 	return c
 }
 
@@ -44,9 +44,8 @@ func (c *caller[T]) Catch(f func(error)) Caller[T] {
 }
 
 // Finally sets the function to be called after the function call completes, regardless of whether an error occurred or not.
-func (c *caller[T]) Finally(f func()) Caller[T] {
+func (c *caller[T]) Finally(f func()) {
 	c.finally = f
-	return c
 }
 
 // runGoroutine runs the function in a goroutine and handles error handling and chaining of functions.
@@ -68,8 +67,9 @@ func (c *caller[T]) runGoroutine() {
 			}
 			return
 		}
-		if c.then != nil {
-			c.then(t)
+		var then func(T)
+		for _, then = range c.then {
+			then(t)
 		}
 	}()
 }
