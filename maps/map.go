@@ -33,6 +33,15 @@ func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV {
 	return kvs
 }
 
+// KVsToMap converts a slice of key-value pairs to a map.
+func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M {
+	m := make(M, len(kvs))
+	for _, kv := range kvs {
+		m[kv.Key] = kv.Val
+	}
+	return m
+}
+
 // MapToTypes converts a map to a slice of types.
 func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T {
 	var ts []T
@@ -40,4 +49,14 @@ func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
 		ts = append(ts, f(k, v))
 	}
 	return ts
+}
+
+// TypesToMap converts a slice of types to a map.
+func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M {
+	m := make(M, len(ts))
+	for _, t := range ts {
+		k, v := f(t)
+		m[k] = v
+	}
+	return m
 }
