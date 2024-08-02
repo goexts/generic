@@ -19,6 +19,10 @@ func (r Runes) Read(offset int, limit int) Runes {
 	return slices.Clone(r[offset : offset+limit])
 }
 
+func (r Runes) ReadString(offset int, limit int) string {
+	return r.Read(offset, limit).String()
+}
+
 func (r Runes) Index(sub []rune) int {
 	return Index(r, sub)
 }
