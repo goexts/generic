@@ -22,6 +22,12 @@ func Read[T ~[]S, S E](arr T, offset int, limit int) T {
 	return arr[offset : offset+limit]
 }
 
+// Append appends the element v to the end of Array[S] s.
+func Append[T ~[]S, S E](arr T, v S) (T, int) {
+	sz := len(arr)
+	return append(arr, v), sz
+}
+
 // Equal reports whether a and b
 // are the same length and contain the same runes.
 // A nil argument is equivalent to an empty slice.
