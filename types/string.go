@@ -5,4 +5,5 @@ package types
 // It can be a string, a byte slice, or a rune slice.
 type String interface {
 	~string | ~[]byte | ~[]rune
+	String() string
 }
