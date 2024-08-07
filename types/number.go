@@ -6,9 +6,7 @@ import (
 )
 
 // Float is an interface that represents a float32 or float64.
-type Float interface {
-	~float32 | ~float64 // The tilde (~) operator is used to specify the underlying type of a type parameter.
-}
+type Float = constraints.Float
 
 // Unsigned is an interface that represents an unsigned integer type.
 type Unsigned = constraints.Unsigned
@@ -22,13 +20,11 @@ type Integer = constraints.Integer
 // Complex is an interface that represents a complex64 or complex128 number.
 type Complex = constraints.Complex
 
+// Ordered is an interface that represents any ordered type.
+type Ordered = constraints.Ordered
+
 // Number is an interface that represents any number type.
 // It includes all the interfaces defined above.
 type Number interface {
 	Float | Integer | Complex
-}
-
-// Ordered is an interface that represents any ordered type.
-type Ordered interface {
-	Integer | Float | ~string
 }
