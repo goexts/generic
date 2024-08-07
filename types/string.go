@@ -5,5 +5,9 @@ package types
 // It can be a string, a byte slice, or a rune slice.
 type String interface {
 	~string | ~[]byte | ~[]rune
-	String() string
+}
+
+// Stringer converts a string-like type to a string.
+func Stringer[T String](t T) string {
+	return string(t)
 }
