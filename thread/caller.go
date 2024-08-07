@@ -23,7 +23,7 @@ type Caller[T any] interface {
 // caller is a struct that represents a function call to be run in a goroutine.
 type caller[T any] struct {
 	ctx     context.Context   // The context to use for the function call.
-	f       func() (T, error) // The function to be called.
+	fn      func() (T, error) // The function to be called.
 	then    []func(T)         // The function to be called after the function call completes successfully.
 	catch   func(error)       // The function to be called if an error occurs during the function call.
 	finally func()            // The function to be called after the function call completes, regardless of whether an error occurred or not.
@@ -57,7 +57,7 @@ func (c *caller[T]) runGoroutine() {
 			}
 		}()
 		ret, err := AsyncOrErr(func() (T, error) {
-			return c.f()
+			return c.fn()
 		})
 
 		t, e := WaitTimeoutOrErr(c.ctx, ret, err)
@@ -76,20 +76,20 @@ func (c *caller[T]) runGoroutine() {
 
 // Try creates a new caller with the given function and runs it in a goroutine.
 // The caller can be used to chain functions to be called after the function call completes.
-func Try[T any](f func() (T, error)) (Caller[T], func()) {
+func Try[T any](fn func() (T, error)) (Caller[T], func()) {
 	c := &caller[T]{
 		ctx: context.Background(),
-		f:   f,
+		fn:  fn,
 	}
 	return c, c.runGoroutine
 }
 
 // TryWithContext creates a new caller with the given function and context and runs it in a goroutine.
 // The caller can be used to chain functions to be called after the function call completes.
-func TryWithContext[T any](ctx context.Context, f func() (T, error)) (Caller[T], func()) {
+func TryWithContext[T any](ctx context.Context, fn func() (T, error)) (Caller[T], func()) {
 	c := &caller[T]{
 		ctx: ctx,
-		f:   f,
+		fn:  fn,
 	}
 	return c, c.runGoroutine
 }

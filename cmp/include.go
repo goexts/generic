@@ -3,8 +3,8 @@ package cmp
 // Includes returns the elements in src that are in ts.
 func Includes[T comparable](src []T, ts ...T) []T {
 	includes := make(map[T]struct{}, len(src))
-	for _, s := range src {
-		includes[s] = struct{}{}
+	for _, t := range src {
+		includes[t] = struct{}{}
 	}
 	var hits []T
 	for _, t := range ts {

@@ -1,5 +1,9 @@
 package trans
 
+import (
+	"fmt"
+)
+
 // Cast attempts to convert a value to the specified type.
 // If the conversion is successful, it returns the converted value and true.
 // If the conversion fails, it returns the original value and false.
@@ -33,10 +37,10 @@ func CastOrZero[T comparable](v any) T {
 
 // MustCast attempts to convert a value to the specified type.
 // If the conversion is successful, it returns the converted value.
-// If the conversion fails, it panics with the message "cast failed".
+// If the conversion fails, it panics with the message.
 func MustCast[T any](v any) T {
 	if ret, ok := v.(T); ok {
 		return ret
 	}
-	panic("cast failed")
+	panic(fmt.Sprintf("value is not type of %T", v))
 }

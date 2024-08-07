@@ -5,7 +5,7 @@ import (
 )
 
 // Async runs the provided function in a separate goroutine and returns a channel that will receive the result of the function.
-// The function f will be executed asynchronously and its result will be sent to the channel.
+// The function fn will be executed asynchronously and its result will be sent to the channel.
 // The channel will be closed after the result is sent.
 func Async[T any](f func() T) <-chan T {
 	ch := make(chan T)
@@ -17,7 +17,7 @@ func Async[T any](f func() T) <-chan T {
 }
 
 // AsyncOrErr runs the provided function in a separate goroutine and returns two channels: one that will receive the result of the function, and another that will receive any error that occurs during the function execution.
-// The function f will be executed asynchronously and its result and error will be sent to the respective channels.
+// The function fn will be executed asynchronously and its result and error will be sent to the respective channels.
 // The channels will be closed after the result or error is sent.
 // If the provided function is nil, an error will be sent to the error channel.
 func AsyncOrErr[T any](f func() (T, error)) (<-chan T, <-chan error) {
