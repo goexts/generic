@@ -9,6 +9,14 @@ func Must[T any](v T, err error) T {
 	return v
 }
 
+// Must2 is a utility function that ensures a value is not nil and returns it.
+func Must2[T any, U any](v T, u U, err error) (T, U) {
+	if err != nil {
+		panic(err)
+	}
+	return v, u
+}
+
 // MustOr is a utility function that ensures a value is not nil and returns it.
 // If the error is not nil, it returns the default value.
 func MustOr[T any](def T, v T, err error) T {
@@ -34,4 +42,20 @@ func MustOrNil[T any](v *T, err error) *T {
 		return nil
 	}
 	return v
+}
+
+// OrNil is a utility function that ensures a value is not nil and returns it.
+func OrNil[T any](_ T, err error) error {
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// OrNil2 is a utility function that ensures a value is not nil and returns it.
+func OrNil2[T any](_, _ T, err error) error {
+	if err != nil {
+		return err
+	}
+	return nil
 }
