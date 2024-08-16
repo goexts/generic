@@ -7,8 +7,14 @@ import (
 // E is comparable type of slice element
 type E = comparable
 
-// ErrTooLarge is an error when number is too large than length
-var ErrTooLarge = errors.New("slices.Array: number is too large than length")
+var (
+	// ErrTooLarge is an error when number is too large than length
+	ErrTooLarge = errors.New("slices.Array: number is too large than length")
+	// ErrTooSmall is an error when number is too small than length
+	ErrTooSmall = errors.New("slices.Array: number is too small than length")
+	// ErrWrongIndex is an error when index is out of range
+	ErrWrongIndex = errors.New("slices.Array: wrong index")
+)
 
 // Read returns a slice of the Array[S] s beginning at offset and length limit.
 // If offset or limit is negative, it is treated as if it were zero.
@@ -574,5 +580,63 @@ func trimRight[T ~[]S, S E](s, cutset T) T {
 		}
 		s = s[:len(s)-n]
 	}
+	return s
+}
+
+// InsertWith inserts v into s at the first index where fn(a, b) is true.
+func InsertWith[T ~[]S, S E](s T, v S, fn func(a, b S) bool) T {
+	pos := binarySearch(s, v, fn)
+
+	// Create the result slice with the appropriate capacity.
+	var ret T
+
+	// Append elements up to the insertion point.
+	ret = append(ret, s[:pos]...)
+
+	// Insert v.
+	ret = append(ret, v)
+
+	// Append the rest of the elements.
+	ret = append(ret, s[pos:]...)
+
+	return ret
+}
+
+// binarySearch performs a binary search to find the insertion point for v in s.
+func binarySearch[T E, S ~[]T](s S, v T, fn func(a, b T) bool) int {
+	left, right := 0, len(s)
+	for left < right {
+		mid := left + (right-left)/2
+		if fn(s[mid], v) {
+			right = mid
+		} else {
+			left = mid + 1
+		}
+	}
+	return left
+}
+
+// RemoveWith removes the first index where fn(a, b) is true.
+func RemoveWith[T ~[]S, S E](s T, fn func(a S) bool) T {
+	ret := s[:0]
+	for i := range s {
+		if !fn(s[i]) {
+			ret = append(ret, s[i])
+		}
+	}
+	return ret
+}
+
+func CopyAt[T ~[]S, S E](s, t T, i int) T {
+	if i < 0 {
+		panic(ErrWrongIndex)
+	}
+	caps := cap(s)
+	lent := len(s)
+	if caps < lent+i {
+		s = append(s, make([]S, lent+i-caps)...)
+	}
+	// copy the elements from s to t.
+	copy(s[i:], t)
 	return s
 }
