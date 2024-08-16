@@ -640,3 +640,16 @@ func CopyAt[T ~[]S, S E](s, t T, i int) T {
 	copy(s[i:], t)
 	return s
 }
+
+func OverWithError[S any](s []S, err error) func(func(int, S) bool) {
+	return func(yield func(int, S) bool) {
+		if err != nil || len(s) == 0 {
+			return
+		}
+		for i := range s {
+			if !yield(i, s[i]) {
+				return
+			}
+		}
+	}
+}
