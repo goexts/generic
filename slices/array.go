@@ -589,7 +589,9 @@ func InsertWith[T ~[]S, S E](s T, v S, fn func(a, b S) bool) T {
 
 	// Create the result slice with the appropriate capacity.
 	var ret T
-
+	if pos == -1 {
+		return append(s, v)
+	}
 	// Append elements up to the insertion point.
 	ret = append(ret, s[:pos]...)
 
@@ -603,17 +605,21 @@ func InsertWith[T ~[]S, S E](s T, v S, fn func(a, b S) bool) T {
 }
 
 // binarySearch performs a binary search to find the insertion point for v in s.
-func binarySearch[T E, S ~[]T](s S, v T, fn func(a, b T) bool) int {
-	left, right := 0, len(s)
-	for left < right {
-		mid := left + (right-left)/2
-		if fn(s[mid], v) {
-			right = mid
+func binarySearch[S ~[]R, R E](s S, target R, cmp func(a, b R) bool) int {
+	n := len(s)
+	l, r := 0, n
+	for l < r {
+		mid := int(uint(l+r) >> 1)
+		if !cmp(s[mid], target) {
+			l = mid + 1
 		} else {
-			left = mid + 1
+			r = mid
 		}
 	}
-	return left
+	if l < n && cmp(s[l], target) {
+		return l
+	}
+	return -1
 }
 
 // RemoveWith removes the first index where fn(a, b) is true.
