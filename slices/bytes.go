@@ -30,7 +30,7 @@ func (r Bytes) FindString(s string) int {
 }
 
 func (r Bytes) StringArray() []string {
-	var result []string
+	result := make([]string, 0, len(r))
 	for i := range r {
 		result = append(result, string(r[i]))
 	}

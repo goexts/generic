@@ -2,6 +2,7 @@ package slices
 
 import (
 	"errors"
+	"slices"
 )
 
 // E is comparable type of slice element
@@ -38,21 +39,7 @@ func Append[T ~[]S, S E](arr T, v S) (T, int) {
 // are the same length and contain the same runes.
 // A nil argument is equivalent to an empty slice.
 func Equal[T ~[]S, S E](a, b T) bool {
-	lenA := len(a)
-	lenB := len(b)
-	if lenA == 0 || lenB == 0 {
-		return lenA == 0 && lenB == 0
-	}
-	if lenA != lenB {
-		return false
-	}
-
-	for i := 0; i < lenA; i++ {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
+	return slices.Equal(a, b)
 }
 
 // HasPrefix tests whether the Array[S] s begins with prefix.
@@ -152,50 +139,6 @@ func Repeat[T ~[]S, S E](b T, count int) T {
 		bp *= 2
 	}
 	return nb
-}
-
-// indexFunc is the same as IndexFunc except that if
-// truth==false, the sense of the predicate function is
-// inverted.
-func indexFunc[T ~[]S, S E](s T, f func(S) bool, truth bool) int {
-	for i, r := range s {
-		if f(r) == truth {
-			return i
-		}
-	}
-	return -1
-}
-
-// lastIndexFunc is the same as LastIndexFunc except that if
-// truth==false, the sense of the predicate function is
-// inverted.
-func lastIndexFunc[T ~[]S, S E](s T, f func(S) bool, truth bool) int {
-	for i := len(s); i > 0; {
-		r := s[i-1]
-		i--
-		if f(r) == truth {
-			return i
-		}
-	}
-	return -1
-}
-
-// TrimPrefix returns s without the provided leading prefix Array.
-// If s doesn't start with prefix, s is returned unchanged.
-func TrimPrefix[T ~[]S, S E](s, prefix T) T {
-	if HasPrefix(s, prefix) {
-		return s[len(prefix):]
-	}
-	return s
-}
-
-// TrimSuffix returns s without the provided trailing suffix Array.
-// If s doesn't end with suffix, s is returned unchanged.
-func TrimSuffix[T ~[]S, S E](s, suffix T) T {
-	if HasSuffix(s, suffix) {
-		return s[:len(s)-len(suffix)]
-	}
-	return s
 }
 
 // IndexArray returns the index of the first instance of the runes point
@@ -339,127 +282,6 @@ func genSplit[T ~[]S, S E](s, sep T, sepSave, n int) []T {
 	return a[:i+1]
 }
 
-// SplitN slices s into sub arrays separated by sep and returns a slice of
-// the sub arrays between those separators.
-//
-// The count determines the number of sub arrays to return:
-//
-//	n > 0: at most n sub arrays; the last subArray will be the unsplit remainder.
-//	n == 0: the result is nil (zero sub arrays)
-//	n < 0: all sub arrays
-//
-// Edge cases for s and sep (for example, empty Arrays) are handled
-// as described in the documentation for Split.
-//
-// To split around the first instance of a separator, see Cut.
-func SplitN[T ~[]S, S E](s, sep T, n int) []T { return genSplit(s, sep, 0, n) }
-
-// SplitAfterN slices s into sub arrays after each instance of sep and
-// returns a slice of those sub arrays.
-//
-// The count determines the number of sub arrays to return:
-//
-//	n > 0: at most n sub arrays; the last subArray will be the unsplit remainder.
-//	n == 0: the result is nil (zero sub arrays)
-//	n < 0: all sub arrays
-//
-// Edge cases for s and sep (for example, empty Arrays) are handled
-// as described in the documentation for SplitAfter.
-func SplitAfterN[T ~[]S, S E](s, sep T, n int) []T {
-	return genSplit(s, sep, len(sep), n)
-}
-
-// Split slices s into all sub arrays separated by sep and returns a slice of
-// the sub arrays between those separators.
-//
-// If s does not contain sep and sep is not empty, Split returns a
-// slice of length 1 whose only element is s.
-//
-// If sep is empty, Split splits after each UTF-8 sequence. If both s
-// and sep are empty, Split returns an empty slice.
-//
-// It is equivalent to SplitN with a count of -1.
-//
-// To split around the first instance of a separator, see Cut.
-func Split[T ~[]S, S E](s, sep T) []T { return genSplit(s, sep, 0, -1) }
-
-// SplitAfter slices s into all sub arrays after each instance of sep and
-// returns a slice of those sub arrays.
-//
-// If s does not contain sep and sep is not empty, SplitAfter returns
-// a slice of length 1 whose only element is s.
-//
-// If sep is empty, SplitAfter splits after each UTF-8 sequence. If
-// both s and sep are empty, SplitAfter returns an empty slice.
-//
-// It is equivalent to SplitAfterN with a count of -1.
-func SplitAfter[T ~[]S, S E](s, sep T) []T {
-	return genSplit(s, sep, len(sep), -1)
-}
-
-// IndexFunc returns the index into s of the first Unicode
-// code point satisfying f(c), or -1 if none do.
-func IndexFunc[T ~[]S, S E](s T, f func(S) bool) int {
-	return indexFunc(s, f, true)
-}
-
-// LastIndexFunc returns the index into s of the last
-// Unicode code point satisfying f(c), or -1 if none do.
-func LastIndexFunc[T ~[]S, S E](s T, f func(S) bool) int {
-	return lastIndexFunc(s, f, true)
-}
-
-// Replace returns a copy of the Array s with the first n
-// non-overlapping instances of old replaced by new.
-// If old is empty, it matches at the beginning of the Array
-// and after each UTF-8 sequence, yielding up to k+1 replacements
-// for a k-rune Array.
-// If n < 0, there is no limit on the number of replacements.
-func Replace[T ~[]S, S E](s, old, new T, n int) T {
-	m := 0
-	if n != 0 {
-		// Compute number of replacements.
-		m = Count(s, old)
-	}
-	if m == 0 {
-		// Just return a copy.
-		return append(T(nil), s...)
-	}
-	if n < 0 || m < n {
-		n = m
-	}
-
-	// Apply replacements to buffer.
-	t := make(T, len(s)+n*(len(new)-len(old)))
-	w := 0
-	start := 0
-	for i := 0; i < n; i++ {
-		j := start
-		if len(old) == 0 {
-			if i > 0 {
-				wid := len(s[start:])
-				j += wid
-			}
-		} else {
-			j += Index(s[start:], old)
-		}
-		w += copy(t[w:], s[start:j])
-		w += copy(t[w:], new)
-		start = j + len(old)
-	}
-	w += copy(t[w:], s[start:])
-	return t[0:w]
-}
-
-// ReplaceAll returns a copy of the Array s with all
-// non-overlapping instances of old replaced by new.
-// If old is empty, it matches at the beginning of the Array
-// and after each UTF-8 sequence, yielding up to k+1 replacements
-// for a k-rune Array.
-func ReplaceAll[T ~[]S, S E](s, old, new T) T {
-	return Replace(s, old, new, -1)
-}
-
 // Cut slices s around the first instance of sep,
 // returning the text before and after sep.
 // The found result reports whether sep appears in s.
@@ -471,124 +293,12 @@ func Cut[T ~[]S, S E](s, sep T) (before, after T, found bool) {
 	return s, nil, false
 }
 
-// TrimLeftFunc returns a slice of the Array s with all leading
-// Unicode code points c satisfying f(c) removed.
-func TrimLeftFunc[T ~[]S, S E](s T, f func(S) bool) T {
-	i := indexFunc(s, f, false)
-	if i == -1 {
-		return nil
-	}
-	return s[i:]
-}
-
-// TrimRightFunc returns a slice of the Array s with all trailing
-// Unicode code points c satisfying f(c) removed.
-func TrimRightFunc[T ~[]S, S E](s T, f func(S) bool) T {
-	i := lastIndexFunc(s, f, false)
-	i++
-	return s[0:i]
-}
-
-// TrimFunc returns a slice of the Array s with all leading
-// and trailing Unicode code points c satisfying f(c) removed.
-func TrimFunc[T ~[]S, S E](s T, f func(S) bool) T {
-	return TrimRightFunc(TrimLeftFunc(s, f), f)
-}
-
-// Trim returns a sub slice of s by slicing off all leading and
-// trailing UTF-8-encoded code points contained in cutset.
-func Trim[T ~[]S, S E](s T, cutset T) T {
-	if len(s) == 0 {
-		// This is what we've historically done.
-		return nil
-	}
-
-	switch len(cutset) {
-	case 0:
-		return s
-	case 1:
-		return trimLeftArray(trimRightArray(s, cutset[0]), cutset[0])
-	default:
-		return trimLeft(trimRight(s, cutset), cutset)
-	}
-}
-
-// TrimLeft returns a sub slice of s by slicing off all leading
-func TrimLeft[T ~[]S, S E](s T, cutset T) T {
-	if len(s) == 0 {
-		// This is what we've historically done.
-		return nil
-	}
-
-	switch len(cutset) {
-	case 0:
-		return s
-	case 1:
-		return trimLeftArray(s, cutset[0])
-	default:
-		return trimLeft(s, cutset)
-
-	}
-}
-
-func TrimRight[T ~[]S, S E](s T, cutset T) T {
-	if len(s) == 0 {
-		// This is what we've historically done.
-		return nil
-	}
-
-	switch len(cutset) {
-	case 0:
-		return s
-	case 1:
-		return trimRightArray(s, cutset[0])
-	default:
-		return trimRight(s, cutset)
-	}
-}
-
-func trimLeftArray[T ~[]S, S E](s T, c S) T {
-	for len(s) > 0 && s[0] == c {
-		s = s[1:]
-	}
-	return s
-}
-
-func trimLeft[T ~[]S, S E](s, cutset T) T {
-	for len(s) > 0 {
-		r, n := s[0], 1
-		if !ContainsArray(cutset, r) {
-			break
-		}
-		s = s[n:]
-	}
-	return s
-}
-
-func trimRightArray[T ~[]S, S E](s T, c S) T {
-	for len(s) > 0 && s[len(s)-1] == c {
-		s = s[:len(s)-1]
-	}
-	return s
-}
-
-func trimRight[T ~[]S, S E](s, cutset T) T {
-	for len(s) > 0 {
-		r, n := s[len(s)-1], 1
-		if !ContainsArray(cutset, r) {
-			break
-		}
-		s = s[:len(s)-n]
-	}
-	return s
-}
-
 // InsertWith inserts v into s at the first index where fn(a, b) is true.
 func InsertWith[T ~[]S, S E](s T, v S, fn func(a, b S) bool) T {
 	pos := binarySearch(s, v, fn)
 
 	// Create the result slice with the appropriate capacity.
-	var ret T
+	ret := make(T, 0, len(s)+1)
 	if pos == -1 {
 		return append(s, v)
 	}

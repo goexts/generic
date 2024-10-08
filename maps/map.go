@@ -1,21 +1,55 @@
 package maps
 
-// Keys returns a slice of the keys in the map.
+import (
+	"golang.org/x/exp/maps"
+)
+
+// Keys returns the keys of the map m.
+// The keys will be in an indeterminate order.
 func Keys[M ~map[K]V, K comparable, V any](m M) []K {
-	var ks []K
-	for k := range m {
-		ks = append(ks, k)
-	}
-	return ks
+	return maps.Keys(m)
 }
 
-// Values returns a slice of the values in the map.
+// Values returns the values of the map m.
+// The values will be in an indeterminate order.
 func Values[M ~map[K]V, K comparable, V any](m M) []V {
-	var vs []V
-	for _, v := range m {
-		vs = append(vs, v)
-	}
-	return vs
+	return maps.Values(m)
+}
+
+// Equal reports whether two maps contain the same key/value pairs.
+// Values are compared using ==.
+func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool {
+	return maps.Equal(m1, m2)
+}
+
+// EqualFunc is like Equal, but compares values using eq.
+// Keys are still compared with ==.
+func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M2, eq func(V1, V2) bool) bool {
+	return maps.EqualFunc(m1, m2, eq)
+}
+
+// Clear removes all entries from m, leaving it empty.
+func Clear[M ~map[K]V, K comparable, V any](m M) {
+	maps.Clear(m)
+}
+
+// Clone returns a copy of m.  This is a shallow clone:
+// the new keys and values are set using ordinary assignment.
+func Clone[M ~map[K]V, K comparable, V any](m M) M {
+	return maps.Clone(m)
+}
+
+// Copy copies all key/value pairs in src adding them to dst.
+// When a key in src is already present in dst,
+// the value in dst will be overwritten by the value associated
+// with the key in src.
+func Copy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) {
+	maps.Copy(dst, src)
+}
+
+// DeleteFunc deletes any key/value pairs from m for which del returns true.
+func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool) {
+	maps.DeleteFunc(m, del)
 }
 
 // KeyValue is a key-value pair.
@@ -26,7 +60,7 @@ type KeyValue[K comparable, V any] struct {
 
 // MapToKVs converts a map to a slice of key-value pairs.
 func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV {
-	var kvs []KV
+	kvs := make([]KV, 0, len(m))
 	for k, v := range m {
 		kvs = append(kvs, KV{Key: k, Val: v})
 	}
@@ -44,7 +78,7 @@ func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue
 
 // MapToTypes converts a map to a slice of types.
 func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T {
-	var ts []T
+	ts := make([]T, 0, len(m))
 	for k, v := range m {
 		ts = append(ts, f(k, v))
 	}

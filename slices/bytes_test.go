@@ -12,13 +12,13 @@ func TestBytes_FindString(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		r    Bytes
+		r    Runes
 		args args
 		want int
 	}{
 		{
 			name: "",
-			r:    []byte("你好世界Hello Worldこんにちわ!"),
+			r:    Runes("你好世界Hello Worldこんにちわ!"),
 			args: args{
 				s: "世界",
 			},
@@ -26,7 +26,7 @@ func TestBytes_FindString(t *testing.T) {
 		},
 		{
 			name: "",
-			r:    []byte("你好你好世界Hello Worldこんにちわ!"),
+			r:    Runes("你好你好世界Hello Worldこんにちわ!"),
 			args: args{
 				s: "世界",
 			},
@@ -34,7 +34,7 @@ func TestBytes_FindString(t *testing.T) {
 		},
 		{
 			name: "",
-			r:    []byte("你好世界Hello Worldこんにちわ!"),
+			r:    Runes("你好世界Hello Worldこんにちわ!"),
 			args: args{
 				s: "こん",
 			},

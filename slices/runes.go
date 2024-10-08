@@ -43,45 +43,8 @@ func (r Runes) String() string {
 	return string(r)
 }
 
-func (r Runes) Map(mapping func(rune) rune) Runes {
-	return MapRune(mapping, r)
-}
-
 func StringToRunes(s string) Runes {
 	return Runes(s)
-}
-
-// MapRune returns a copy of the []rune s with all its characters modified
-// according to the mapping function. If mapping returns a negative value, the character is
-// dropped from the []rune with no replacement.
-func MapRune(mapping func(rune) rune, s []rune) []rune {
-	// In the worst case, the slice can grow when mapped, making
-	// things unpleasant. But it's so rare we barge in assuming it's
-	// fine. It could also shrink but that falls out naturally.
-	maxrunes := len(s) // length of b
-	nrunes := 0        // number of bytes encoded in b
-	b := make([]rune, maxrunes)
-	for i := 0; i < len(s); {
-		wid := 1
-		r := s[i]
-		r = mapping(r)
-		if r >= 0 {
-			rl := utf8.RuneLen(r)
-			if rl < 0 {
-				rl = len(string(utf8.RuneError))
-			}
-			if nrunes+rl > maxrunes {
-				// Grow the buffer.
-				maxrunes = maxrunes*2 + utf8.UTFMax
-				nb := make([]rune, maxrunes)
-				copy(nb, b[0:nrunes])
-				b = nb
-			}
-			nrunes++
-		}
-		i += wid
-	}
-	return b[0:nrunes]
 }
 
 // ToUpperRune returns s with all Unicode letters mapped to their upper case.
@@ -105,42 +68,6 @@ func ToUpperRune(s []rune) []rune {
 		b[i] = c
 	}
 	return b
-}
-
-// TrimSpaceRune returns a slice of the []rune s, with all leading
-// and trailing white space removed, as defined by Unicode.
-func TrimSpaceRune(s []rune) []rune {
-	// Fast path for ASCII: look for the first ASCII non-space byte
-	start := 0
-	for ; start < len(s); start++ {
-		c := s[start]
-		if c >= utf8.RuneSelf {
-			// If we run into a non-ASCII byte, fall back to the
-			// slower unicode-aware method on the remaining bytes
-			return TrimFunc(s[start:], unicode.IsSpace)
-		}
-		if asciiSpace[c] == 0 {
-			break
-		}
-	}
-
-	// Now look for the first ASCII non-space byte from the end
-	stop := len(s)
-	for ; stop > start; stop-- {
-		c := s[stop-1]
-		if c >= utf8.RuneSelf {
-			// start has been already trimmed above, should trim end only
-			return TrimRightFunc(s[start:stop], unicode.IsSpace)
-		}
-		if asciiSpace[c] == 0 {
-			break
-		}
-	}
-
-	// At this point s[start:stop] starts and ends with an ASCII
-	// non-space bytes, so we're done. Non-ASCII cases have already
-	// been handled above.
-	return s[start:stop]
 }
 
 // EqualFoldRune reports whether s and t, interpreted as UTF-8 []runes,
@@ -243,51 +170,6 @@ func ToLowerRune(s []rune) []rune {
 	return b
 }
 
-// ToTitleRune returns a copy of the []rune s with all Unicode letters mapped to
-// their Unicode title case.
-func ToTitleRune(s []rune) []rune { return MapRune(unicode.ToTitle, s) }
-
-// ToUpperSpecialRune returns a copy of the []rune s with all Unicode letters mapped to their
-// upper case using the case mapping specified by c.
-func ToUpperSpecialRune(c unicode.SpecialCase, s []rune) []rune {
-	return MapRune(c.ToUpper, s)
-}
-
-// ToLowerSpecialRune returns a copy of the []rune s with all Unicode letters mapped to their
-// lower case using the case mapping specified by c.
-func ToLowerSpecialRune(c unicode.SpecialCase, s []rune) []rune {
-	return MapRune(c.ToLower, s)
-}
-
-// ToTitleSpecialRune returns a copy of the []rune s with all Unicode letters mapped to their
-// Unicode title case, giving priority to the special casing rules.
-func ToTitleSpecialRune(c unicode.SpecialCase, s []rune) []rune {
-	return MapRune(c.ToTitle, s)
-}
-
-// ToValidUTF8Rune returns a copy of the []rune s with each run of invalid UTF-8 byte sequences
-// replaced by the replacement []rune, which may be empty.
-func ToValidUTF8Rune(s, replacement []rune) []rune {
-	b := make([]rune, 0, len(s)+len(replacement))
-	invalid := false // previous byte was from an invalid UTF-8 sequence
-	for i := 0; i < len(s); {
-		c := s[i]
-		if c < utf8.RuneSelf {
-			i++
-			invalid = false
-			b = append(b, c)
-			continue
-		}
-		i++
-		if !invalid {
-			invalid = true
-			b = append(b, replacement...)
-		}
-		continue
-	}
-	return b
-}
-
 // isSeparatorRune reports whether the rune could mark a word boundary.
 // TODO: update when package unicode captures more of the properties.
 func isSeparatorRune(r rune) bool {
@@ -311,28 +193,6 @@ func isSeparatorRune(r rune) bool {
 	}
 	// Otherwise, all we can do for now is treat spaces as separators.
 	return unicode.IsSpace(r)
-}
-
-// TitleRune returns a copy of the []rune s with all Unicode letters that begin words
-// mapped to their Unicode title case.
-//
-// Deprecated: The rule TitleRune uses for word boundaries does not handle Unicode
-// punctuation properly. Use golang.org/x/text/cases instead.
-func TitleRune(s []rune) []rune {
-	// Use a closure here to remember state.
-	// Hackish but effective. Depends on MapRune scanning in order and calling
-	// the closure once per rune.
-	prev := ' '
-	return MapRune(
-		func(r rune) rune {
-			if isSeparatorRune(prev) {
-				prev = r
-				return unicode.ToTitle(r)
-			}
-			prev = r
-			return r
-		},
-		s)
 }
 
 var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
@@ -363,45 +223,4 @@ func makeASCIISet(chars string) (as asciiSet, ok bool) {
 // contains reports whether c is inside the set.
 func (as *asciiSet) contains(c rune) bool {
 	return (as[c/32] & (1 << (c % 32))) != 0
-}
-
-// TrimRightRune returns a slice of the []rune s, with all trailing
-// Unicode code points contained in cutset removed.
-//
-// To remove a suffix, use TrimSuffix instead.
-func TrimRightRune(s []rune, cutset string) []rune {
-	if len(s) == 0 || cutset == "" {
-		return s
-	}
-
-	if len(cutset) == 1 && cutset[0] < utf8.RuneSelf {
-		return trimRightArray(s, []rune(cutset)[0])
-	}
-
-	if as, ok := makeASCIISet(cutset); ok {
-		return trimRightASCII(s, &as)
-	}
-
-	return trimRightUnicode(s, cutset)
-}
-
-func trimRightASCII(s []rune, as *asciiSet) []rune {
-	for len(s) > 0 {
-		if !as.contains(s[len(s)-1]) {
-			break
-		}
-		s = s[:len(s)-1]
-	}
-	return s
-}
-
-func trimRightUnicode(s []rune, cutset string) []rune {
-	for len(s) > 0 {
-		r, n := s[len(s)-1], 1
-		if !containsRune(cutset, r) {
-			break
-		}
-		s = s[:len(s)-n]
-	}
-	return s
 }
