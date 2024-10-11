@@ -12,7 +12,7 @@ type Setting[S any] interface {
 }
 
 func (s ApplyFunc[S]) Apply(v *S) {
-	if v == nil {
+	if s == nil {
 		return
 	}
 	(s)(v)
