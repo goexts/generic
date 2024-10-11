@@ -6,6 +6,7 @@ func Zero[T any]() (zero T) {
 }
 
 // ZeroOr returns def if v is the zero value.
+// Decrypted: use cmp.ZeroOr instead.
 func ZeroOr[T comparable](v T, def T) T {
 	if v == Zero[T]() {
 		return def
