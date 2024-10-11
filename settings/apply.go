@@ -1,33 +1,41 @@
 package settings
 
-// Setting is a setting function for Apply
-type Setting[S any] func(*S)
+// ApplyFunc is a ApplyFunc function for Apply
+type ApplyFunc[S any] func(*S)
 
-func (s *Setting[S]) Apply(v *S) {
+type ApplySetting[S any] interface {
+	Apply(v *S)
+}
+
+type Setting[S any] interface {
+	func(*S) | ApplyFunc[S]
+}
+
+func (s ApplyFunc[S]) Apply(v *S) {
 	if v == nil {
 		return
 	}
-	(*s)(v)
+	(s)(v)
 }
 
 // Apply is apply settings
-func Apply[T Setting[S], S any](d *S, ss []T) *S {
+func Apply[S any](d *S, ss []func(*S)) *S {
 	if d == nil {
 		return nil
 	}
 	for _, s := range ss {
-		s(d)
+		(s)(d)
 	}
 	return d
 }
 
 // ApplyOr is an apply settings with defaults
-func ApplyOr[T Setting[S], S any](d S, ss ...T) *S {
-	return Apply(&d, ss)
+func ApplyOr[S any](s *S, ts ...func(*S)) *S {
+	return Apply(s, ts)
 }
 
 // ApplyOrZero is an apply settings with defaults
-func ApplyOrZero[T Setting[S], S any](ss ...T) *S {
+func ApplyOrZero[S any](ss ...func(*S)) *S {
 	var val S
 	return Apply(&val, ss)
 }

@@ -13,7 +13,7 @@ func TestApplyModifiesInputObject(t *testing.T) {
 	changeName := func(s *Ship) {
 		s.Name = "Black Pearl"
 	}
-	setting := Setting[Ship](changeName)
+	setting := ApplyFunc[Ship](changeName)
 	ship := &Ship{Name: "Queen Anne's Revenge"}
 
 	setting.Apply(ship)
@@ -32,7 +32,7 @@ func TestApplyExecutesWithoutErrors(t *testing.T) {
 	changeName := func(s *Ship) {
 		s.Name = "Flying Dutchman"
 	}
-	setting := Setting[Ship](changeName)
+	setting := ApplyFunc[Ship](changeName)
 	ship := &Ship{Name: "Jolly Roger"}
 
 	defer func() {
@@ -58,7 +58,7 @@ func TestApplyHandlesMultipleSettings(t *testing.T) {
 		s.Speed += 10
 	}
 
-	settings := []Setting[Ship]{changeName, increaseSpeed}
+	settings := []ApplyFunc[Ship]{changeName, increaseSpeed}
 	ship := &Ship{Name: "Endeavour", Speed: 20}
 
 	for _, setting := range settings {
@@ -79,7 +79,7 @@ func TestApplyHandlesNilInput(t *testing.T) {
 	changeName := func(s *Ship) {
 		s.Name = "Ghost Ship"
 	}
-	setting := Setting[Ship](changeName)
+	setting := ApplyFunc[Ship](changeName)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -97,7 +97,7 @@ func TestApplyProcessesEmptySettingsList(t *testing.T) {
 		Name string
 	}
 
-	var settings []Setting[Ship]
+	var settings []ApplyFunc[Ship]
 	ship := &Ship{Name: "Silent Mary"}
 
 	for _, setting := range settings {
@@ -118,7 +118,7 @@ func TestApplyHandlesNoOpSettings(t *testing.T) {
 
 	noOp := func(s *Ship) {}
 
-	setting := Setting[Ship](noOp)
+	setting := ApplyFunc[Ship](noOp)
 	ship := &Ship{Name: "Interceptor"}
 
 	setting.Apply(ship)
@@ -140,7 +140,7 @@ func TestApplyMaintainsObjectIntegrity(t *testing.T) {
 		s.Cannons += 2
 	}
 
-	setting := Setting[Ship](addCannons)
+	setting := ApplyFunc[Ship](addCannons)
 	ship := &Ship{Name: "Blackbeard's Revenge", Cannons: 10}
 
 	setting.Apply(ship)
