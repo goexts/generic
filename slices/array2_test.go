@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/goexts/ggb/slices"
+	"github.com/goexts/generic/slices"
 )
 
 func TestInsertWithMiddle(t *testing.T) {

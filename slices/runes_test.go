@@ -3,7 +3,7 @@ package slices_test
 import (
 	"testing"
 
-	. "github.com/goexts/ggb/slices"
+	. "github.com/goexts/generic/slices"
 )
 
 func TestRunes_FindString(t *testing.T) {

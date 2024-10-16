@@ -11,7 +11,7 @@ import (
 	"testing"
 	"unicode"
 
-	. "github.com/goexts/ggb/slices"
+	. "github.com/goexts/generic/slices"
 )
 
 type BinOpTest struct {
