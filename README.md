@@ -4,7 +4,8 @@ This is a simple example of using generics in Go.
 
 ## Dependencies
 
-## Usage
+## API Documentation
+Please see the [API Documentation](./docs/api.md) for api documentation.
 
 ## License
 
