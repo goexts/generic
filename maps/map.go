@@ -52,6 +52,44 @@ func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool) {
 	maps.DeleteFunc(m, del)
 }
 
+// Merge merges the values of src into dest.
+func Merge[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, overlay bool) {
+	for k, v := range src {
+		if _, ok := dest[k]; !ok || overlay {
+			dest[k] = v
+		}
+	}
+}
+
+// MergeFunc merges the values of src into dest using the provided merge function.
+func MergeFunc[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, merge func(K, V, V) V) {
+	for k, v := range src {
+		if _, ok := dest[k]; !ok {
+			dest[k] = v
+		} else {
+			dest[k] = merge(k, dest[k], v)
+		}
+	}
+}
+
+// Filter removes all key/value pairs from m for which f returns false.
+func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
+	for k, v := range m {
+		if !f(k, v) {
+			delete(m, k)
+		}
+	}
+}
+
+// FilterFunc is like Filter, but uses a function.
+func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
+	for k, v := range m {
+		if !f(k, v) {
+			delete(m, k)
+		}
+	}
+}
+
 // KeyValue is a key-value pair.
 type KeyValue[K comparable, V any] struct {
 	Key K
