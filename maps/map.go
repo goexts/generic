@@ -1,59 +1,8 @@
 package maps
 
-import (
-	"golang.org/x/exp/maps"
-)
-
-// Keys returns the keys of the map m.
-// The keys will be in an indeterminate order.
-func Keys[M ~map[K]V, K comparable, V any](m M) []K {
-	return maps.Keys(m)
-}
-
-// Values returns the values of the map m.
-// The values will be in an indeterminate order.
-func Values[M ~map[K]V, K comparable, V any](m M) []V {
-	return maps.Values(m)
-}
-
-// Equal reports whether two maps contain the same key/value pairs.
-// Values are compared using ==.
-func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool {
-	return maps.Equal(m1, m2)
-}
-
-// EqualFunc is like Equal, but compares values using eq.
-// Keys are still compared with ==.
-func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M2, eq func(V1, V2) bool) bool {
-	return maps.EqualFunc(m1, m2, eq)
-}
-
-// Clear removes all entries from m, leaving it empty.
-func Clear[M ~map[K]V, K comparable, V any](m M) {
-	maps.Clear(m)
-}
-
-// Clone returns a copy of m.  This is a shallow clone:
-// the new keys and values are set using ordinary assignment.
-func Clone[M ~map[K]V, K comparable, V any](m M) M {
-	return maps.Clone(m)
-}
-
-// Copy copies all key/value pairs in src adding them to dst.
-// When a key in src is already present in dst,
-// the value in dst will be overwritten by the value associated
-// with the key in src.
-func Copy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) {
-	maps.Copy(dst, src)
-}
-
-// DeleteFunc deletes any key/value pairs from m for which del returns true.
-func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool) {
-	maps.DeleteFunc(m, del)
-}
-
 // Merge merges the values of src into dest.
-func Merge[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, overlay bool) {
+// If overlay is true, existing values in dest will be overwritten.
+func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool) {
 	for k, v := range src {
 		if _, ok := dest[k]; !ok || overlay {
 			dest[k] = v
@@ -62,21 +11,48 @@ func Merge[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, overl
 }
 
 // MergeFunc merges the values of src into dest using the provided merge function.
-func MergeFunc[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, merge func(K, V, V) V) {
+// If a key exists in both maps, the merge function will be called to determine the final value.
+func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V) {
 	for k, v := range src {
-		if _, ok := dest[k]; !ok {
+		if existing, ok := dest[k]; !ok {
 			dest[k] = v
 		} else {
-			dest[k] = merge(k, dest[k], v)
+			dest[k] = cmp(k, existing, v)
 		}
 	}
 }
 
+// MergeMaps merges multiple maps into a single map.
+// If a key exists in multiple maps, the value from the last map will be used.
+func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M) {
+	if len(ms) == 0 {
+		return
+	}
+
+	// Merge subsequent ms into the result map
+	for _, mm := range ms {
+		Merge(m, mm, true)
+	}
+}
+
+// MergeMapsFunc merges multiple maps into a single map using a custom merge function.
+// If a key exists in multiple maps, the merge function will be called to determine the final value.
+func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M) {
+	if len(ms) == 0 {
+		return
+	}
+
+	// Merge subsequent maps into the result map
+	for _, mm := range ms {
+		MergeFunc(m, mm, merge)
+	}
+}
+
 // Filter removes all key/value pairs from m for which f returns false.
-func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
-	for k, v := range m {
-		if !f(k, v) {
-			delete(m, k)
+func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K) {
+	for i := range keys {
+		if _, ok := m[keys[i]]; ok {
+			delete(m, keys[i])
 		}
 	}
 }
@@ -84,7 +60,7 @@ func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
 // FilterFunc is like Filter, but uses a function.
 func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
 	for k, v := range m {
-		if !f(k, v) {
+		if f(k, v) {
 			delete(m, k)
 		}
 	}
@@ -131,4 +107,13 @@ func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)
 		m[k] = v
 	}
 	return m
+}
+
+// MapToStruct converts a map to a struct.
+func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S {
+	s := new(S)
+	for k, v := range m {
+		s = f(s, k, v)
+	}
+	return s
 }
