@@ -1,4 +1,8 @@
-// Package types provides type definitions for various data types.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package types implements the functions, types, and interfaces for the module.
 package types
 
 // Boolean is an interface that represents a boolean type.

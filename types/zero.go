@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package types implements the functions, types, and interfaces for the module.
 package types
 
 // Zero is the zero value for a type.
