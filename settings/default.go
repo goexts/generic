@@ -20,8 +20,13 @@ type ErrorDefaulter interface {
 // to apply the default settings.
 func ApplyDefaults[S any](s *S, fs []func(*S)) *S {
 	s = Apply(s, fs)
-	if d, ok := any(s).(Defaulter); ok {
-		d.ApplyDefaults()
+	switch v := any(s).(type) {
+	case ErrorDefaulter:
+		_ = v.ApplyDefaults()
+		return s
+	case Defaulter:
+		v.ApplyDefaults()
+		return s
 	}
 	return s
 }
@@ -32,11 +37,16 @@ func ApplyDefaults[S any](s *S, fs []func(*S)) *S {
 // implements the ErrorDefaulter interface. If it does, it calls the ApplyDefaults method
 func ApplyErrorDefaults[S any](s *S, fs []func(*S)) (*S, error) {
 	s = Apply(s, fs)
-	if d, ok := any(s).(ErrorDefaulter); ok {
-		err := d.ApplyDefaults()
+	switch v := any(s).(type) {
+	case ErrorDefaulter:
+		err := v.ApplyDefaults()
 		if err != nil {
-			return s, err
+			return nil, err
 		}
+		return s, nil
+	case Defaulter:
+		v.ApplyDefaults()
+		return s, nil
 	}
 	return s, nil
 }
