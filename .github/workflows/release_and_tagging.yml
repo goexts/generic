@@ -1,0 +1,93 @@
+name: Auto Tagging And Release After Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
+
+      - name: Set up Go
+        uses: actions/setup-go@v5.0.2
+        with:
+          go-version: stable
+
+      - name: Run tests
+        run: |
+          go test -race -v ./...
+
+  tagging:
+    needs: [ test ]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
+
+      - name: Get latest release
+        id: get_latest_release
+        run: |
+          LATEST_RELEASE=$(curl -s -H "Authorization: token ${{ env.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.tag_name')
+          echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_OUTPUT
+
+      - name: Determine next version
+        id: determine_next_version
+        run: |
+          chmod +x ./.github/scripts/git/release.sh
+          HEAD_TAG=$(./.github/scripts/git/release.sh get_head_version_tag .)
+          NEXT_TAG=$(./.github/scripts/git/release.sh get_next_module_version .)   
+          echo "HEAD_TAG=$HEAD_TAG"
+          echo "HEAD_TAG=$HEAD_TAG" >> $GITHUB_OUTPUT
+          echo "NEXT_TAG=$NEXT_TAG"
+          echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: generate_changelog
+        run: |
+          LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
+          echo "LATEST_RELEASE is $LATEST_RELEASE"
+          echo "# Changelog" > changelog.txt
+          if [[ -z "$LATEST_RELEASE" || "$LATEST_RELEASE" == "null" ]]; then
+            # If there's no previous release, get only the current commit log
+            git config --global core.pager cat
+            # git log --pretty=format:"* %s **by** @%an"
+            git log --pretty=format:"* %s **by** @%an" >> changelog.txt
+          else
+            # Get all submission information since the last release
+            # CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s **by** @%an")
+            git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s **by** @%an" >> changelog.txt
+          fi
+
+      - name: Create release
+        if: ${{ !steps.determine_next_version.outputs.HEAD_TAG }}
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          tag_name: ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+          body_path: changelog.txt
+          draft: false
+          prerelease: false
+      #      # Skip this step if HEAD_TAG is not empty, Because the commit is tagged for the submodule
+      #      - name: Create release (only if HEAD_TAG exists)
+      #        if: ${{ steps.determine_next_version.outputs.HEAD_TAG }}
+      #        uses: softprops/action-gh-release@v1
+      #        with:
+      #          name: Release ${{ steps.determine_next_version.outputs.NEXT_TAG }}
+      #          body_path: changelog.txt
+      #          draft: false
+      #          prerelease: false
