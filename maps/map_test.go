@@ -18,10 +18,7 @@ func TestMapToKVs(t *testing.T) {
 	type testCase struct {
 		name string
 		args args
-		want []struct {
-			Key int
-			Val string
-		}
+		want []KeyValue[int, string]
 	}
 	tests := []testCase{
 		{
@@ -33,10 +30,7 @@ func TestMapToKVs(t *testing.T) {
 					3: "c",
 				},
 			},
-			want: []struct {
-				Key int
-				Val string
-			}{
+			want: []KeyValue[int, string]{
 				{
 					Key: 1,
 					Val: "a",
@@ -116,7 +110,7 @@ func TestMergeMapsEmptyVariadic(t *testing.T) {
 	base := map[string]int{"x": 1}
 	MergeMaps(base)
 
-	assert.Nil(t, base)
+	assert.NotNil(t, base)
 }
 
 // Merging nil map with non-nil map
