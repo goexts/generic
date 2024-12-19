@@ -291,7 +291,7 @@ func TestRemap(t *testing.T) {
 		"a": 1,
 		"b": 2,
 	}
-	s := Remap(src, func(k string, v int) (string, any, bool) {
+	s := Transform(src, func(k string, v int) (string, any, bool) {
 		return k, v, true
 	})
 	t.Logf("%+v", s)

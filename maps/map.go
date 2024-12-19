@@ -123,11 +123,11 @@ func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *
 	return s
 }
 
-// Remap remaps the keys and values of a map using a custom transformation function.
+// Transform remaps the keys and values of a map using a custom transformation function.
 // The transformation function is called for each key-value pair in the original map.
 // If the transformation function returns false as its third return value, the key-value pair is skipped.
 // Otherwise, the transformed key-value pair is added to the new map.
-func Remap[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV {
+func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV {
 	// Create a new map with the same length as the original map to avoid reallocations.
 	n := make(map[TK]TV, len(m))
 
