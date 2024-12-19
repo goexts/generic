@@ -285,3 +285,14 @@ func TestMapToTypesStruct(t *testing.T) {
 	assert.Contains(t, result, "42")
 	assert.Contains(t, result, "true")
 }
+
+func TestRemap(t *testing.T) {
+	src := map[string]int{
+		"a": 1,
+		"b": 2,
+	}
+	s := Remap(src, func(k string, v int) (string, any, bool) {
+		return k, v, true
+	})
+	t.Logf("%+v", s)
+}
