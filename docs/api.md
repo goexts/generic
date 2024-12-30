@@ -6,8 +6,12 @@
 import "github.com/goexts/generic"
 ```
 
+Package generic implements the functions, types, and interfaces for the module.
+
 ## Index
 
+- [func ChooseLeft[L any, R any](l L, _ R) L](<#func-chooseleft>)
+- [func ChooseRight[L any, R any](_ L, r R) R](<#func-chooseright>)
 - [func Must[T any](v T, err error) T](<#func-must>)
 - [func Must2[T any, U any](v T, u U, err error) (T, U)](<#func-must2>)
 - [func MustLookup[T any](v T, ok bool) T](<#func-mustlookup>)
@@ -17,9 +21,28 @@ import "github.com/goexts/generic"
 - [func MustOr[T any](def T, v T, err error) T](<#func-mustor>)
 - [func MustOrNil[T any](v *T, err error) *T](<#func-mustornil>)
 - [func MustOrZero[T any](v T, err error) T](<#func-mustorzero>)
+- [func OnlyLeft[L any, R1 any, R2 any](l L, _ R1, _ R2) L](<#func-onlyleft>)
+- [func OnlyMiddle[L any, M any, R any](_ L, m M, _ R) M](<#func-onlymiddle>)
+- [func OnlyRight[L1 any, L2 any, R any](_ L1, _ L2, r R) R](<#func-onlyright>)
 - [func OrNil[T any](_ T, err error) error](<#func-ornil>)
 - [func OrNil2[T any](_, _ T, err error) error](<#func-ornil2>)
 
+
+## func [ChooseLeft](<https://github.com/goexts/generic/blob/main/choose.go#L16>)
+
+```go
+func ChooseLeft[L any, R any](l L, _ R) L
+```
+
+ChooseLeft returns the leftmost value, ignoring the right value. This function is useful when you need to prioritize the left value over the right.
+
+## func [ChooseRight](<https://github.com/goexts/generic/blob/main/choose.go#L10>)
+
+```go
+func ChooseRight[L any, R any](_ L, r R) R
+```
+
+ChooseRight returns the rightmost value, ignoring the left value. This function is useful when you need to prioritize the right value over the left.
 
 ## func [Must](<https://github.com/goexts/generic/blob/main/must.go#L5>)
 
@@ -92,6 +115,30 @@ func MustOrZero[T any](v T, err error) T
 ```
 
 MustOrZero is a utility function that ensures a value is not nil and returns it. If the error is not nil, it returns a zero value.
+
+## func [OnlyLeft](<https://github.com/goexts/generic/blob/main/choose.go#L22>)
+
+```go
+func OnlyLeft[L any, R1 any, R2 any](l L, _ R1, _ R2) L
+```
+
+OnlyLeft returns the leftmost value, ignoring all other values. This function is useful when you need to extract the leftmost value from a tuple.
+
+## func [OnlyMiddle](<https://github.com/goexts/generic/blob/main/choose.go#L34>)
+
+```go
+func OnlyMiddle[L any, M any, R any](_ L, m M, _ R) M
+```
+
+OnlyMiddle returns the middle value, ignoring all other values. This function is useful when you need to extract the middle value from a tuple.
+
+## func [OnlyRight](<https://github.com/goexts/generic/blob/main/choose.go#L28>)
+
+```go
+func OnlyRight[L1 any, L2 any, R any](_ L1, _ L2, r R) R
+```
+
+OnlyRight returns the rightmost value, ignoring all other values. This function is useful when you need to extract the rightmost value from a tuple.
 
 ## func [OrNil](<https://github.com/goexts/generic/blob/main/must.go#L48>)
 
@@ -179,28 +226,36 @@ ZeroOr returns def if v is the zero value.
 import "github.com/goexts/generic/maps"
 ```
 
+Package maps implements the functions, types, and interfaces for the module.
+
+Package maps implements the functions, types, and interfaces for the module.
+
 ## Index
 
 - [func Clear[M ~map[K]V, K comparable, V any](m M)](<#func-clear>)
 - [func Clone[M ~map[K]V, K comparable, V any](m M) M](<#func-clone>)
-- [func Copy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2)](<#func-copy>)
+- [func Copy[M ~map[K]V, K comparable, V any](dst M, src M)](<#func-copy>)
 - [func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool)](<#func-deletefunc>)
 - [func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool](<#func-equal>)
 - [func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M2, eq func(V1, V2) bool) bool](<#func-equalfunc>)
-- [func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)](<#func-filter>)
+- [func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K)](<#func-filter>)
 - [func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)](<#func-filterfunc>)
 - [func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M](<#func-kvstomap>)
 - [func Keys[M ~map[K]V, K comparable, V any](m M) []K](<#func-keys>)
 - [func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV](<#func-maptokvs>)
+- [func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S](<#func-maptostruct>)
 - [func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T](<#func-maptotypes>)
-- [func Merge[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, overlay bool)](<#func-merge>)
-- [func MergeFunc[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, merge func(K, V, V) V)](<#func-mergefunc>)
+- [func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)](<#func-merge>)
+- [func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)](<#func-mergefunc>)
+- [func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M)](<#func-mergemaps>)
+- [func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)](<#func-mergemapsfunc>)
+- [func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV](<#func-transform>)
 - [func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M](<#func-typestomap>)
 - [func Values[M ~map[K]V, K comparable, V any](m M) []V](<#func-values>)
 - [type KeyValue](<#type-keyvalue>)
 
 
-## func [Clear](<https://github.com/goexts/generic/blob/main/maps/map.go#L32>)
+## func [Clear](<https://github.com/goexts/generic/blob/main/maps/const.go#L37>)
 
 ```go
 func Clear[M ~map[K]V, K comparable, V any](m M)
@@ -208,7 +263,7 @@ func Clear[M ~map[K]V, K comparable, V any](m M)
 
 Clear removes all entries from m, leaving it empty.
 
-## func [Clone](<https://github.com/goexts/generic/blob/main/maps/map.go#L38>)
+## func [Clone](<https://github.com/goexts/generic/blob/main/maps/const.go#L43>)
 
 ```go
 func Clone[M ~map[K]V, K comparable, V any](m M) M
@@ -216,15 +271,15 @@ func Clone[M ~map[K]V, K comparable, V any](m M) M
 
 Clone returns a copy of m.  This is a shallow clone: the new keys and values are set using ordinary assignment.
 
-## func [Copy](<https://github.com/goexts/generic/blob/main/maps/map.go#L46>)
+## func [Copy](<https://github.com/goexts/generic/blob/main/maps/const.go#L51>)
 
 ```go
-func Copy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2)
+func Copy[M ~map[K]V, K comparable, V any](dst M, src M)
 ```
 
 Copy copies all key/value pairs in src adding them to dst. When a key in src is already present in dst, the value in dst will be overwritten by the value associated with the key in src.
 
-## func [DeleteFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L51>)
+## func [DeleteFunc](<https://github.com/goexts/generic/blob/main/maps/const.go#L56>)
 
 ```go
 func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool)
@@ -232,7 +287,7 @@ func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool)
 
 DeleteFunc deletes any key/value pairs from m for which del returns true.
 
-## func [Equal](<https://github.com/goexts/generic/blob/main/maps/map.go#L21>)
+## func [Equal](<https://github.com/goexts/generic/blob/main/maps/const.go#L26>)
 
 ```go
 func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool
@@ -240,7 +295,7 @@ func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool
 
 Equal reports whether two maps contain the same key/value pairs. Values are compared using ==.
 
-## func [EqualFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L27>)
+## func [EqualFunc](<https://github.com/goexts/generic/blob/main/maps/const.go#L32>)
 
 ```go
 func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M2, eq func(V1, V2) bool) bool
@@ -248,15 +303,15 @@ func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M
 
 EqualFunc is like Equal, but compares values using eq. Keys are still compared with ==.
 
-## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L76>)
+## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L57>)
 
 ```go
-func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
+func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K)
 ```
 
 Filter removes all key/value pairs from m for which f returns false.
 
-## func [FilterFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L85>)
+## func [FilterFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L66>)
 
 ```go
 func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
@@ -264,7 +319,7 @@ func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
 
 FilterFunc is like Filter, but uses a function.
 
-## func [KVsToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L109>)
+## func [KVsToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L90>)
 
 ```go
 func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M
@@ -272,7 +327,7 @@ func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue
 
 KVsToMap converts a slice of key\-value pairs to a map.
 
-## func [Keys](<https://github.com/goexts/generic/blob/main/maps/map.go#L9>)
+## func [Keys](<https://github.com/goexts/generic/blob/main/maps/const.go#L14>)
 
 ```go
 func Keys[M ~map[K]V, K comparable, V any](m M) []K
@@ -280,7 +335,7 @@ func Keys[M ~map[K]V, K comparable, V any](m M) []K
 
 Keys returns the keys of the map m. The keys will be in an indeterminate order.
 
-## func [MapToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L100>)
+## func [MapToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L81>)
 
 ```go
 func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV
@@ -288,7 +343,15 @@ func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV
 
 MapToKVs converts a map to a slice of key\-value pairs.
 
-## func [MapToTypes](<https://github.com/goexts/generic/blob/main/maps/map.go#L118>)
+## func [MapToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L118>)
+
+```go
+func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
+```
+
+MapToStruct converts a map to a struct.
+
+## func [MapToTypes](<https://github.com/goexts/generic/blob/main/maps/map.go#L99>)
 
 ```go
 func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
@@ -296,23 +359,47 @@ func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
 
 MapToTypes converts a map to a slice of types.
 
-## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L56>)
+## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L10>)
 
 ```go
-func Merge[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, overlay bool)
+func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)
 ```
 
-Merge merges the values of src into dest.
+Merge merges the values of src into dest. If overlay is true, existing values in dest will be overwritten.
 
-## func [MergeFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L65>)
+## func [MergeFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L20>)
 
 ```go
-func MergeFunc[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dest M1, src M2, merge func(K, V, V) V)
+func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)
 ```
 
-MergeFunc merges the values of src into dest using the provided merge function.
+MergeFunc merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
 
-## func [TypesToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L127>)
+## func [MergeMaps](<https://github.com/goexts/generic/blob/main/maps/map.go#L32>)
+
+```go
+func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M)
+```
+
+MergeMaps merges multiple maps into a single map. If a key exists in multiple maps, the value from the last map will be used.
+
+## func [MergeMapsFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L45>)
+
+```go
+func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)
+```
+
+MergeMapsFunc merges multiple maps into a single map using a custom merge function. If a key exists in multiple maps, the merge function will be called to determine the final value.
+
+## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L130>)
+
+```go
+func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV
+```
+
+Transform remaps the keys and values of a map using a custom transformation function. The transformation function is called for each key\-value pair in the original map. If the transformation function returns false as its third return value, the key\-value pair is skipped. Otherwise, the transformed key\-value pair is added to the new map.
+
+## func [TypesToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L108>)
 
 ```go
 func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M
@@ -320,7 +407,7 @@ func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)
 
 TypesToMap converts a slice of types to a map.
 
-## func [Values](<https://github.com/goexts/generic/blob/main/maps/map.go#L15>)
+## func [Values](<https://github.com/goexts/generic/blob/main/maps/const.go#L20>)
 
 ```go
 func Values[M ~map[K]V, K comparable, V any](m M) []V
@@ -328,7 +415,7 @@ func Values[M ~map[K]V, K comparable, V any](m M) []V
 
 Values returns the values of the map m. The values will be in an indeterminate order.
 
-## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L94-L97>)
+## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L75-L78>)
 
 KeyValue is a key\-value pair.
 
@@ -345,19 +432,32 @@ type KeyValue[K comparable, V any] struct {
 import "github.com/goexts/generic/settings"
 ```
 
+Package settings implements the functions, types, and interfaces for the module.
+
+Package settings implements the functions, types, and interfaces for the module.
+
 ## Index
 
 - [func Apply[S any](s *S, fs []func(*S)) *S](<#func-apply>)
 - [func ApplyAny[S any](s *S, fs []interface{}) *S](<#func-applyany>)
+- [func ApplyDefaults[S any](s *S, fs []func(*S)) *S](<#func-applydefaults>)
+- [func ApplyDefaultsOr[S any](s *S, fs ...func(*S)) *S](<#func-applydefaultsor>)
+- [func ApplyDefaultsOrError[S any](s *S, fs ...func(*S)) (*S, error)](<#func-applydefaultsorerror>)
+- [func ApplyDefaultsOrZero[S any](fs ...func(*S)) *S](<#func-applydefaultsorzero>)
+- [func ApplyErrorDefaults[S any](s *S, fs []func(*S)) (*S, error)](<#func-applyerrordefaults>)
+- [func ApplyErrorDefaultsOr[S any](s *S, fs ...func(*S)) (*S, error)](<#func-applyerrordefaultsor>)
+- [func ApplyErrorDefaultsOrZero[S any](fs ...func(*S)) (*S, error)](<#func-applyerrordefaultsorzero>)
 - [func ApplyOr[S any](s *S, fs ...func(*S)) *S](<#func-applyor>)
 - [func ApplyOrZero[S any](fs ...func(*S)) *S](<#func-applyorzero>)
 - [type ApplyFunc](<#type-applyfunc>)
   - [func (s ApplyFunc[S]) Apply(v *S)](<#func-applyfuncs-apply>)
 - [type ApplySetting](<#type-applysetting>)
+- [type Defaulter](<#type-defaulter>)
+- [type ErrorDefaulter](<#type-errordefaulter>)
 - [type Setting](<#type-setting>)
 
 
-## func [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L26>)
+## func [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L31>)
 
 ```go
 func Apply[S any](s *S, fs []func(*S)) *S
@@ -365,7 +465,7 @@ func Apply[S any](s *S, fs []func(*S)) *S
 
 Apply is apply settings
 
-## func [ApplyAny](<https://github.com/goexts/generic/blob/main/settings/apply.go#L49>)
+## func [ApplyAny](<https://github.com/goexts/generic/blob/main/settings/apply.go#L54>)
 
 ```go
 func ApplyAny[S any](s *S, fs []interface{}) *S
@@ -373,7 +473,77 @@ func ApplyAny[S any](s *S, fs []interface{}) *S
 
 ApplyAny Applies a set of setting functions to a struct. These Settings functions can be ApplyFunc\[S\] or func\(\*S\), or objects that implement the ApplySetting interface.
 
-## func [ApplyOr](<https://github.com/goexts/generic/blob/main/settings/apply.go#L37>)
+## func [ApplyDefaults](<https://github.com/goexts/generic/blob/main/settings/default.go#L21>)
+
+```go
+func ApplyDefaults[S any](s *S, fs []func(*S)) *S
+```
+
+ApplyDefaults applies the given settings and default settings to the provided value.
+
+It first applies the given settings using the Apply function, then checks if the value implements the Defaulter interface. If it does, it calls the ApplyDefaults method to apply the default settings.
+
+## func [ApplyDefaultsOr](<https://github.com/goexts/generic/blob/main/settings/default.go#L57>)
+
+```go
+func ApplyDefaultsOr[S any](s *S, fs ...func(*S)) *S
+```
+
+ApplyDefaultsOr applies the given settings and default settings to the provided value.
+
+It is a convenience wrapper around ApplyDefaults that accepts a variable number of setting functions.
+
+## func [ApplyDefaultsOrError](<https://github.com/goexts/generic/blob/main/settings/default.go#L88>)
+
+```go
+func ApplyDefaultsOrError[S any](s *S, fs ...func(*S)) (*S, error)
+```
+
+ApplyDefaultsOrError applies the given settings and default settings to the provided value.
+
+It is a convenience wrapper around ApplyDefaults that accepts a variable number of setting functions.
+
+## func [ApplyDefaultsOrZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L72>)
+
+```go
+func ApplyDefaultsOrZero[S any](fs ...func(*S)) *S
+```
+
+ApplyDefaultsOrZero applies the given settings and default settings to a zero value of the type.
+
+It creates a zero value of the type, then calls ApplyDefaults to apply the given settings and default settings.
+
+## func [ApplyErrorDefaults](<https://github.com/goexts/generic/blob/main/settings/default.go#L38>)
+
+```go
+func ApplyErrorDefaults[S any](s *S, fs []func(*S)) (*S, error)
+```
+
+ApplyErrorDefaults applies the given settings and default settings to the provided value.
+
+It first applies the given settings using the Apply function, then checks if the value implements the ErrorDefaulter interface. If it does, it calls the ApplyDefaults method
+
+## func [ApplyErrorDefaultsOr](<https://github.com/goexts/generic/blob/main/settings/default.go#L65>)
+
+```go
+func ApplyErrorDefaultsOr[S any](s *S, fs ...func(*S)) (*S, error)
+```
+
+ApplyErrorDefaultsOr applies the given settings and default settings to the provided value.
+
+It is a convenience wrapper around ApplyDefaults that accepts a variable number of interface\{\} values.
+
+## func [ApplyErrorDefaultsOrZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L80>)
+
+```go
+func ApplyErrorDefaultsOrZero[S any](fs ...func(*S)) (*S, error)
+```
+
+ApplyErrorDefaultsOrZero applies the given settings and default settings to a zero value of the type.
+
+It creates a zero value of the type, then calls ApplyDefaults to apply the given settings and default settings.
+
+## func [ApplyOr](<https://github.com/goexts/generic/blob/main/settings/apply.go#L42>)
 
 ```go
 func ApplyOr[S any](s *S, fs ...func(*S)) *S
@@ -381,7 +551,7 @@ func ApplyOr[S any](s *S, fs ...func(*S)) *S
 
 ApplyOr is an apply settings with defaults
 
-## func [ApplyOrZero](<https://github.com/goexts/generic/blob/main/settings/apply.go#L42>)
+## func [ApplyOrZero](<https://github.com/goexts/generic/blob/main/settings/apply.go#L47>)
 
 ```go
 func ApplyOrZero[S any](fs ...func(*S)) *S
@@ -389,7 +559,7 @@ func ApplyOrZero[S any](fs ...func(*S)) *S
 
 ApplyOrZero is an apply settings with defaults
 
-## type [ApplyFunc](<https://github.com/goexts/generic/blob/main/settings/apply.go#L4>)
+## type [ApplyFunc](<https://github.com/goexts/generic/blob/main/settings/apply.go#L9>)
 
 ApplyFunc is a ApplyFunc function for Apply
 
@@ -397,13 +567,13 @@ ApplyFunc is a ApplyFunc function for Apply
 type ApplyFunc[S any] func(*S)
 ```
 
-### func \(ApplyFunc\[S\]\) [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L14>)
+### func \(ApplyFunc\[S\]\) [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L19>)
 
 ```go
 func (s ApplyFunc[S]) Apply(v *S)
 ```
 
-## type [ApplySetting](<https://github.com/goexts/generic/blob/main/settings/apply.go#L6-L8>)
+## type [ApplySetting](<https://github.com/goexts/generic/blob/main/settings/apply.go#L11-L13>)
 
 ```go
 type ApplySetting[S any] interface {
@@ -411,7 +581,29 @@ type ApplySetting[S any] interface {
 }
 ```
 
-## type [Setting](<https://github.com/goexts/generic/blob/main/settings/apply.go#L10-L12>)
+## type [Defaulter](<https://github.com/goexts/generic/blob/main/settings/default.go#L5-L8>)
+
+Defaulter is an interface that provides a method to apply default settings.
+
+```go
+type Defaulter interface {
+    // ApplyDefaults applies the default settings to the implementing type.
+    ApplyDefaults()
+}
+```
+
+## type [ErrorDefaulter](<https://github.com/goexts/generic/blob/main/settings/default.go#L11-L14>)
+
+ErrorDefaulter is an interface that provides a method to apply default settings and return an error.
+
+```go
+type ErrorDefaulter interface {
+    // ApplyDefaults applies the default settings to the implementing type and returns an error.
+    ApplyDefaults() error
+}
+```
+
+## type [Setting](<https://github.com/goexts/generic/blob/main/settings/apply.go#L15-L17>)
 
 ```go
 type Setting[S any] interface {
@@ -823,6 +1015,133 @@ func (r Runes) String() string
 func (r Runes) StringArray() []string
 ```
 
+# sync
+
+```go
+import "github.com/goexts/generic/sync"
+```
+
+## Index
+
+- [type Map](<#type-map>)
+  - [func (m *Map[K, V]) Clear()](<#func-mapk-v-clear>)
+  - [func (m *Map[K, V]) CompareAndDelete(key K, old V) (deleted bool)](<#func-mapk-v-compareanddelete>)
+  - [func (m *Map[K, V]) CompareAndSwap(key K, old, new V) (swapped bool)](<#func-mapk-v-compareandswap>)
+  - [func (m *Map[K, V]) Delete(key K)](<#func-mapk-v-delete>)
+  - [func (m *Map[K, V]) Load(key K) (value V, ok bool)](<#func-mapk-v-load>)
+  - [func (m *Map[K, V]) LoadAndDelete(key K) (value V, loaded bool)](<#func-mapk-v-loadanddelete>)
+  - [func (m *Map[K, V]) LoadOrStore(key K, value V) (actual any, loaded bool)](<#func-mapk-v-loadorstore>)
+  - [func (m *Map[K, V]) Range(f func(key K, value V) bool)](<#func-mapk-v-range>)
+  - [func (m *Map[K, V]) Store(key K, value V)](<#func-mapk-v-store>)
+  - [func (m *Map[K, V]) Swap(key K, value V) (previous any, loaded bool)](<#func-mapk-v-swap>)
+
+
+## type [Map](<https://github.com/goexts/generic/blob/main/sync/map.go#L39-L72>)
+
+Map is like a Go map\[any\]any but is safe for concurrent use by multiple goroutines without additional locking or coordination. Loads, stores, and deletes run in amortized constant time.
+
+The Map type is specialized. Most code should use a plain Go map instead, with separate locking or coordination, for better type safety and to make it easier to maintain other invariants along with the map content.
+
+The Map type is optimized for two common use cases: \(1\) when the entry for a given key is only ever written once but read many times, as in caches that only grow, or \(2\) when multiple goroutines read, write, and overwrite entries for disjoint sets of keys. In these two cases, use of a Map may significantly reduce lock contention compared to a Go map paired with a separate \[Mutex\] or \[RWMutex\].
+
+The zero Map is empty and ready for use. A Map must not be copied after first use.
+
+In the terminology of \[the Go memory model\], Map arranges that a write operation “synchronizes before” any read operation that observes the effect of the write, where read and write operations are defined as follows. \[Map.Load\], \[Map.LoadAndDelete\], \[Map.LoadOrStore\], \[Map.Swap\], \[Map.CompareAndSwap\], and \[Map.CompareAndDelete\] are read operations; \[Map.Delete\], \[Map.LoadAndDelete\], \[Map.Store\], and \[Map.Swap\] are write operations; \[Map.LoadOrStore\] is a write operation when it returns loaded set to false; \[Map.CompareAndSwap\] is a write operation when it returns swapped set to true; and \[Map.CompareAndDelete\] is a write operation when it returns deleted set to true.
+
+\[the Go memory model\]: https://go.dev/ref/mem
+
+```go
+type Map[K comparable, V any] struct {
+    // contains filtered or unexported fields
+}
+```
+
+### func \(\*Map\[K, V\]\) [Clear](<https://github.com/goexts/generic/blob/main/sync/map.go#L165>)
+
+```go
+func (m *Map[K, V]) Clear()
+```
+
+Clear deletes all the entries, resulting in an empty Map.
+
+### func \(\*Map\[K, V\]\) [CompareAndDelete](<https://github.com/goexts/generic/blob/main/sync/map.go#L441>)
+
+```go
+func (m *Map[K, V]) CompareAndDelete(key K, old V) (deleted bool)
+```
+
+CompareAndDelete deletes the entry for key if its value is equal to old. The old value must be of a comparable type.
+
+If there is no current value for key in the map, CompareAndDelete returns false \(even if the old value is the nil interface value\).
+
+### func \(\*Map\[K, V\]\) [CompareAndSwap](<https://github.com/goexts/generic/blob/main/sync/map.go#L409>)
+
+```go
+func (m *Map[K, V]) CompareAndSwap(key K, old, new V) (swapped bool)
+```
+
+CompareAndSwap swaps the old and new values for key if the value stored in the map is equal to old. The old value must be of a comparable type.
+
+### func \(\*Map\[K, V\]\) [Delete](<https://github.com/goexts/generic/blob/main/sync/map.go#L329>)
+
+```go
+func (m *Map[K, V]) Delete(key K)
+```
+
+Delete deletes the value for a key.
+
+### func \(\*Map\[K, V\]\) [Load](<https://github.com/goexts/generic/blob/main/sync/map.go#L124>)
+
+```go
+func (m *Map[K, V]) Load(key K) (value V, ok bool)
+```
+
+Load returns the value stored in the map for a key, or nil if no value is present. The ok result indicates whether value was found in the map.
+
+### func \(\*Map\[K, V\]\) [LoadAndDelete](<https://github.com/goexts/generic/blob/main/sync/map.go#L304>)
+
+```go
+func (m *Map[K, V]) LoadAndDelete(key K) (value V, loaded bool)
+```
+
+LoadAndDelete deletes the value for a key, returning the previous value if any. The loaded result reports whether the key was present.
+
+### func \(\*Map\[K, V\]\) [LoadOrStore](<https://github.com/goexts/generic/blob/main/sync/map.go#L233>)
+
+```go
+func (m *Map[K, V]) LoadOrStore(key K, value V) (actual any, loaded bool)
+```
+
+LoadOrStore returns the existing value for the key if present. Otherwise, it stores and returns the given value. The loaded result is true if the value was loaded, false if stored.
+
+### func \(\*Map\[K, V\]\) [Range](<https://github.com/goexts/generic/blob/main/sync/map.go#L485>)
+
+```go
+func (m *Map[K, V]) Range(f func(key K, value V) bool)
+```
+
+Range calls f sequentially for each key and value present in the map. If f returns false, range stops the iteration.
+
+Range does not necessarily correspond to any consistent snapshot of the Map's contents: no key will be visited more than once, but if the value for any key is stored or deleted concurrently \(including by f\), Range may reflect any mapping for that key from any point during the Range call. Range does not block other methods on the receiver; even f itself may call any method on m.
+
+Range may be O\(N\) with the number of elements in the map even if f returns false after a constant number of calls.
+
+### func \(\*Map\[K, V\]\) [Store](<https://github.com/goexts/generic/blob/main/sync/map.go#L160>)
+
+```go
+func (m *Map[K, V]) Store(key K, value V)
+```
+
+Store sets the value for a key.
+
+### func \(\*Map\[K, V\]\) [Swap](<https://github.com/goexts/generic/blob/main/sync/map.go#L365>)
+
+```go
+func (m *Map[K, V]) Swap(key K, value V) (previous any, loaded bool)
+```
+
+Swap swaps the value for a key and returns the previous value if any. The loaded result reports whether the key was present.
+
 # thread
 
 ```go
@@ -965,6 +1284,10 @@ type Promise[T any] interface {
 import "github.com/goexts/generic/trans"
 ```
 
+Package trans implements the functions, types, and interfaces for the module.
+
+Package trans implements the functions, types, and interfaces for the module.
+
 ## Index
 
 - [func Cast[T any](v any) (ret T, ok bool)](<#func-cast>)
@@ -975,7 +1298,7 @@ import "github.com/goexts/generic/trans"
 - [func Value[T any](v *T) T](<#func-value>)
 
 
-## func [Cast](<https://github.com/goexts/generic/blob/main/trans/types.go#L10>)
+## func [Cast](<https://github.com/goexts/generic/blob/main/trans/types.go#L15>)
 
 ```go
 func Cast[T any](v any) (ret T, ok bool)
@@ -983,7 +1306,7 @@ func Cast[T any](v any) (ret T, ok bool)
 
 Cast attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value and true. If the conversion fails, it returns the original value and false.
 
-## func [CastOr](<https://github.com/goexts/generic/blob/main/trans/types.go#L20>)
+## func [CastOr](<https://github.com/goexts/generic/blob/main/trans/types.go#L25>)
 
 ```go
 func CastOr[T any](v any, def T) T
@@ -991,7 +1314,7 @@ func CastOr[T any](v any, def T) T
 
 CastOr attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value. If the conversion fails, it returns the default value.
 
-## func [CastOrZero](<https://github.com/goexts/generic/blob/main/trans/types.go#L30>)
+## func [CastOrZero](<https://github.com/goexts/generic/blob/main/trans/types.go#L35>)
 
 ```go
 func CastOrZero[T comparable](v any) T
@@ -999,7 +1322,7 @@ func CastOrZero[T comparable](v any) T
 
 CastOrZero attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value. If the conversion fails, it returns a zero value of the specified type.
 
-## func [MustCast](<https://github.com/goexts/generic/blob/main/trans/types.go#L41>)
+## func [MustCast](<https://github.com/goexts/generic/blob/main/trans/types.go#L46>)
 
 ```go
 func MustCast[T any](v any) T
@@ -1007,7 +1330,7 @@ func MustCast[T any](v any) T
 
 MustCast attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value. If the conversion fails, it panics with the message.
 
-## func [Pointer](<https://github.com/goexts/generic/blob/main/trans/pv.go#L4>)
+## func [Pointer](<https://github.com/goexts/generic/blob/main/trans/pv.go#L9>)
 
 ```go
 func Pointer[T any](v T) *T
@@ -1015,7 +1338,7 @@ func Pointer[T any](v T) *T
 
 Pointer returns a pointer to value of Type.
 
-## func [Value](<https://github.com/goexts/generic/blob/main/trans/pv.go#L9>)
+## func [Value](<https://github.com/goexts/generic/blob/main/trans/pv.go#L14>)
 
 ```go
 func Value[T any](v *T) T
@@ -1029,13 +1352,17 @@ Value returns the value of the pointer of Type.
 import "github.com/goexts/generic/types"
 ```
 
-Package types provides type definitions for various data types.
+Package types implements the functions, types, and interfaces for the module.
 
-Package types defines interfaces for different types of data.
+Package types implements the functions, types, and interfaces for the module.
 
-Package types defines interfaces for different types of numbers.
+Package types implements the functions, types, and interfaces for the module.
 
-Package types defines interfaces for different types of data.
+Package types implements the functions, types, and interfaces for the module.
+
+Package types implements the functions, types, and interfaces for the module.
+
+Package types implements the functions, types, and interfaces for the module.
 
 ## Index
 
@@ -1055,7 +1382,7 @@ Package types defines interfaces for different types of data.
 - [type Unsigned](<#type-unsigned>)
 
 
-## func [Stringer](<https://github.com/goexts/generic/blob/main/types/string.go#L11>)
+## func [Stringer](<https://github.com/goexts/generic/blob/main/types/string.go#L15>)
 
 ```go
 func Stringer[T String](t T) string
@@ -1063,7 +1390,7 @@ func Stringer[T String](t T) string
 
 Stringer converts a string\-like type to a string.
 
-## func [Zero](<https://github.com/goexts/generic/blob/main/types/zero.go#L4>)
+## func [Zero](<https://github.com/goexts/generic/blob/main/types/zero.go#L9>)
 
 ```go
 func Zero[T any]() (zero T)
@@ -1071,7 +1398,7 @@ func Zero[T any]() (zero T)
 
 Zero is the zero value for a type.
 
-## func [ZeroOr](<https://github.com/goexts/generic/blob/main/types/zero.go#L10>)
+## func [ZeroOr](<https://github.com/goexts/generic/blob/main/types/zero.go#L15>)
 
 ```go
 func ZeroOr[T comparable](v T, def T) T
@@ -1079,7 +1406,7 @@ func ZeroOr[T comparable](v T, def T) T
 
 ZeroOr returns def if v is the zero value. Decrypted: use cmp.ZeroOr instead.
 
-## type [Boolean](<https://github.com/goexts/generic/blob/main/types/boolean.go#L6-L9>)
+## type [Boolean](<https://github.com/goexts/generic/blob/main/types/boolean.go#L10-L13>)
 
 Boolean is an interface that represents a boolean type. It is implemented by the built\-in bool type.
 
@@ -1089,7 +1416,7 @@ type Boolean interface {
 }
 ```
 
-## type [Complex](<https://github.com/goexts/generic/blob/main/types/number.go#L21>)
+## type [Complex](<https://github.com/goexts/generic/blob/main/types/number.go#L25>)
 
 Complex is an interface that represents a complex64 or complex128 number.
 
@@ -1097,7 +1424,7 @@ Complex is an interface that represents a complex64 or complex128 number.
 type Complex = constraints.Complex
 ```
 
-## type [Const](<https://github.com/goexts/generic/blob/main/types/const.go#L6-L8>)
+## type [Const](<https://github.com/goexts/generic/blob/main/types/const.go#L10-L12>)
 
 Const is an interface that represents a value that is either a Number, a Boolean, or a string. It is used to define constants in Go.
 
@@ -1107,7 +1434,7 @@ type Const interface {
 }
 ```
 
-## type [Float](<https://github.com/goexts/generic/blob/main/types/number.go#L9>)
+## type [Float](<https://github.com/goexts/generic/blob/main/types/number.go#L13>)
 
 Float is an interface that represents a float32 or float64.
 
@@ -1115,7 +1442,7 @@ Float is an interface that represents a float32 or float64.
 type Float = constraints.Float
 ```
 
-## type [Integer](<https://github.com/goexts/generic/blob/main/types/number.go#L18>)
+## type [Integer](<https://github.com/goexts/generic/blob/main/types/number.go#L22>)
 
 Integer is an interface that represents an integer type.
 
@@ -1123,7 +1450,7 @@ Integer is an interface that represents an integer type.
 type Integer = constraints.Integer
 ```
 
-## type [Number](<https://github.com/goexts/generic/blob/main/types/number.go#L28-L30>)
+## type [Number](<https://github.com/goexts/generic/blob/main/types/number.go#L32-L34>)
 
 Number is an interface that represents any number type. It includes all the interfaces defined above.
 
@@ -1133,7 +1460,7 @@ type Number interface {
 }
 ```
 
-## type [Ordered](<https://github.com/goexts/generic/blob/main/types/number.go#L24>)
+## type [Ordered](<https://github.com/goexts/generic/blob/main/types/number.go#L28>)
 
 Ordered is an interface that represents any ordered type.
 
@@ -1141,7 +1468,7 @@ Ordered is an interface that represents any ordered type.
 type Ordered = constraints.Ordered
 ```
 
-## type [Signed](<https://github.com/goexts/generic/blob/main/types/number.go#L15>)
+## type [Signed](<https://github.com/goexts/generic/blob/main/types/number.go#L19>)
 
 Signed is an interface that represents a signed integer type.
 
@@ -1149,7 +1476,7 @@ Signed is an interface that represents a signed integer type.
 type Signed = constraints.Signed
 ```
 
-## type [Slice](<https://github.com/goexts/generic/blob/main/types/slice.go#L6>)
+## type [Slice](<https://github.com/goexts/generic/blob/main/types/slice.go#L11>)
 
 ```go
 type Slice[T any] interface {
@@ -1157,7 +1484,7 @@ type Slice[T any] interface {
 }
 ```
 
-## type [String](<https://github.com/goexts/generic/blob/main/types/string.go#L6-L8>)
+## type [String](<https://github.com/goexts/generic/blob/main/types/string.go#L10-L12>)
 
 String is an interface that represents a string\-like type. It can be a string, a byte slice, or a rune slice.
 
@@ -1167,7 +1494,7 @@ type String interface {
 }
 ```
 
-## type [Unsigned](<https://github.com/goexts/generic/blob/main/types/number.go#L12>)
+## type [Unsigned](<https://github.com/goexts/generic/blob/main/types/number.go#L16>)
 
 Unsigned is an interface that represents an unsigned integer type.
 
