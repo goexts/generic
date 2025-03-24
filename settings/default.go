@@ -62,6 +62,14 @@ func WithZero[S any](settings ...any) *S {
 	return &zero
 }
 
+// WithDefaultE applies settings and handles default values.
+// Parameters:
+//   - target: Struct pointer to configure
+//   - settings: Configuration functions to apply
+//
+// Returns:
+//   - *S: Configured struct pointer
+//   - error: Error if any occurred during the configuration process
 func WithDefaultE[S any](target *S, settings ...any) (*S, error) {
 	for _, setting := range settings {
 		if _, err := applyWithError(target, setting); err != nil {
@@ -71,6 +79,13 @@ func WithDefaultE[S any](target *S, settings ...any) (*S, error) {
 	return target, nil
 }
 
+// WithZeroE applies settings and handles default values.
+// Parameters:
+//   - settings: Configuration functions to apply
+//
+// Returns:
+//   - *S: Configured struct pointer
+//   - error: Error if any occurred during the configuration process
 func WithZeroE[S any](settings ...any) (*S, error) {
 	var zero S
 	var err error
@@ -82,49 +97,34 @@ func WithZeroE[S any](settings ...any) (*S, error) {
 	return &zero, nil
 }
 
-func MixedDefaultE[S any](target *S, settings ...any) (*S, error) {
+// WithMixed applies settings and handles default values.
+// Parameters:
+//   - target: Struct pointer to configure
+//   - settings: Configuration functions to apply
+//
+// Returns:
+//   - *S: Configured struct pointer
+//   - error: Error if any occurred during the configuration process
+func WithMixed[S any](target *S, settings ...any) (*S, error) {
+	var err error
 	for _, setting := range settings {
-		applied, err := applyWithError(target, setting)
-		// if not applied will not return. try down apply
-		if applied {
-			if err == nil {
-				continue
-			}
+		if err = mixedApply(target, setting); err != nil {
 			return nil, err
 		}
-
-		// if applied will continue to next
-		if apply(target, setting) {
-			continue
-		}
-
-		// all tried failed, return the error
-		return nil, err
 	}
 	return target, nil
 }
 
-func MixedZeroE[S any](settings ...any) (*S, error) {
+// WithMixedZero applies settings and handles default values.
+// Parameters:
+//   - settings: Configuration functions to apply
+//
+// Returns:
+//   - *S: Configured struct pointer
+//   - error: Error if any occurred during the configuration process
+func WithMixedZero[S any](settings ...any) (*S, error) {
 	var zero S
-	for _, setting := range settings {
-		applied, err := applyWithError(&zero, setting)
-		// if not applied will not return. try down apply
-		if applied {
-			if err == nil {
-				continue
-			}
-			return nil, err
-		}
-
-		// if applied will continue to next
-		if apply(&zero, setting) {
-			continue
-		}
-
-		// all tried failed, return the error
-		return nil, err
-	}
-	return &zero, nil
+	return WithMixed(&zero, settings...)
 }
 
 // ApplyErrorDefaults applies the given settings and default settings to the provided value.

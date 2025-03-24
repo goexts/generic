@@ -93,12 +93,30 @@ func applyWithError[S any](target *S, setting any) (bool, error) {
 	return true, wrapIfNeeded(err, setting)
 }
 
+func mixedApply[S any](target *S, setting any) error {
+	applied, err := applyWithError(target, setting)
+	// if not applied will not return. try down apply
+	if applied {
+		if err == nil {
+			return nil
+		}
+		return err
+	}
+
+	// if applied will continue to next
+	if apply(target, setting) {
+		return nil
+	}
+
+	// all tried failed, return the error
+	return err
+}
+
 // Apply configures a target struct with ordered settings.
 // Parameters:
 //   - target: Pointer to the struct being configured (non-nil)
 //   - settings: Ordered list of configuration functions
 //
-// Retur
 // Returns:
 //   - *S: Configured struct pointer (same as input)
 func Apply[S any](target *S, settings []func(*S)) *S {
@@ -124,6 +142,14 @@ func ApplyOrZero[S any](fs ...func(*S)) *S {
 	return Apply(&val, fs)
 }
 
+// ApplyE applies a list of settings to a target struct.
+// Parameters:
+//   - target: Pointer to the struct being configured (non-nil)
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+//   - error: Any error encountered during configuration
 func ApplyE[S any](target *S, settings []func(target *S) error) (*S, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
@@ -144,6 +170,10 @@ func ApplyE[S any](target *S, settings []func(target *S) error) (*S, error) {
 //
 // Returns:
 //   - *S: Configured struct pointer (same as input)
+//
+// Panics:
+//   - If target is nil
+//   - If any setting is not a supported type
 func ApplyStrict[S any](target *S, settings []any) *S {
 	if target == nil {
 		panic(newConfigError(ErrEmptyTargetValue, nil, nil))
@@ -156,6 +186,13 @@ func ApplyStrict[S any](target *S, settings []any) *S {
 	return target
 }
 
+// ApplyStrictE applies a list of settings to a target struct.
+// Parameters:
+//   - target: Pointer to the struct being configured (non-nil)
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
 func ApplyStrictE[S any](target *S, settings []any) (*S, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
@@ -169,27 +206,22 @@ func ApplyStrictE[S any](target *S, settings []any) (*S, error) {
 	return target, nil
 }
 
+// ApplyMixed applies a list of settings to a target struct.
+// Parameters:
+//   - target: Pointer to the struct being configured (non-nil)
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
 func ApplyMixed[S any](target *S, settings []any) (*S, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
 	}
+	var err error
 	for _, setting := range settings {
-		applied, err := applyWithError(target, setting)
-		// if not applied will not return. try down apply
-		if applied {
-			if err == nil {
-				continue
-			}
+		if err = mixedApply(target, setting); err != nil {
 			return nil, err
 		}
-
-		// if applied will continue to next
-		if apply(target, setting) {
-			continue
-		}
-
-		// all tried failed, return the error
-		return nil, err
 	}
 	return target, nil
 }

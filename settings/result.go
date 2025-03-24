@@ -74,9 +74,9 @@ func ResultWithZero[S any](settings []func(*S)) Result[S] {
 }
 
 func ResultWithE[S any](target *S, settings []func(*S) error) Result[S] {
+	var err error
 	for _, setting := range settings {
-		_, err := applyWithError(target, setting)
-		if err != nil {
+		if _, err = applyWithError(target, setting); err != nil {
 			return NewErrorResult[S](err)
 		}
 	}
@@ -94,23 +94,11 @@ func ResultZeroMixed[S any](settings []any) Result[S] {
 }
 
 func ResultMixed[S any](target *S, settings []any) Result[S] {
+	var err error
 	for _, setting := range settings {
-		applied, err := applyWithError(target, setting)
-		// if not applied will not return. try down apply
-		if applied {
-			if err == nil {
-				continue
-			}
+		if err = mixedApply(target, setting); err != nil {
 			return NewErrorResult[S](err)
 		}
-
-		// if applied will continue to next
-		if apply(target, setting) {
-			continue
-		}
-
-		// all tried failed, return the error
-		return NewErrorResult[S](err)
 	}
 	return NewValueResult[S](target)
 }
