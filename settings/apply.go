@@ -212,8 +212,7 @@ func New[S any](settings []func(*S)) *S {
 // Deprecated: Use ApplyMixed with slice syntax. Will be removed in v0.3.0
 //
 //	Before: ApplyAny(&obj, []interface{}{f1, f2})
-//	After:  ApplyMixed(&obj, []interface{}{f1, f2})
-//     After:  ApplyMixed(&obj, []interface{}{f1, f2})
+//	After:  ApplyMixed(&obj, []interface{}{f1, f2}) (*obj, error)
 func ApplyAny[S any](target *S, settings []any) *S {
 	_, _ = ApplyMixed(target, settings)
 	return target
