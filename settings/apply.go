@@ -207,16 +207,12 @@ func New[S any](settings []func(*S)) *S {
 	}
 	return &zero
 }
-//
-//	Before: ApplyAny(&obj, []interface{}{f1, f2})
-ApplyMixed(&obj, []interface{}{f1, f2})
-//
-// Depr
+
+// ApplyAny applies a list of settings to a target struct.
+// Deprecated: Use ApplyMixed with slice syntax. Will be removed in v0.3.0
 //
 //	Before: ApplyAny(&obj, []interface{}{f1, f2})
 //	After:  ApplyMixed(&obj, []interface{}{f1, f2})
-// Example migration:
-//     Before: ApplyAny(&obj, []interface{}{f1, f2})
 //     After:  ApplyMixed(&obj, []interface{}{f1, f2})
 func ApplyAny[S any](target *S, settings []any) *S {
 	_, _ = ApplyMixed(target, settings)
