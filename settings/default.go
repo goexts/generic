@@ -2,18 +2,21 @@
 package settings
 
 // Defaulter is an interface that provides a method to apply default settings.
+// Decrypted: use Apply instead of Defaulter
 type Defaulter interface {
 	// ApplyDefaults applies the default settings to the implementing type.
 	ApplyDefaults()
 }
 
 // ErrorDefaulter is an interface that provides a method to apply default settings and return an error.
+// Decrypted: use ApplyE instead of ErrorDefaulter
 type ErrorDefaulter interface {
 	// ApplyDefaults applies the default settings to the implementing type and returns an error.
 	ApplyDefaults() error
 }
 
 // ApplyDefaults applies the given settings and default settings to the provided value.
+// Decrypted: use Apply instead of ApplyDefaults
 //
 // It first applies the given settings using the Apply function, then checks if the value
 // implements the Defaulter interface. If it does, it calls the ApplyDefaults method
@@ -29,6 +32,34 @@ func ApplyDefaults[S any](s *S, fs []func(*S)) *S {
 		return s
 	}
 	return s
+}
+
+// WithDefault applies settings and handles default values.
+// Parameters:
+//   - target: Struct pointer to configure
+//   - settings: Configuration functions to apply
+//
+// Returns:
+//   - *S: Configured struct pointer
+func WithDefault[S any](target *S, settings ...func(*S)) *S {
+	for _, setting := range settings {
+		_ = apply(target, setting)
+	}
+	return target
+}
+
+// WithZero applies settings and handles default values.
+// Parameters:
+//   - settings: Configuration functions to apply
+//
+// Returns:
+//   - *S: Configured struct pointer
+func WithZero[S any](settings ...func(*S)) *S {
+	var zero S
+	for _, setting := range settings {
+		_ = apply(&zero, setting)
+	}
+	return &zero
 }
 
 // ApplyErrorDefaults applies the given settings and default settings to the provided value.
