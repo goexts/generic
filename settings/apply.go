@@ -128,8 +128,9 @@ func ApplyE[S any](target *S, settings []func(target *S) error) (*S, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
 	}
+	var err error
 	for _, setting := range settings {
-		if err := setting(target); err != nil {
+		if err = setting(target); err != nil {
 			return nil, err
 		}
 	}

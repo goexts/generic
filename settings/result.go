@@ -55,16 +55,62 @@ func NewErrorResult[S any](err error) Result[S] {
 	}
 }
 
-// NewWithResult creates a zero-value instance and applies settings.
+func ResultWith[S any](target *S, settings []func(*S)) Result[S] {
+	for _, setting := range settings {
+		_ = apply(target, setting)
+	}
+	return NewValueResult(target)
+}
+
+// ResultWithZero creates a zero-value instance and applies settings.
 // Parameters:
 //   - settings: Configuration functions to apply
 //
 // Returns:
 //   - *S: New configured instance
-func NewWithResult[S any](settings []func(*S)) Result[S] {
+func ResultWithZero[S any](settings []func(*S)) Result[S] {
 	var zero S
+	return ResultWith(&zero, settings)
+}
+
+func ResultWithE[S any](target *S, settings []func(*S) error) Result[S] {
 	for _, setting := range settings {
-		_ = apply(&zero, setting)
+		_, err := applyWithError(target, setting)
+		if err != nil {
+			return NewErrorResult[S](err)
+		}
 	}
-	return NewValueResult(&zero)
+	return NewValueResult[S](target)
+}
+
+func ResultWithZeroE[S any](settings []func(*S) error) Result[S] {
+	var zero S
+	return ResultWithE(&zero, settings)
+}
+
+func ResultZeroMixed[S any](settings []any) Result[S] {
+	var zero S
+	return ResultMixed(&zero, settings)
+}
+
+func ResultMixed[S any](target *S, settings []any) Result[S] {
+	for _, setting := range settings {
+		applied, err := applyWithError(target, setting)
+		// if not applied will not return. try down apply
+		if applied {
+			if err == nil {
+				continue
+			}
+			return NewErrorResult[S](err)
+		}
+
+		// if applied will continue to next
+		if apply(target, setting) {
+			continue
+		}
+
+		// all tried failed, return the error
+		return NewErrorResult[S](err)
+	}
+	return NewValueResult[S](target)
 }

@@ -41,7 +41,7 @@ func ApplyDefaults[S any](s *S, fs []func(*S)) *S {
 //
 // Returns:
 //   - *S: Configured struct pointer
-func WithDefault[S any](target *S, settings ...func(*S)) *S {
+func WithDefault[S any](target *S, settings ...any) *S {
 	for _, setting := range settings {
 		_ = apply(target, setting)
 	}
@@ -54,7 +54,7 @@ func WithDefault[S any](target *S, settings ...func(*S)) *S {
 //
 // Returns:
 //   - *S: Configured struct pointer
-func WithZero[S any](settings ...func(*S)) *S {
+func WithZero[S any](settings ...any) *S {
 	var zero S
 	for _, setting := range settings {
 		_ = apply(&zero, setting)
@@ -62,7 +62,73 @@ func WithZero[S any](settings ...func(*S)) *S {
 	return &zero
 }
 
+func WithDefaultE[S any](target *S, settings ...any) (*S, error) {
+	for _, setting := range settings {
+		if _, err := applyWithError(target, setting); err != nil {
+			return nil, err
+		}
+	}
+	return target, nil
+}
+
+func WithZeroE[S any](settings ...any) (*S, error) {
+	var zero S
+	var err error
+	for _, setting := range settings {
+		if _, err = applyWithError(&zero, setting); err != nil {
+			return nil, err
+		}
+	}
+	return &zero, nil
+}
+
+func MixedDefaultE[S any](target *S, settings ...any) (*S, error) {
+	for _, setting := range settings {
+		applied, err := applyWithError(target, setting)
+		// if not applied will not return. try down apply
+		if applied {
+			if err == nil {
+				continue
+			}
+			return nil, err
+		}
+
+		// if applied will continue to next
+		if apply(target, setting) {
+			continue
+		}
+
+		// all tried failed, return the error
+		return nil, err
+	}
+	return target, nil
+}
+
+func MixedZeroE[S any](settings ...any) (*S, error) {
+	var zero S
+	for _, setting := range settings {
+		applied, err := applyWithError(&zero, setting)
+		// if not applied will not return. try down apply
+		if applied {
+			if err == nil {
+				continue
+			}
+			return nil, err
+		}
+
+		// if applied will continue to next
+		if apply(&zero, setting) {
+			continue
+		}
+
+		// all tried failed, return the error
+		return nil, err
+	}
+	return &zero, nil
+}
+
 // ApplyErrorDefaults applies the given settings and default settings to the provided value.
+// Decrypted: use WithDefaultE instead of ApplyErrorDefaults
 //
 // It first applies the given settings using the Apply function, then checks if the value
 // implements the ErrorDefaulter interface. If it does, it calls the ApplyDefaults method
@@ -83,6 +149,7 @@ func ApplyErrorDefaults[S any](s *S, fs []func(*S)) (*S, error) {
 }
 
 // ApplyDefaultsOr applies the given settings and default settings to the provided value.
+// Decrypted: use WithZeroE instead of ApplyDefaultsOr
 //
 // It is a convenience wrapper around ApplyDefaults that accepts a variable number of setting functions.
 func ApplyDefaultsOr[S any](s *S, fs ...func(*S)) *S {
@@ -91,6 +158,7 @@ func ApplyDefaultsOr[S any](s *S, fs ...func(*S)) *S {
 }
 
 // ApplyErrorDefaultsOr applies the given settings and default settings to the provided value.
+// Decrypted: use WithDefaultE instead of ApplyErrorDefaultsOr
 //
 // It is a convenience wrapper around ApplyDefaults that accepts a variable number of interface{} values.
 func ApplyErrorDefaultsOr[S any](s *S, fs ...func(*S)) (*S, error) {
@@ -98,6 +166,7 @@ func ApplyErrorDefaultsOr[S any](s *S, fs ...func(*S)) (*S, error) {
 }
 
 // ApplyDefaultsOrZero applies the given settings and default settings to a zero value of the type.
+// Decrypted: use WithZero instead of ApplyDefaultsOrZero
 //
 // It creates a zero value of the type, then calls ApplyDefaults to apply the given settings and default settings.
 func ApplyDefaultsOrZero[S any](fs ...func(*S)) *S {
@@ -106,6 +175,7 @@ func ApplyDefaultsOrZero[S any](fs ...func(*S)) *S {
 }
 
 // ApplyErrorDefaultsOrZero applies the given settings and default settings to a zero value of the type.
+// Decrypted: use WithZeroE instead of ApplyErrorDefaultsOrZero
 //
 // It creates a zero value of the type, then calls ApplyDefaults to apply the given settings and default settings.
 func ApplyErrorDefaultsOrZero[S any](fs ...func(*S)) (*S, error) {
@@ -114,6 +184,7 @@ func ApplyErrorDefaultsOrZero[S any](fs ...func(*S)) (*S, error) {
 }
 
 // ApplyDefaultsOrError applies the given settings and default settings to the provided value.
+// Decrypted: use WithDefaultE instead of ApplyDefaultsOrError
 //
 // It is a convenience wrapper around ApplyDefaults that accepts a variable number of setting functions.
 func ApplyDefaultsOrError[S any](s *S, fs ...func(*S)) (*S, error) {
