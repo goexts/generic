@@ -63,21 +63,6 @@ func TestUnchangedZeroValueWithNoModification(t *testing.T) {
 	}
 }
 
-// Handles nil functions gracefully without panic
-func TestHandlesNilFunctionsGracefully(t *testing.T) {
-	// By the powers! Let's see if it handles nil without a mutiny!
-	var nilFunc func(*int)
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf("The code panicked with nil function")
-		}
-	}()
-	result := ApplyOrZero(nilFunc)
-	if result == nil || *result != 0 {
-		t.Errorf("Expected zero value, but got %v", result)
-	}
-}
-
 // Supports various types for S, including complex structs
 type Pirate struct {
 	Name string

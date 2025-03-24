@@ -35,7 +35,7 @@ func TestApplyMixedReturnsModifiedStruct(t *testing.T) {
 	settings := []interface{}{
 		func(s *Ship) { s.Speed += 5 },
 	}
-	result := ApplyMixed(s, settings)
+	result, _ := ApplyMixed(s, settings)
 	if result.Speed != 15 {
 		t.Errorf("Expected speed 15, but got %d", result.Speed)
 	}
@@ -74,14 +74,14 @@ func TestApplyMixedWithNilStruct(t *testing.T) {
 	settings := []interface{}{
 		func(s *Ship) { s.Name = "Flying Dutchman" },
 	}
-	result := ApplyMixed(s, settings)
+	result, _ := ApplyMixed(s, settings)
 	if result != nil {
 		t.Error("Expected nil, but got a non-nil result")
 	}
 }
 
 // Panics when an invalid setting type is provided
-func TestApplyMixedPanicsOnInvalidType(t *testing.T) {
+func TestApplyStrictPanicsOnInvalidType(t *testing.T) {
 	// Arrr! Beware the kraken of invalid types!
 	type Ship struct {
 		Name string
@@ -95,7 +95,7 @@ func TestApplyMixedPanicsOnInvalidType(t *testing.T) {
 			t.Error("Expected panic, but did not panic")
 		}
 	}()
-	ApplyMixed(s, settings)
+	ApplyStrict(s, settings)
 }
 
 // Handles an empty list of settings without error
@@ -106,7 +106,7 @@ func TestApplyMixedWithEmptySettingsList(t *testing.T) {
 	}
 	s := &Ship{Name: "Silent Mary"}
 	settings := []interface{}{}
-	result := ApplyMixed(s, settings)
+	result, _ := ApplyMixed(s, settings)
 	if result.Name != "Silent Mary" {
 		t.Errorf("Expected 'Silent Mary', but got %s", result.Name)
 	}

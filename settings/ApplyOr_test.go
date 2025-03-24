@@ -19,7 +19,7 @@ func TestApplyOrAppliesSettingsToNonNilStruct(t *testing.T) {
 	setting := func(s *Ship) {
 		s.Name = "Flying Dutchman"
 	}
-	type ShipSetting SettingFunc[Ship]
+	type ShipSetting Func[Ship]
 
 	setting2 := ShipSetting(func(s *Ship) {
 		s.Name = "Queen Anne's Revenge"
@@ -74,7 +74,7 @@ func TestApplyOrHandlesNilStructInput(t *testing.T) {
 		Name string
 	}
 	var s *Ship = nil
-	setting := SettingFunc[Ship](func(s *Ship) {
+	setting := Func[Ship](func(s *Ship) {
 		s.Name = "Ghost Ship"
 	})
 	result := ApplyOr(s, setting)

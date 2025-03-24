@@ -49,10 +49,10 @@ func TestApplyProcessesAllSettings(t *testing.T) {
 		Name  string
 		Speed int
 	}
-	modifyName := SettingFunc[Ship](func(s *Ship) {
+	modifyName := Func[Ship](func(s *Ship) {
 		s.Name = "HMS Victory"
 	})
-	increaseSpeed := SettingFunc[Ship](func(s *Ship) {
+	increaseSpeed := Func[Ship](func(s *Ship) {
 		s.Speed += 10
 	})
 	ship := &Ship{Name: "Endeavour", Speed: 20}

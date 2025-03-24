@@ -139,10 +139,8 @@ func ApplyE[S any](target *S, settings []func(target *S) error) (*S, error) {
 // ApplyStrict is a version for strict type safety
 // Parameters:
 //   - target: Pointer to the struct being configured (non-nil)
-ttings: Ordered list of configuration functions
-//
-// Re
 //   - settings: Ordered list of configuration functions
+//
 // Returns:
 //   - *S: Configured struct pointer (same as input)
 func ApplyStrict[S any](target *S, settings []any) *S {
@@ -195,11 +193,11 @@ func ApplyMixed[S any](target *S, settings []any) (*S, error) {
 	return target, nil
 }
 
-arameters:
-//   - settings: Configuration functions to app
 // New creates a zero-value instance and applies settings.
 // Parameters:
 //   - settings: Configuration functions to apply
+//
+// Retur
 // Returns:
 //   - *S: New configured instance
 func New[S any](settings []func(*S)) *S {
@@ -211,8 +209,12 @@ func New[S any](settings []func(*S)) *S {
 }
 //
 //	Before: ApplyAny(&obj, []interface{}{f1, f2})
+ApplyMixed(&obj, []interface{}{f1, f2})
+//
+// Depr
+//
+//	Before: ApplyAny(&obj, []interface{}{f1, f2})
 //	After:  ApplyMixed(&obj, []interface{}{f1, f2})
-// Deprecated: Use ApplyMixed with slice syntax. Will be removed in v0.3.0
 // Example migration:
 //     Before: ApplyAny(&obj, []interface{}{f1, f2})
 //     After:  ApplyMixed(&obj, []interface{}{f1, f2})
