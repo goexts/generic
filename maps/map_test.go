@@ -6,11 +6,23 @@ package maps
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func sortKV(kvs []KeyValue[int, string]) []KeyValue[int, string] {
+	slices.SortFunc(kvs, func(a, b KeyValue[int, string]) int {
+		if a.Key > b.Key {
+			return 1
+		} else if a.Key < b.Key {
+			return -1
+		}
+		return 0
+	})
+	return kvs
+}
 func TestMapToKVs(t *testing.T) {
 	type args struct {
 		m map[int]string
@@ -32,16 +44,16 @@ func TestMapToKVs(t *testing.T) {
 			},
 			want: []KeyValue[int, string]{
 				{
-					Key: 1,
-					Val: "a",
+					Key: 3,
+					Val: "c",
 				},
 				{
 					Key: 2,
 					Val: "b",
 				},
 				{
-					Key: 3,
-					Val: "c",
+					Key: 1,
+					Val: "a",
 				},
 			},
 		},
@@ -49,7 +61,7 @@ func TestMapToKVs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := MapToKVs(tt.args.m)
-			assert.Equal(t, tt.want, got)
+			assert.EqualValues(t, sortKV(tt.want), sortKV(got))
 		})
 	}
 }
