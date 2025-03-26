@@ -68,7 +68,7 @@ func TestApplyReturnsNilForNilInput(t *testing.T) {
 	type Ship struct {
 		Name string
 	}
-	result := Apply[Ship](nil, nil)
+	result := Apply(nil, ([]func(*Ship))(nil))
 	if result != nil {
 		t.Error("Expected nil for nil input, but got a non-nil result")
 	}

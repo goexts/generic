@@ -61,35 +61,48 @@ func (f FuncE[S]) Apply(target *S) error {
 	return nil
 }
 
+// FuncType represents a union type for configuration options.
+type FuncType[S any] interface {
+	~func(*S)
+}
+
+// FuncEType represents a union type for configuration options.
+type FuncEType[S any] interface {
+	~func(*S) error
+}
+
 // -------------------------
 // Unified Application Logic
 // -------------------------
 func apply[S any](target *S, setting any) bool {
+	var applyFunc Applier[S]
 	switch s := setting.(type) {
 	case func(*S):
-		Func[S](s).Apply(target)
+		applyFunc = Func[S](s)
 	case Func[S]:
-		s.Apply(target)
+		applyFunc = s
 	case Applier[S]:
-		s.Apply(target)
+		applyFunc = s
 	default:
 		return false
 	}
+	applyFunc.Apply(target)
 	return true
 }
 
 func applyWithError[S any](target *S, setting any) (bool, error) {
-	var err error
+	var applyFunc ApplierE[S]
 	switch s := setting.(type) {
 	case func(*S) error:
-		err = FuncE[S](s).Apply(target)
+		applyFunc = FuncE[S](s)
 	case FuncE[S]:
-		err = s.Apply(target)
+		applyFunc = s
 	case ApplierE[S]:
-		err = s.Apply(target)
+		applyFunc = s
 	default:
 		return false, newConfigError(ErrUnsupportedType, setting, nil)
 	}
+	err := applyFunc.Apply(target)
 	return true, wrapIfNeeded(err, setting)
 }
 
@@ -119,7 +132,7 @@ func mixedApply[S any](target *S, setting any) error {
 //
 // Returns:
 //   - *S: Configured struct pointer (same as input)
-func Apply[S any](target *S, settings []func(*S)) *S {
+func Apply[S any, F FuncType[S]](target *S, settings []F) *S {
 	if target == nil {
 		return nil
 	}
@@ -127,6 +140,61 @@ func Apply[S any](target *S, settings []func(*S)) *S {
 		setting(target)
 	}
 	return target
+}
+
+// ApplyWith applies a list of settings to a target struct.
+// Parameters:
+//   - target: Pointer to the struct being configured (non-nil)
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyWith[S any, F FuncType[S]](target *S, settings ...F) *S {
+	return Apply(target, settings)
+}
+
+// ApplyDefault applies a list of settings to a target struct.
+// Parameters:
+//   - s: Struct to be configured
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyDefault[S any](s S, settings ...func(*S)) *S {
+	return Apply(&s, settings)
+}
+
+// ApplyWithDefault applies a list of settings to a target struct.
+// Parameters:
+//   - s: Struct to be configured
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyWithDefault[S any](s S, settings ...func(*S)) *S {
+	return Apply(&s, settings)
+}
+
+// ApplyZero applies a list of settings to a target struct.
+// Parameters:
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyZero[S any](settings ...func(*S)) *S {
+	var zero S
+	return Apply(&zero, settings)
+}
+
+// ApplyWithZero applies a list of settings to a target struct.
+// Parameters:
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyWithZero[S any](settings ...func(*S)) *S {
+	var zero S
+	return Apply(&zero, settings)
 }
 
 // ApplyOr is an apply settings with defaults
@@ -150,7 +218,7 @@ func ApplyOrZero[S any](fs ...func(*S)) *S {
 // Returns:
 //   - *S: Configured struct pointer (same as input)
 //   - error: Any error encountered during configuration
-func ApplyE[S any](target *S, settings []func(target *S) error) (*S, error) {
+func ApplyE[S any, Func FuncEType[S]](target *S, settings []Func) (*S, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
 	}
@@ -161,6 +229,62 @@ func ApplyE[S any](target *S, settings []func(target *S) error) (*S, error) {
 		}
 	}
 	return target, nil
+}
+
+// ApplyWithE applies a list of settings to a target struct.
+// Parameters:
+//   - target: Pointer to the struct being configured (non-nil)
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+//   - error: Any error encountered during configuration
+func ApplyWithE[S any, Func FuncEType[S]](target *S, settings ...Func) (*S, error) {
+	return ApplyE(target, settings)
+}
+
+// ApplyDefaultE is an apply settings with
+// Parameters:
+//   - target: Pointer to the struct being configured (non-nil)
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+//   - error: Any error encountered during configuration
+func ApplyDefaultE[S any](target S, settings []FuncE[S]) (*S, error) {
+	return ApplyE(&target, settings)
+}
+
+// ApplyWithDefaultE is an apply settings with defaults
+// Parameters:// Parameters:
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyWithDefaultE[S any](target S, settings ...FuncE[S]) (*S, error) {
+	return ApplyE(&target, settings)
+}
+
+// ApplyZeroE is an apply settings with defaults
+// Parameters:
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyZeroE[S any](settings []FuncE[S]) (*S, error) {
+	var zero S
+	return ApplyE(&zero, settings)
+}
+
+// ApplyWithZeroE is an apply settings with defaults
+// Parameters:
+//   - settings: Ordered list of configuration functions
+//
+// Returns:
+//   - *S: Configured struct pointer (same as input)
+func ApplyWithZeroE[S any](settings ...FuncE[S]) (*S, error) {
+	var zero S
+	return ApplyE(&zero, settings)
 }
 
 // ApplyStrict is a version for strict type safety
@@ -233,7 +357,7 @@ func ApplyMixed[S any](target *S, settings []any) (*S, error) {
 // Retur
 // Returns:
 //   - *S: New configured instance
-func New[S any](settings []func(*S)) *S {
+func New[S any, F FuncType[S]](settings []F) *S {
 	var zero S
 	for _, setting := range settings {
 		_ = apply(&zero, setting)

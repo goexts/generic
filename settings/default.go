@@ -41,11 +41,11 @@ func ApplyDefaults[S any](s *S, fs []func(*S)) *S {
 //
 // Returns:
 //   - *S: Configured struct pointer
-func WithDefault[S any](target *S, settings ...any) *S {
+func WithDefault[S any](target S, settings ...any) *S {
 	for _, setting := range settings {
-		_ = apply(target, setting)
+		_ = apply(&target, setting)
 	}
-	return target
+	return &target
 }
 
 // WithZero applies settings and handles default values.

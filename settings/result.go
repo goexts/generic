@@ -17,11 +17,6 @@ type Result[S any] interface {
 	MustUnwrap() *S
 }
 
-// Setting represents a union type for configuration options.
-type Setting[S any] interface {
-	func(*S) | func(*S) error | Func[S] | FuncE[S]
-}
-
 type baseResult[S any] struct {
 	val *S
 	err error
