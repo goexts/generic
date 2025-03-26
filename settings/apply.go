@@ -160,7 +160,7 @@ func ApplyWith[S any, F FuncType[S]](target *S, settings ...F) *S {
 //
 // Returns:
 //   - *S: Configured struct pointer (same as input)
-func ApplyDefault[S any](s S, settings ...func(*S)) *S {
+func ApplyDefault[S any](s S, settings []func(*S)) *S {
 	return Apply(&s, settings)
 }
 
@@ -181,7 +181,7 @@ func ApplyWithDefault[S any](s S, settings ...func(*S)) *S {
 //
 // Returns:
 //   - *S: Configured struct pointer (same as input)
-func ApplyZero[S any](settings ...func(*S)) *S {
+func ApplyZero[S any](settings []func(*S)) *S {
 	var zero S
 	return Apply(&zero, settings)
 }
