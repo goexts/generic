@@ -32,11 +32,10 @@ func CastOr[T any](v any, def T) T {
 // CastOrZero attempts to convert a value to the specified type.
 // If the conversion is successful, it returns the converted value.
 // If the conversion fails, it returns a zero value of the specified type.
-func CastOrZero[T comparable](v any) T {
+func CastOrZero[T comparable](v any) (zero T) {
 	if ret, ok := v.(T); ok {
 		return ret
 	}
-	var zero T
 	return zero
 }
 
