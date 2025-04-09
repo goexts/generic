@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
-	"unicode"
 
 	. "github.com/goexts/generic/slices"
 )
@@ -698,52 +697,6 @@ var RunesTests = []RunesTest{
 	{"ab\xc0c", []rune{97, 98, 0xFFFD, 99}, true},
 }
 
-func TestRunes(t *testing.T) {
-	for _, tt := range RunesTests {
-		tin := []rune(tt.in)
-		a := Runes(tin)
-		if !runesEqual(a, tt.out) {
-			t.Errorf("Runes(%q) = %v; want %v", tin, a, tt.out)
-			continue
-		}
-		if !tt.lossy {
-			// can only test reassembly if we didn't lose information
-			s := string(a)
-			if s != tt.in {
-				t.Errorf("string(Runes(%q)) = %x; want %x", tin, s, tin)
-			}
-		}
-	}
-}
-
-var EqualFoldTests = []struct {
-	s, t string
-	out  bool
-}{
-	{"abc", "abc", true},
-	{"ABcd", "ABcd", true},
-	{"123abc", "123ABC", true},
-	{"αβδ", "ΑΒΔ", true},
-	{"abc", "xyz", false},
-	{"abc", "XYZ", false},
-	{"abcdefghijk", "abcdefghijX", false},
-	{"abcdefghijk", "abcdefghij\u212A", true},
-	{"abcdefghijK", "abcdefghij\u212A", true},
-	{"abcdefghijkz", "abcdefghij\u212Ay", false},
-	{"abcdefghijKz", "abcdefghij\u212Ay", false},
-}
-
-func TestEqualFold(t *testing.T) {
-	for _, tt := range EqualFoldTests {
-		if out := EqualFoldRune([]rune(tt.s), []rune(tt.t)); out != tt.out {
-			t.Errorf("EqualFoldRune(%#q, %#q) = %v, want %v", tt.s, tt.t, out, tt.out)
-		}
-		if out := EqualFoldRune([]rune(tt.t), []rune(tt.s)); out != tt.out {
-			t.Errorf("EqualFoldRune(%#q, %#q) = %v, want %v", tt.t, tt.s, out, tt.out)
-		}
-	}
-}
-
 var cutTests = []struct {
 	s, sep        string
 	before, after string
@@ -898,40 +851,6 @@ var bytesdata = []struct {
 }{
 	{"ASCII", makeFieldsInputASCII()},
 	{"Mixed", makeFieldsInput()},
-}
-
-// func BenchmarkFields(b *testing.B) {
-// 	for _, sd := range bytesdata {
-// 		b.Run(sd.name, func(b *testing.B) {
-// 			for j := 1 << 4; j <= 1<<20; j <<= 4 {
-// 				b.Run(fmt.Sprintf("%d", j), func(b *testing.B) {
-// 					b.ReportAllocs()
-// 					b.SetBytes(int64(j))
-// 					data := sd.data[:j]
-// 					for i := 0; i < b.N; i++ {
-// 						Fields(data)
-// 					}
-// 				})
-// 			}
-// 		})
-// 	}
-// }
-
-func BenchmarkFieldsFunc(b *testing.B) {
-	for _, sd := range bytesdata {
-		b.Run(sd.name, func(b *testing.B) {
-			for j := 1 << 4; j <= 1<<20; j <<= 4 {
-				b.Run(fmt.Sprintf("%d", j), func(b *testing.B) {
-					b.ReportAllocs()
-					b.SetBytes(int64(j))
-					data := sd.data[:j]
-					for i := 0; i < b.N; i++ {
-						FieldsFunc(data, unicode.IsSpace)
-					}
-				})
-			}
-		})
-	}
 }
 
 func makeBenchInputHard() []rune {

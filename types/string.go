@@ -8,6 +8,7 @@ package types
 // String is an interface that represents a string-like type.
 // It can be a string, a byte slice, or a rune slice.
 type String interface {
+	Object
 	~string | ~[]byte | ~[]rune
 }
 
