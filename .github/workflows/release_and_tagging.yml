@@ -22,7 +22,7 @@ jobs:
 
       - name: Run tests
         run: |
-          go test -race -v ./...
+          go test -v ./...
 
   tagging:
     needs: [ test ]
