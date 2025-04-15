@@ -162,10 +162,15 @@ OrNil2 is a utility function that ensures a value is not nil and returns it.
 import "github.com/goexts/generic/cmp"
 ```
 
+Package cmp implements the functions, types, and interfaces for the module.
+
 ## Index
 
 - [func Excludes[T comparable](src []T, ts ...T) []T](<#func-excludes>)
 - [func Has[T comparable](s []T, e T) bool](<#func-has>)
+- [func If[T any](condition bool, trueVal T, falseVal T) T](<#func-if>)
+- [func IfFunc[T any](condition bool, trueFn func() T, falseFn func() T) T](<#func-iffunc>)
+- [func IfFuncWithError[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error)](<#func-iffuncwitherror>)
 - [func Includes[T comparable](src []T, ts ...T) []T](<#func-includes>)
 - [func IsZero[T comparable](v T) bool](<#func-iszero>)
 - [func Or[T comparable](vals ...T) T](<#func-or>)
@@ -187,6 +192,30 @@ func Has[T comparable](s []T, e T) bool
 ```
 
 Has checks whether a value is in a slice.
+
+## func [If](<https://github.com/goexts/generic/blob/main/cmp/if.go#L7>)
+
+```go
+func If[T any](condition bool, trueVal T, falseVal T) T
+```
+
+If function takes a boolean condition and two values of any type T, and returns the first value if the condition is true, and the second value if the condition is false.
+
+## func [IfFunc](<https://github.com/goexts/generic/blob/main/cmp/if.go#L20>)
+
+```go
+func IfFunc[T any](condition bool, trueFn func() T, falseFn func() T) T
+```
+
+IfFunc function takes a boolean condition, a function to execute if the condition is true, and a function to execute if the condition is false. It returns the result of the function that was executed.
+
+## func [IfFuncWithError](<https://github.com/goexts/generic/blob/main/cmp/if.go#L33>)
+
+```go
+func IfFuncWithError[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error)
+```
+
+IfFuncWithError function takes a boolean condition, a function to execute if the condition is true, and a function to execute if the condition is false. It returns the result of the function that was executed.
 
 ## func [Includes](<https://github.com/goexts/generic/blob/main/cmp/include.go#L4>)
 
@@ -238,19 +267,19 @@ Package maps implements the functions, types, and interfaces for the module.
 - [func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool)](<#func-deletefunc>)
 - [func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool](<#func-equal>)
 - [func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M2, eq func(V1, V2) bool) bool](<#func-equalfunc>)
-- [func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K)](<#func-filter>)
-- [func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)](<#func-filterfunc>)
-- [func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M](<#func-kvstomap>)
+- [func Filter[M types.Map[K, V], K comparable, V any](m M, keys ...K)](<#func-filter>)
+- [func FilterFunc[M types.Map[K, V], K comparable, V any](m M, f func(K, V) bool)](<#func-filterfunc>)
+- [func KVsToMap[KV KeyValue[K, V], K comparable, V any, M types.Map[K, V]](kvs []KeyValue[K, V]) M](<#func-kvstomap>)
 - [func Keys[M ~map[K]V, K comparable, V any](m M) []K](<#func-keys>)
-- [func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV](<#func-maptokvs>)
-- [func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S](<#func-maptostruct>)
-- [func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T](<#func-maptotypes>)
-- [func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)](<#func-merge>)
-- [func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)](<#func-mergefunc>)
-- [func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M)](<#func-mergemaps>)
-- [func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)](<#func-mergemapsfunc>)
-- [func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV](<#func-transform>)
-- [func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M](<#func-typestomap>)
+- [func MapToKVs[M types.Map[K, V], K comparable, V any, KV KeyValue[K, V]](m M) []KV](<#func-maptokvs>)
+- [func MapToStruct[M types.Map[K, V], K comparable, V any, S any](m M, f func(*S, K, V) *S) *S](<#func-maptostruct>)
+- [func MapToTypes[M types.Map[K, V], K comparable, V any, T any](m M, f func(K, V) T) []T](<#func-maptotypes>)
+- [func Merge[M types.Map[K, V], K comparable, V any](dest M, src M, overlay bool)](<#func-merge>)
+- [func MergeFunc[M types.Map[K, V], K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)](<#func-mergefunc>)
+- [func MergeMaps[M types.Map[K, V], K comparable, V any](m M, ms ...M)](<#func-mergemaps>)
+- [func MergeMapsFunc[M types.Map[K, V], K comparable, V any](merge func(K, V, V) V, m M, ms ...M)](<#func-mergemapsfunc>)
+- [func Transform[M types.Map[K, V], K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV](<#func-transform>)
+- [func TypesToMap[T any, M types.Map[K, V], K comparable, V any](ts []T, f func(T) (K, V)) M](<#func-typestomap>)
 - [func Values[M ~map[K]V, K comparable, V any](m M) []V](<#func-values>)
 - [type KeyValue](<#type-keyvalue>)
 
@@ -303,26 +332,26 @@ func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M
 
 EqualFunc is like Equal, but compares values using eq. Keys are still compared with ==.
 
-## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L57>)
+## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L61>)
 
 ```go
-func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K)
+func Filter[M types.Map[K, V], K comparable, V any](m M, keys ...K)
 ```
 
 Filter removes all key/value pairs from m for which f returns false.
 
-## func [FilterFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L66>)
+## func [FilterFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L70>)
 
 ```go
-func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
+func FilterFunc[M types.Map[K, V], K comparable, V any](m M, f func(K, V) bool)
 ```
 
 FilterFunc is like Filter, but uses a function.
 
-## func [KVsToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L90>)
+## func [KVsToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L94>)
 
 ```go
-func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M
+func KVsToMap[KV KeyValue[K, V], K comparable, V any, M types.Map[K, V]](kvs []KeyValue[K, V]) M
 ```
 
 KVsToMap converts a slice of key\-value pairs to a map.
@@ -335,74 +364,74 @@ func Keys[M ~map[K]V, K comparable, V any](m M) []K
 
 Keys returns the keys of the map m. The keys will be in an indeterminate order.
 
-## func [MapToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L81>)
+## func [MapToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L85>)
 
 ```go
-func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV
+func MapToKVs[M types.Map[K, V], K comparable, V any, KV KeyValue[K, V]](m M) []KV
 ```
 
 MapToKVs converts a map to a slice of key\-value pairs.
 
-## func [MapToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L118>)
+## func [MapToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L122>)
 
 ```go
-func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
+func MapToStruct[M types.Map[K, V], K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
 ```
 
 MapToStruct converts a map to a struct.
 
-## func [MapToTypes](<https://github.com/goexts/generic/blob/main/maps/map.go#L99>)
+## func [MapToTypes](<https://github.com/goexts/generic/blob/main/maps/map.go#L103>)
 
 ```go
-func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
+func MapToTypes[M types.Map[K, V], K comparable, V any, T any](m M, f func(K, V) T) []T
 ```
 
 MapToTypes converts a map to a slice of types.
 
-## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L10>)
+## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L14>)
 
 ```go
-func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)
+func Merge[M types.Map[K, V], K comparable, V any](dest M, src M, overlay bool)
 ```
 
 Merge merges the values of src into dest. If overlay is true, existing values in dest will be overwritten.
 
-## func [MergeFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L20>)
+## func [MergeFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L24>)
 
 ```go
-func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)
+func MergeFunc[M types.Map[K, V], K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)
 ```
 
 MergeFunc merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
 
-## func [MergeMaps](<https://github.com/goexts/generic/blob/main/maps/map.go#L32>)
+## func [MergeMaps](<https://github.com/goexts/generic/blob/main/maps/map.go#L36>)
 
 ```go
-func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M)
+func MergeMaps[M types.Map[K, V], K comparable, V any](m M, ms ...M)
 ```
 
 MergeMaps merges multiple maps into a single map. If a key exists in multiple maps, the value from the last map will be used.
 
-## func [MergeMapsFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L45>)
+## func [MergeMapsFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L49>)
 
 ```go
-func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)
+func MergeMapsFunc[M types.Map[K, V], K comparable, V any](merge func(K, V, V) V, m M, ms ...M)
 ```
 
 MergeMapsFunc merges multiple maps into a single map using a custom merge function. If a key exists in multiple maps, the merge function will be called to determine the final value.
 
-## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L130>)
+## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L134>)
 
 ```go
-func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV
+func Transform[M types.Map[K, V], K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV
 ```
 
 Transform remaps the keys and values of a map using a custom transformation function. The transformation function is called for each key\-value pair in the original map. If the transformation function returns false as its third return value, the key\-value pair is skipped. Otherwise, the transformed key\-value pair is added to the new map.
 
-## func [TypesToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L108>)
+## func [TypesToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L112>)
 
 ```go
-func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M
+func TypesToMap[T any, M types.Map[K, V], K comparable, V any](ts []T, f func(T) (K, V)) M
 ```
 
 TypesToMap converts a slice of types to a map.
@@ -415,7 +444,7 @@ func Values[M ~map[K]V, K comparable, V any](m M) []V
 
 Values returns the values of the map m. The values will be in an indeterminate order.
 
-## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L75-L78>)
+## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L79-L82>)
 
 KeyValue is a key\-value pair.
 
@@ -432,148 +461,525 @@ type KeyValue[K comparable, V any] struct {
 import "github.com/goexts/generic/settings"
 ```
 
+Package settings provides type\-safe configuration management with default value handling.
+
+Package settings provides utility functions for coalescing values of various types.
+
+Package settings implements the functions, types, and interfaces for the module.
+
 Package settings implements the functions, types, and interfaces for the module.
 
 Package settings implements the functions, types, and interfaces for the module.
 
 ## Index
 
-- [func Apply[S any](s *S, fs []func(*S)) *S](<#func-apply>)
-- [func ApplyAny[S any](s *S, fs []interface{}) *S](<#func-applyany>)
+- [Constants](<#constants>)
+- [func Apply[S any, F FuncType[S]](target *S, settings []F) *S](<#func-apply>)
+- [func ApplyAny[S any](target *S, settings []any) *S](<#func-applyany>)
+- [func ApplyDefault[S any, F FuncType[S]](s S, settings []F) *S](<#func-applydefault>)
+- [func ApplyDefaultE[S any](target S, settings []FuncE[S]) (*S, error)](<#func-applydefaulte>)
 - [func ApplyDefaults[S any](s *S, fs []func(*S)) *S](<#func-applydefaults>)
 - [func ApplyDefaultsOr[S any](s *S, fs ...func(*S)) *S](<#func-applydefaultsor>)
 - [func ApplyDefaultsOrError[S any](s *S, fs ...func(*S)) (*S, error)](<#func-applydefaultsorerror>)
 - [func ApplyDefaultsOrZero[S any](fs ...func(*S)) *S](<#func-applydefaultsorzero>)
+- [func ApplyE[S any, Func FuncEType[S]](target *S, settings []Func) (*S, error)](<#func-applye>)
 - [func ApplyErrorDefaults[S any](s *S, fs []func(*S)) (*S, error)](<#func-applyerrordefaults>)
 - [func ApplyErrorDefaultsOr[S any](s *S, fs ...func(*S)) (*S, error)](<#func-applyerrordefaultsor>)
 - [func ApplyErrorDefaultsOrZero[S any](fs ...func(*S)) (*S, error)](<#func-applyerrordefaultsorzero>)
+- [func ApplyMixed[S any](target *S, settings []any) (*S, error)](<#func-applymixed>)
 - [func ApplyOr[S any](s *S, fs ...func(*S)) *S](<#func-applyor>)
 - [func ApplyOrZero[S any](fs ...func(*S)) *S](<#func-applyorzero>)
+- [func ApplyStrict[S any](target *S, settings []any) *S](<#func-applystrict>)
+- [func ApplyStrictE[S any](target *S, settings []any) (*S, error)](<#func-applystricte>)
+- [func ApplyWith[S any, F FuncType[S]](target *S, settings ...F) *S](<#func-applywith>)
+- [func ApplyWithDefault[S any, F FuncType[S]](s S, settings ...F) *S](<#func-applywithdefault>)
+- [func ApplyWithDefaultE[S any](target S, settings ...FuncE[S]) (*S, error)](<#func-applywithdefaulte>)
+- [func ApplyWithE[S any, Func FuncEType[S]](target *S, settings ...Func) (*S, error)](<#func-applywithe>)
+- [func ApplyWithZero[S any, F FuncType[S]](settings ...F) *S](<#func-applywithzero>)
+- [func ApplyWithZeroE[S any](settings ...FuncE[S]) (*S, error)](<#func-applywithzeroe>)
+- [func ApplyZero[S any, F FuncType[S]](settings []F) *S](<#func-applyzero>)
+- [func ApplyZeroE[S any](settings []FuncE[S]) (*S, error)](<#func-applyzeroe>)
+- [func Coalesce[T comparable](a, b T) T](<#func-coalesce>)
+- [func CoalesceBool[T types.Boolean](a, b T) T](<#func-coalescebool>)
+- [func CoalesceFloat[T types.Float](a, b T) T](<#func-coalescefloat>)
+- [func CoalesceInt[T types.Integer](a, b T) T](<#func-coalesceint>)
+- [func CoalesceString[T types.String](a, b T) T](<#func-coalescestring>)
+- [func IsConfigError(err error) bool](<#func-isconfigerror>)
+- [func IsEmptyTargetValueError(err error) bool](<#func-isemptytargetvalueerror>)
+- [func IsExecutionFailedError(err error) bool](<#func-isexecutionfailederror>)
+- [func IsUnsupportedTypeError(err error) bool](<#func-isunsupportedtypeerror>)
+- [func New[S any, F FuncType[S]](settings []F) *S](<#func-new>)
+- [func WithDefault[S any](target S, settings ...any) *S](<#func-withdefault>)
+- [func WithDefaultE[S any](target *S, settings ...any) (*S, error)](<#func-withdefaulte>)
+- [func WithMixed[S any](target *S, settings ...any) (*S, error)](<#func-withmixed>)
+- [func WithMixedZero[S any](settings ...any) (*S, error)](<#func-withmixedzero>)
+- [func WithZero[S any](settings ...any) *S](<#func-withzero>)
+- [func WithZeroE[S any](settings ...any) (*S, error)](<#func-withzeroe>)
+- [type Applier](<#type-applier>)
+- [type ApplierE](<#type-appliere>)
 - [type ApplyFunc](<#type-applyfunc>)
   - [func (s ApplyFunc[S]) Apply(v *S)](<#func-applyfuncs-apply>)
 - [type ApplySetting](<#type-applysetting>)
+- [type ConfigError](<#type-configerror>)
+  - [func (e *ConfigError) Error() string](<#func-configerror-error>)
+  - [func (e *ConfigError) Unwrap() error](<#func-configerror-unwrap>)
 - [type Defaulter](<#type-defaulter>)
 - [type ErrorDefaulter](<#type-errordefaulter>)
-- [type Setting](<#type-setting>)
+- [type Func](<#type-func>)
+  - [func (f Func[S]) Apply(target *S)](<#func-funcs-apply>)
+- [type FuncE](<#type-funce>)
+  - [func (f FuncE[S]) Apply(target *S) error](<#func-funces-apply>)
+- [type FuncEType](<#type-funcetype>)
+- [type FuncType](<#type-functype>)
+- [type Result](<#type-result>)
+  - [func NewErrorResult[S any](err error) Result[S]](<#func-newerrorresult>)
+  - [func NewResult[S any](val *S, err error) Result[S]](<#func-newresult>)
+  - [func NewValueResult[S any](val *S) Result[S]](<#func-newvalueresult>)
+  - [func ResultMixed[S any](target *S, settings []any) Result[S]](<#func-resultmixed>)
+  - [func ResultWith[S any](target *S, settings []func(*S)) Result[S]](<#func-resultwith>)
+  - [func ResultWithE[S any](target *S, settings []func(*S) error) Result[S]](<#func-resultwithe>)
+  - [func ResultWithZero[S any](settings []func(*S)) Result[S]](<#func-resultwithzero>)
+  - [func ResultWithZeroE[S any](settings []func(*S) error) Result[S]](<#func-resultwithzeroe>)
+  - [func ResultZeroMixed[S any](settings []any) Result[S]](<#func-resultzeromixed>)
 
 
-## func [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L31>)
+## Constants
+
+Error types for configuration errors
 
 ```go
-func Apply[S any](s *S, fs []func(*S)) *S
+const (
+    ErrUnsupportedType = iota
+    ErrExecutionFailed
+    ErrEmptyTargetValue
+)
 ```
 
-Apply is apply settings
-
-## func [ApplyAny](<https://github.com/goexts/generic/blob/main/settings/apply.go#L54>)
+## func [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L135>)
 
 ```go
-func ApplyAny[S any](s *S, fs []interface{}) *S
+func Apply[S any, F FuncType[S]](target *S, settings []F) *S
 ```
 
-ApplyAny Applies a set of setting functions to a struct. These Settings functions can be ApplyFunc\[S\] or func\(\*S\), or objects that implement the ApplySetting interface.
+Apply configures a target struct with ordered settings. Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
 
-## func [ApplyDefaults](<https://github.com/goexts/generic/blob/main/settings/default.go#L21>)
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyAny](<https://github.com/goexts/generic/blob/main/settings/apply.go#L373>)
+
+```go
+func ApplyAny[S any](target *S, settings []any) *S
+```
+
+ApplyAny applies a list of settings to a target struct. Deprecated: Use ApplyMixed with slice syntax. Will be removed in v0.3.0
+
+```
+Before: ApplyAny(&obj, []interface{}{f1, f2})
+After:  ApplyMixed(&obj, []interface{}{f1, f2}) (*obj, error)
+```
+
+## func [ApplyDefault](<https://github.com/goexts/generic/blob/main/settings/apply.go#L163>)
+
+```go
+func ApplyDefault[S any, F FuncType[S]](s S, settings []F) *S
+```
+
+ApplyDefault applies a list of settings to a target struct. Parameters: \- s: Struct to be configured \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyDefaultE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L254>)
+
+```go
+func ApplyDefaultE[S any](target S, settings []FuncE[S]) (*S, error)
+```
+
+ApplyDefaultE is an apply settings with Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\) \- error: Any error encountered during configuration
+
+## func [ApplyDefaults](<https://github.com/goexts/generic/blob/main/settings/default.go#L24>)
 
 ```go
 func ApplyDefaults[S any](s *S, fs []func(*S)) *S
 ```
 
-ApplyDefaults applies the given settings and default settings to the provided value.
+ApplyDefaults applies the given settings and default settings to the provided value. Decrypted: use Apply instead of ApplyDefaults
 
 It first applies the given settings using the Apply function, then checks if the value implements the Defaulter interface. If it does, it calls the ApplyDefaults method to apply the default settings.
 
-## func [ApplyDefaultsOr](<https://github.com/goexts/generic/blob/main/settings/default.go#L57>)
+## func [ApplyDefaultsOr](<https://github.com/goexts/generic/blob/main/settings/default.go#L155>)
 
 ```go
 func ApplyDefaultsOr[S any](s *S, fs ...func(*S)) *S
 ```
 
-ApplyDefaultsOr applies the given settings and default settings to the provided value.
+ApplyDefaultsOr applies the given settings and default settings to the provided value. Decrypted: use WithZeroE instead of ApplyDefaultsOr
 
 It is a convenience wrapper around ApplyDefaults that accepts a variable number of setting functions.
 
-## func [ApplyDefaultsOrError](<https://github.com/goexts/generic/blob/main/settings/default.go#L88>)
+## func [ApplyDefaultsOrError](<https://github.com/goexts/generic/blob/main/settings/default.go#L190>)
 
 ```go
 func ApplyDefaultsOrError[S any](s *S, fs ...func(*S)) (*S, error)
 ```
 
-ApplyDefaultsOrError applies the given settings and default settings to the provided value.
+ApplyDefaultsOrError applies the given settings and default settings to the provided value. Decrypted: use WithDefaultE instead of ApplyDefaultsOrError
 
 It is a convenience wrapper around ApplyDefaults that accepts a variable number of setting functions.
 
-## func [ApplyDefaultsOrZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L72>)
+## func [ApplyDefaultsOrZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L172>)
 
 ```go
 func ApplyDefaultsOrZero[S any](fs ...func(*S)) *S
 ```
 
-ApplyDefaultsOrZero applies the given settings and default settings to a zero value of the type.
+ApplyDefaultsOrZero applies the given settings and default settings to a zero value of the type. Decrypted: use WithZero instead of ApplyDefaultsOrZero
 
 It creates a zero value of the type, then calls ApplyDefaults to apply the given settings and default settings.
 
-## func [ApplyErrorDefaults](<https://github.com/goexts/generic/blob/main/settings/default.go#L38>)
+## func [ApplyE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L221>)
+
+```go
+func ApplyE[S any, Func FuncEType[S]](target *S, settings []Func) (*S, error)
+```
+
+ApplyE applies a list of settings to a target struct. Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\) \- error: Any error encountered during configuration
+
+## func [ApplyErrorDefaults](<https://github.com/goexts/generic/blob/main/settings/default.go#L135>)
 
 ```go
 func ApplyErrorDefaults[S any](s *S, fs []func(*S)) (*S, error)
 ```
 
-ApplyErrorDefaults applies the given settings and default settings to the provided value.
+ApplyErrorDefaults applies the given settings and default settings to the provided value. Decrypted: use WithDefaultE instead of ApplyErrorDefaults
 
 It first applies the given settings using the Apply function, then checks if the value implements the ErrorDefaulter interface. If it does, it calls the ApplyDefaults method
 
-## func [ApplyErrorDefaultsOr](<https://github.com/goexts/generic/blob/main/settings/default.go#L65>)
+## func [ApplyErrorDefaultsOr](<https://github.com/goexts/generic/blob/main/settings/default.go#L164>)
 
 ```go
 func ApplyErrorDefaultsOr[S any](s *S, fs ...func(*S)) (*S, error)
 ```
 
-ApplyErrorDefaultsOr applies the given settings and default settings to the provided value.
+ApplyErrorDefaultsOr applies the given settings and default settings to the provided value. Decrypted: use WithDefaultE instead of ApplyErrorDefaultsOr
 
 It is a convenience wrapper around ApplyDefaults that accepts a variable number of interface\{\} values.
 
-## func [ApplyErrorDefaultsOrZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L80>)
+## func [ApplyErrorDefaultsOrZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L181>)
 
 ```go
 func ApplyErrorDefaultsOrZero[S any](fs ...func(*S)) (*S, error)
 ```
 
-ApplyErrorDefaultsOrZero applies the given settings and default settings to a zero value of the type.
+ApplyErrorDefaultsOrZero applies the given settings and default settings to a zero value of the type. Decrypted: use WithZeroE instead of ApplyErrorDefaultsOrZero
 
 It creates a zero value of the type, then calls ApplyDefaults to apply the given settings and default settings.
 
-## func [ApplyOr](<https://github.com/goexts/generic/blob/main/settings/apply.go#L42>)
+## func [ApplyMixed](<https://github.com/goexts/generic/blob/main/settings/apply.go#L340>)
+
+```go
+func ApplyMixed[S any](target *S, settings []any) (*S, error)
+```
+
+ApplyMixed applies a list of settings to a target struct. Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyOr](<https://github.com/goexts/generic/blob/main/settings/apply.go#L202>)
 
 ```go
 func ApplyOr[S any](s *S, fs ...func(*S)) *S
 ```
 
-ApplyOr is an apply settings with defaults
+ApplyOr is an apply settings with defaults Decrypted: use WithDefault instead of ApplyOr. Will be removed in v0.3.0
 
-## func [ApplyOrZero](<https://github.com/goexts/generic/blob/main/settings/apply.go#L47>)
+## func [ApplyOrZero](<https://github.com/goexts/generic/blob/main/settings/apply.go#L208>)
 
 ```go
 func ApplyOrZero[S any](fs ...func(*S)) *S
 ```
 
-ApplyOrZero is an apply settings with defaults
+ApplyOrZero is an apply settings with defaults Decrypted: use WithZero instead of ApplyOrZero. Will be removed in v0.3.0
 
-## type [ApplyFunc](<https://github.com/goexts/generic/blob/main/settings/apply.go#L9>)
+## func [ApplyStrict](<https://github.com/goexts/generic/blob/main/settings/apply.go#L301>)
 
-ApplyFunc is a ApplyFunc function for Apply
+```go
+func ApplyStrict[S any](target *S, settings []any) *S
+```
+
+ApplyStrict is a version for strict type safety Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+Panics: \- If target is nil \- If any setting is not a supported type
+
+## func [ApplyStrictE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L320>)
+
+```go
+func ApplyStrictE[S any](target *S, settings []any) (*S, error)
+```
+
+ApplyStrictE applies a list of settings to a target struct. Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyWith](<https://github.com/goexts/generic/blob/main/settings/apply.go#L152>)
+
+```go
+func ApplyWith[S any, F FuncType[S]](target *S, settings ...F) *S
+```
+
+ApplyWith applies a list of settings to a target struct. Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyWithDefault](<https://github.com/goexts/generic/blob/main/settings/apply.go#L174>)
+
+```go
+func ApplyWithDefault[S any, F FuncType[S]](s S, settings ...F) *S
+```
+
+ApplyWithDefault applies a list of settings to a target struct. Parameters: \- s: Struct to be configured \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyWithDefaultE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L264>)
+
+```go
+func ApplyWithDefaultE[S any](target S, settings ...FuncE[S]) (*S, error)
+```
+
+ApplyWithDefaultE is an apply settings with defaults Parameters:// Parameters: \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyWithE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L242>)
+
+```go
+func ApplyWithE[S any, Func FuncEType[S]](target *S, settings ...Func) (*S, error)
+```
+
+ApplyWithE applies a list of settings to a target struct. Parameters: \- target: Pointer to the struct being configured \(non\-nil\) \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\) \- error: Any error encountered during configuration
+
+## func [ApplyWithZero](<https://github.com/goexts/generic/blob/main/settings/apply.go#L195>)
+
+```go
+func ApplyWithZero[S any, F FuncType[S]](settings ...F) *S
+```
+
+ApplyWithZero applies a list of settings to a target struct. Parameters: \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyWithZeroE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L285>)
+
+```go
+func ApplyWithZeroE[S any](settings ...FuncE[S]) (*S, error)
+```
+
+ApplyWithZeroE is an apply settings with defaults Parameters: \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyZero](<https://github.com/goexts/generic/blob/main/settings/apply.go#L184>)
+
+```go
+func ApplyZero[S any, F FuncType[S]](settings []F) *S
+```
+
+ApplyZero applies a list of settings to a target struct. Parameters: \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [ApplyZeroE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L274>)
+
+```go
+func ApplyZeroE[S any](settings []FuncE[S]) (*S, error)
+```
+
+ApplyZeroE is an apply settings with defaults Parameters: \- settings: Ordered list of configuration functions
+
+Returns: \- \*S: Configured struct pointer \(same as input\)
+
+## func [Coalesce](<https://github.com/goexts/generic/blob/main/settings/coalesce.go#L14>)
+
+```go
+func Coalesce[T comparable](a, b T) T
+```
+
+Coalesce returns the first non\-zero value of comparable type T If a is non\-zero, returns a; otherwise returns b
+
+## func [CoalesceBool](<https://github.com/goexts/generic/blob/main/settings/coalesce.go#L45>)
+
+```go
+func CoalesceBool[T types.Boolean](a, b T) T
+```
+
+CoalesceBool provides type\-safe coalescing for boolean types Returns the first non\-zero boolean value
+
+## func [CoalesceFloat](<https://github.com/goexts/generic/blob/main/settings/coalesce.go#L36>)
+
+```go
+func CoalesceFloat[T types.Float](a, b T) T
+```
+
+CoalesceFloat handles floating point coalescing with epsilon comparison Returns b if a is NaN or its absolute value is below epsilon threshold
+
+## func [CoalesceInt](<https://github.com/goexts/generic/blob/main/settings/coalesce.go#L30>)
+
+```go
+func CoalesceInt[T types.Integer](a, b T) T
+```
+
+CoalesceInt provides type\-safe coalescing for integer types Returns the first non\-zero integer value
+
+## func [CoalesceString](<https://github.com/goexts/generic/blob/main/settings/coalesce.go#L24>)
+
+```go
+func CoalesceString[T types.String](a, b T) T
+```
+
+CoalesceString handles string coalescing with type safety Converts parameters to string type before comparison
+
+## func [IsConfigError](<https://github.com/goexts/generic/blob/main/settings/error.go#L62>)
+
+```go
+func IsConfigError(err error) bool
+```
+
+## func [IsEmptyTargetValueError](<https://github.com/goexts/generic/blob/main/settings/error.go#L72>)
+
+```go
+func IsEmptyTargetValueError(err error) bool
+```
+
+## func [IsExecutionFailedError](<https://github.com/goexts/generic/blob/main/settings/error.go#L77>)
+
+```go
+func IsExecutionFailedError(err error) bool
+```
+
+## func [IsUnsupportedTypeError](<https://github.com/goexts/generic/blob/main/settings/error.go#L67>)
+
+```go
+func IsUnsupportedTypeError(err error) bool
+```
+
+## func [New](<https://github.com/goexts/generic/blob/main/settings/apply.go#L360>)
+
+```go
+func New[S any, F FuncType[S]](settings []F) *S
+```
+
+New creates a zero\-value instance and applies settings. Parameters: \- settings: Configuration functions to apply
+
+Retur Returns: \- \*S: New configured instance
+
+## func [WithDefault](<https://github.com/goexts/generic/blob/main/settings/default.go#L44>)
+
+```go
+func WithDefault[S any](target S, settings ...any) *S
+```
+
+WithDefault applies settings and handles default values. Parameters: \- target: Struct pointer to configure \- settings: Configuration functions to apply
+
+Returns: \- \*S: Configured struct pointer
+
+## func [WithDefaultE](<https://github.com/goexts/generic/blob/main/settings/default.go#L73>)
+
+```go
+func WithDefaultE[S any](target *S, settings ...any) (*S, error)
+```
+
+WithDefaultE applies settings and handles default values. Parameters: \- target: Struct pointer to configure \- settings: Configuration functions to apply
+
+Returns: \- \*S: Configured struct pointer \- error: Error if any occurred during the configuration process
+
+## func [WithMixed](<https://github.com/goexts/generic/blob/main/settings/default.go#L108>)
+
+```go
+func WithMixed[S any](target *S, settings ...any) (*S, error)
+```
+
+WithMixed applies settings and handles default values. Parameters: \- target: Struct pointer to configure \- settings: Configuration functions to apply
+
+Returns: \- \*S: Configured struct pointer \- error: Error if any occurred during the configuration process
+
+## func [WithMixedZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L125>)
+
+```go
+func WithMixedZero[S any](settings ...any) (*S, error)
+```
+
+WithMixedZero applies settings and handles default values. Parameters: \- settings: Configuration functions to apply
+
+Returns: \- \*S: Configured struct pointer \- error: Error if any occurred during the configuration process
+
+## func [WithZero](<https://github.com/goexts/generic/blob/main/settings/default.go#L57>)
+
+```go
+func WithZero[S any](settings ...any) *S
+```
+
+WithZero applies settings and handles default values. Parameters: \- settings: Configuration functions to apply
+
+Returns: \- \*S: Configured struct pointer
+
+## func [WithZeroE](<https://github.com/goexts/generic/blob/main/settings/default.go#L89>)
+
+```go
+func WithZeroE[S any](settings ...any) (*S, error)
+```
+
+WithZeroE applies settings and handles default values. Parameters: \- settings: Configuration functions to apply
+
+Returns: \- \*S: Configured struct pointer \- error: Error if any occurred during the configuration process
+
+## type [Applier](<https://github.com/goexts/generic/blob/main/settings/apply.go#L28-L31>)
+
+Applier defines the interface for configuration application mechanisms.
+
+```go
+type Applier[S any] interface {
+    // Apply modifies the target struct with specific settings
+    Apply(target *S)
+}
+```
+
+## type [ApplierE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L34-L36>)
+
+ApplierE defines enhanced configuration interface with error handling
+
+```go
+type ApplierE[S any] interface {
+    Apply(target *S) error
+}
+```
+
+## type [ApplyFunc](<https://github.com/goexts/generic/blob/main/settings/apply.go#L10>)
+
+ApplyFunc is a ApplyFunc function for Apply Decrypted: use Func instead of ApplyFunc. Will be removed in v0.3.0
 
 ```go
 type ApplyFunc[S any] func(*S)
 ```
 
-### func \(ApplyFunc\[S\]\) [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L19>)
+### func \(ApplyFunc\[S\]\) [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L14>)
 
 ```go
 func (s ApplyFunc[S]) Apply(v *S)
 ```
 
-## type [ApplySetting](<https://github.com/goexts/generic/blob/main/settings/apply.go#L11-L13>)
+Apply executes the configuration function with nil safety. Decrypted: use Func instead of ApplyFunc. Will be removed in v0.3.0
+
+## type [ApplySetting](<https://github.com/goexts/generic/blob/main/settings/apply.go#L23-L25>)
+
+ApplySetting defines the interface for configuration settings. Decrypted: use Applier instead of ApplySetting. Will be removed in v0.3.0
 
 ```go
 type ApplySetting[S any] interface {
@@ -581,9 +987,33 @@ type ApplySetting[S any] interface {
 }
 ```
 
-## type [Defaulter](<https://github.com/goexts/generic/blob/main/settings/default.go#L5-L8>)
+## type [ConfigError](<https://github.com/goexts/generic/blob/main/settings/error.go#L16-L20>)
 
-Defaulter is an interface that provides a method to apply default settings.
+```go
+type ConfigError struct {
+    Type       int    // Error category
+    TypeString string // Setting type info
+    Err        error  // Original error
+}
+```
+
+### func \(\*ConfigError\) [Error](<https://github.com/goexts/generic/blob/main/settings/error.go#L36>)
+
+```go
+func (e *ConfigError) Error() string
+```
+
+Error message display is enhanced
+
+### func \(\*ConfigError\) [Unwrap](<https://github.com/goexts/generic/blob/main/settings/error.go#L31>)
+
+```go
+func (e *ConfigError) Unwrap() error
+```
+
+## type [Defaulter](<https://github.com/goexts/generic/blob/main/settings/default.go#L6-L9>)
+
+Defaulter is an interface that provides a method to apply default settings. Decrypted: use Apply instead of Defaulter
 
 ```go
 type Defaulter interface {
@@ -592,9 +1022,9 @@ type Defaulter interface {
 }
 ```
 
-## type [ErrorDefaulter](<https://github.com/goexts/generic/blob/main/settings/default.go#L11-L14>)
+## type [ErrorDefaulter](<https://github.com/goexts/generic/blob/main/settings/default.go#L13-L16>)
 
-ErrorDefaulter is an interface that provides a method to apply default settings and return an error.
+ErrorDefaulter is an interface that provides a method to apply default settings and return an error. Decrypted: use ApplyE instead of ErrorDefaulter
 
 ```go
 type ErrorDefaulter interface {
@@ -603,12 +1033,131 @@ type ErrorDefaulter interface {
 }
 ```
 
-## type [Setting](<https://github.com/goexts/generic/blob/main/settings/apply.go#L15-L17>)
+## type [Func](<https://github.com/goexts/generic/blob/main/settings/apply.go#L39>)
+
+Func defines the standard function type for configuration operations.
 
 ```go
-type Setting[S any] interface {
+type Func[S any] func(*S)
+```
+
+### func \(Func\[S\]\) [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L44>)
+
+```go
+func (f Func[S]) Apply(target *S)
+```
+
+Apply executes the configuration function with nil safety.
+
+## type [FuncE](<https://github.com/goexts/generic/blob/main/settings/apply.go#L51>)
+
+FuncE defines enhanced configuration function with error return
+
+```go
+type FuncE[S any] func(*S) error
+```
+
+### func \(FuncE\[S\]\) [Apply](<https://github.com/goexts/generic/blob/main/settings/apply.go#L57>)
+
+```go
+func (f FuncE[S]) Apply(target *S) error
+```
+
+Apply executes the configuration function with nil safety. Returns: \- error: Any error encountered during execution \- nil: Success or non\-error configuration applied
+
+## type [FuncEType](<https://github.com/goexts/generic/blob/main/settings/apply.go#L70-L72>)
+
+FuncEType represents a union type for configuration options.
+
+```go
+type FuncEType[S any] interface {
     // contains filtered or unexported methods
 }
+```
+
+## type [FuncType](<https://github.com/goexts/generic/blob/main/settings/apply.go#L65-L67>)
+
+FuncType represents a union type for configuration options.
+
+```go
+type FuncType[S any] interface {
+    // contains filtered or unexported methods
+}
+```
+
+## type [Result](<https://github.com/goexts/generic/blob/main/settings/result.go#L9-L18>)
+
+Result defines the unified return type for configuration operations
+
+```go
+type Result[S any] interface {
+    // Value returns the configured struct pointer
+    Value() *S
+    // Err returns any error occurred during configuration
+    Err() error
+    // Unwrap returns both value and error for direct handling
+    Unwrap() (*S, error)
+    // MustUnwrap panics if error exists
+    MustUnwrap() *S
+}
+```
+
+### func [NewErrorResult](<https://github.com/goexts/generic/blob/main/settings/result.go#L47>)
+
+```go
+func NewErrorResult[S any](err error) Result[S]
+```
+
+### func [NewResult](<https://github.com/goexts/generic/blob/main/settings/result.go#L35>)
+
+```go
+func NewResult[S any](val *S, err error) Result[S]
+```
+
+### func [NewValueResult](<https://github.com/goexts/generic/blob/main/settings/result.go#L42>)
+
+```go
+func NewValueResult[S any](val *S) Result[S]
+```
+
+### func [ResultMixed](<https://github.com/goexts/generic/blob/main/settings/result.go#L91>)
+
+```go
+func ResultMixed[S any](target *S, settings []any) Result[S]
+```
+
+### func [ResultWith](<https://github.com/goexts/generic/blob/main/settings/result.go#L53>)
+
+```go
+func ResultWith[S any](target *S, settings []func(*S)) Result[S]
+```
+
+### func [ResultWithE](<https://github.com/goexts/generic/blob/main/settings/result.go#L71>)
+
+```go
+func ResultWithE[S any](target *S, settings []func(*S) error) Result[S]
+```
+
+### func [ResultWithZero](<https://github.com/goexts/generic/blob/main/settings/result.go#L66>)
+
+```go
+func ResultWithZero[S any](settings []func(*S)) Result[S]
+```
+
+ResultWithZero creates a zero\-value instance and applies settings. Parameters: \- settings: Configuration functions to apply
+
+Returns: \- \*S: New configured instance
+
+### func [ResultWithZeroE](<https://github.com/goexts/generic/blob/main/settings/result.go#L81>)
+
+```go
+func ResultWithZeroE[S any](settings []func(*S) error) Result[S]
+```
+
+### func [ResultZeroMixed](<https://github.com/goexts/generic/blob/main/settings/result.go#L86>)
+
+```go
+func ResultZeroMixed[S any](settings []any) Result[S]
 ```
 
 # slices
@@ -617,38 +1166,32 @@ type Setting[S any] interface {
 import "github.com/goexts/generic/slices"
 ```
 
+Package slices implements the functions, types, and interfaces for the module.
+
 ## Index
 
 - [Variables](<#variables>)
-- [func Append[T ~[]S, S E](arr T, v S) (T, int)](<#func-append>)
-- [func Contains[T ~[]S, S E](s, sub T) bool](<#func-contains>)
-- [func ContainsArray[T ~[]S, S E](s T, e S) bool](<#func-containsarray>)
-- [func ContainsRune(s []rune, r rune) bool](<#func-containsrune>)
-- [func CopyAt[T ~[]S, S E](s, t T, i int) T](<#func-copyat>)
-- [func Count[T ~[]S, S E](s, sub T) int](<#func-count>)
-- [func CountArray[T ~[]S, S E](ss T, s S) int](<#func-countarray>)
-- [func Cut[T ~[]S, S E](s, sep T) (before, after T, found bool)](<#func-cut>)
-- [func Equal[T ~[]S, S E](a, b T) bool](<#func-equal>)
-- [func EqualFoldRune(s, t []rune) bool](<#func-equalfoldrune>)
-- [func Fields[T ~[]S, S interface{ ~byte | ~rune }](s T) []T](<#func-fields>)
-- [func FieldsFunc[T ~[]S, S E](s T, f func(S) bool) []T](<#func-fieldsfunc>)
-- [func HasPrefix[T ~[]S, S E](s, prefix T) bool](<#func-hasprefix>)
-- [func HasSuffix[T ~[]S, S E](s, suffix T) bool](<#func-hassuffix>)
-- [func Index[T ~[]S, S E](s, sep T) int](<#func-index>)
-- [func IndexArray[T ~[]S, S E](s T, r S) int](<#func-indexarray>)
-- [func IndexByteRune(s []rune, c byte) int](<#func-indexbyterune>)
-- [func IndexRune(s []rune, r rune) int](<#func-indexrune>)
-- [func InsertWith[T ~[]S, S E](s T, v S, fn func(a, b S) bool) T](<#func-insertwith>)
-- [func IsSpace[S interface{ ~byte | ~rune }](r S) bool](<#func-isspace>)
-- [func Join[T ~[]S, S E](s []T, sep T) T](<#func-join>)
-- [func LastIndex[T ~[]S, S E](s, sep T) int](<#func-lastindex>)
-- [func LastIndexArray[T ~[]S, S E](s T, c S) int](<#func-lastindexarray>)
+- [func Append[T types.Slice[S], S E](arr T, v S) (T, int)](<#func-append>)
+- [func Contains[T types.Slice[S], S E](s, sub T) bool](<#func-contains>)
+- [func ContainsArray[T types.Slice[S], S E](s T, e S) bool](<#func-containsarray>)
+- [func CopyAt[T types.Slice[S], S E](s, t T, i int) T](<#func-copyat>)
+- [func Count[T types.Slice[S], S E](s, sub T) int](<#func-count>)
+- [func CountArray[T types.Slice[S], S E](ss T, s S) int](<#func-countarray>)
+- [func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool)](<#func-cut>)
+- [func Equal[T types.Slice[S], S E](a, b T) bool](<#func-equal>)
+- [func HasPrefix[T types.Slice[S], S E](s, prefix T) bool](<#func-hasprefix>)
+- [func HasSuffix[T types.Slice[S], S E](s, suffix T) bool](<#func-hassuffix>)
+- [func Index[T types.Slice[S], S E](s, sep T) int](<#func-index>)
+- [func IndexArray[T types.Slice[S], S E](s T, r S) int](<#func-indexarray>)
+- [func InsertWith[T types.Slice[S], S E](s T, v S, fn func(a, b S) bool) T](<#func-insertwith>)
+- [func Join[T types.Slice[S], S E](s []T, sep T) T](<#func-join>)
+- [func LastIndex[T types.Slice[S], S E](s, sep T) int](<#func-lastindex>)
+- [func LastIndexArray[T types.Slice[S], S E](s T, c S) int](<#func-lastindexarray>)
 - [func OverWithError[S any](s []S, err error) func(func(int, S) bool)](<#func-overwitherror>)
-- [func Read[T ~[]S, S E](arr T, offset int, limit int) T](<#func-read>)
-- [func RemoveWith[T ~[]S, S E](s T, fn func(a S) bool) T](<#func-removewith>)
-- [func Repeat[T ~[]S, S E](b T, count int) T](<#func-repeat>)
-- [func ToLowerRune(s []rune) []rune](<#func-tolowerrune>)
-- [func ToUpperRune(s []rune) []rune](<#func-toupperrune>)
+- [func Read[T types.Slice[S], S E](arr T, offset int, limit int) T](<#func-read>)
+- [func RemoveWith[T types.Slice[S], S E](s T, fn func(a S) bool) T](<#func-removewith>)
+- [func Repeat[T types.Slice[S], S E](b T, count int) T](<#func-repeat>)
+- [func Transform[TS types.Slice[S], S any, T any](s TS, f func(S) (T, bool)) []T](<#func-transform>)
 - [type Bytes](<#type-bytes>)
   - [func StringToBytes(s string) Bytes](<#func-stringtobytes>)
   - [func (r Bytes) FindString(s string) int](<#func-bytes-findstring>)
@@ -666,6 +1209,7 @@ import "github.com/goexts/generic/slices"
   - [func (r Runes) ReadString(offset int, limit int) string](<#func-runes-readstring>)
   - [func (r Runes) String() string](<#func-runes-string>)
   - [func (r Runes) StringArray() []string](<#func-runes-stringarray>)
+- [type Slicer](<#type-slicer>)
 
 
 ## Variables
@@ -681,235 +1225,169 @@ var (
 )
 ```
 
-## func [Append](<https://github.com/goexts/generic/blob/main/slices/array.go#L33>)
+## func [Append](<https://github.com/goexts/generic/blob/main/slices/array.go#L38>)
 
 ```go
-func Append[T ~[]S, S E](arr T, v S) (T, int)
+func Append[T types.Slice[S], S E](arr T, v S) (T, int)
 ```
 
 Append appends the element v to the end of Array\[S\] s.
 
-## func [Contains](<https://github.com/goexts/generic/blob/main/slices/array.go#L225>)
+## func [Contains](<https://github.com/goexts/generic/blob/main/slices/array.go#L230>)
 
 ```go
-func Contains[T ~[]S, S E](s, sub T) bool
+func Contains[T types.Slice[S], S E](s, sub T) bool
 ```
 
 Contains reports whether substr is within s.
 
-## func [ContainsArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L230>)
+## func [ContainsArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L235>)
 
 ```go
-func ContainsArray[T ~[]S, S E](s T, e S) bool
+func ContainsArray[T types.Slice[S], S E](s T, e S) bool
 ```
 
 ContainsArray reports whether any Unicode code points in chars are within s.
 
-## func [ContainsRune](<https://github.com/goexts/generic/blob/main/slices/runes.go#L147>)
+## func [CopyAt](<https://github.com/goexts/generic/blob/main/slices/array.go#L351>)
 
 ```go
-func ContainsRune(s []rune, r rune) bool
+func CopyAt[T types.Slice[S], S E](s, t T, i int) T
 ```
 
-ContainsRune reports whether the Unicode code point r is within s.
-
-## func [CopyAt](<https://github.com/goexts/generic/blob/main/slices/array.go#L346>)
+## func [Count](<https://github.com/goexts/generic/blob/main/slices/array.go#L198>)
 
 ```go
-func CopyAt[T ~[]S, S E](s, t T, i int) T
-```
-
-## func [Count](<https://github.com/goexts/generic/blob/main/slices/array.go#L193>)
-
-```go
-func Count[T ~[]S, S E](s, sub T) int
+func Count[T types.Slice[S], S E](s, sub T) int
 ```
 
 Count counts the number of non\-overlapping instances of substr in s. If substr is an empty Array, Count returns 1 \+ the number of Unicode code points in s.
 
-## func [CountArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L214>)
+## func [CountArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L219>)
 
 ```go
-func CountArray[T ~[]S, S E](ss T, s S) int
+func CountArray[T types.Slice[S], S E](ss T, s S) int
 ```
 
 CountArray counts the number of non\-overlapping instances of c in s.
 
-## func [Cut](<https://github.com/goexts/generic/blob/main/slices/array.go#L289>)
+## func [Cut](<https://github.com/goexts/generic/blob/main/slices/array.go#L294>)
 
 ```go
-func Cut[T ~[]S, S E](s, sep T) (before, after T, found bool)
+func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool)
 ```
 
 Cut slices s around the first instance of sep, returning the text before and after sep. The found result reports whether sep appears in s. If sep does not appear in s, cut returns s, "", false.
 
-## func [Equal](<https://github.com/goexts/generic/blob/main/slices/array.go#L41>)
+## func [Equal](<https://github.com/goexts/generic/blob/main/slices/array.go#L46>)
 
 ```go
-func Equal[T ~[]S, S E](a, b T) bool
+func Equal[T types.Slice[S], S E](a, b T) bool
 ```
 
 Equal reports whether a and b are the same length and contain the same runes. A nil argument is equivalent to an empty slice.
 
-## func [EqualFoldRune](<https://github.com/goexts/generic/blob/main/slices/runes.go#L76>)
+## func [HasPrefix](<https://github.com/goexts/generic/blob/main/slices/array.go#L51>)
 
 ```go
-func EqualFoldRune(s, t []rune) bool
-```
-
-EqualFoldRune reports whether s and t, interpreted as UTF\-8 \[\]runes, are equal under simple Unicode case\-folding, which is a more general form of case\-insensitivity.
-
-## func [Fields](<https://github.com/goexts/generic/blob/main/slices/std.go#L62>)
-
-```go
-func Fields[T ~[]S, S interface{ ~byte | ~rune }](s T) []T
-```
-
-Fields splits the Array s around each instance of one or more consecutive white space characters, as defined by unicode.IsSpace, returning a slice of subArrays of s or an empty slice if s contains only white space.
-
-## func [FieldsFunc](<https://github.com/goexts/generic/blob/main/slices/std.go#L21>)
-
-```go
-func FieldsFunc[T ~[]S, S E](s T, f func(S) bool) []T
-```
-
-FieldsFunc splits the Array s at each run of Unicode code points c satisfying f\(c\) and returns an array of slices of s. If all code points in s satisfy f\(c\) or the Array is empty, an empty slice is returned.
-
-FieldsFunc makes no guarantees about the order in which it calls f\(c\) and assumes that f always returns the same value for a given c.
-
-## func [HasPrefix](<https://github.com/goexts/generic/blob/main/slices/array.go#L46>)
-
-```go
-func HasPrefix[T ~[]S, S E](s, prefix T) bool
+func HasPrefix[T types.Slice[S], S E](s, prefix T) bool
 ```
 
 HasPrefix tests whether the Array\[S\] s begins with prefix.
 
-## func [HasSuffix](<https://github.com/goexts/generic/blob/main/slices/array.go#L51>)
+## func [HasSuffix](<https://github.com/goexts/generic/blob/main/slices/array.go#L56>)
 
 ```go
-func HasSuffix[T ~[]S, S E](s, suffix T) bool
+func HasSuffix[T types.Slice[S], S E](s, suffix T) bool
 ```
 
 HasSuffix tests whether the Array\[S\] s ends with suffix.
 
-## func [Index](<https://github.com/goexts/generic/blob/main/slices/array.go#L156>)
+## func [Index](<https://github.com/goexts/generic/blob/main/slices/array.go#L161>)
 
 ```go
-func Index[T ~[]S, S E](s, sep T) int
+func Index[T types.Slice[S], S E](s, sep T) int
 ```
 
 Index returns the index of the first instance of substr in s, or \-1 if substr is not present in s.
 
-## func [IndexArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L146>)
+## func [IndexArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L151>)
 
 ```go
-func IndexArray[T ~[]S, S E](s T, r S) int
+func IndexArray[T types.Slice[S], S E](s T, r S) int
 ```
 
 IndexArray returns the index of the first instance of the runes point r, or \-1 if rune is not present in s.
 
-## func [IndexByteRune](<https://github.com/goexts/generic/blob/main/slices/runes.go#L119>)
+## func [InsertWith](<https://github.com/goexts/generic/blob/main/slices/array.go#L302>)
 
 ```go
-func IndexByteRune(s []rune, c byte) int
-```
-
-IndexByteRune returns the index of the first instance of c in s, or \-1 if c is not present in s.
-
-## func [IndexRune](<https://github.com/goexts/generic/blob/main/slices/runes.go#L125>)
-
-```go
-func IndexRune(s []rune, r rune) int
-```
-
-IndexRune returns the index of the first instance of the runes point r, or \-1 if rune is not present in s.
-
-## func [InsertWith](<https://github.com/goexts/generic/blob/main/slices/array.go#L297>)
-
-```go
-func InsertWith[T ~[]S, S E](s T, v S, fn func(a, b S) bool) T
+func InsertWith[T types.Slice[S], S E](s T, v S, fn func(a, b S) bool) T
 ```
 
 InsertWith inserts v into s at the first index where fn\(a, b\) is true.
 
-## func [IsSpace](<https://github.com/goexts/generic/blob/main/slices/std.go#L112>)
+## func [Join](<https://github.com/goexts/generic/blob/main/slices/array.go#L100>)
 
 ```go
-func IsSpace[S interface{ ~byte | ~rune }](r S) bool
-```
-
-## func [Join](<https://github.com/goexts/generic/blob/main/slices/array.go#L95>)
-
-```go
-func Join[T ~[]S, S E](s []T, sep T) T
+func Join[T types.Slice[S], S E](s []T, sep T) T
 ```
 
 Join concatenates the elements of its first argument to create a single Array\[S\]. The separator Array\[S\] sep is placed between elements in the resulting Array\[S\].
 
-## func [LastIndex](<https://github.com/goexts/generic/blob/main/slices/array.go#L56>)
+## func [LastIndex](<https://github.com/goexts/generic/blob/main/slices/array.go#L61>)
 
 ```go
-func LastIndex[T ~[]S, S E](s, sep T) int
+func LastIndex[T types.Slice[S], S E](s, sep T) int
 ```
 
 LastIndex returns the index of the last instance of substr in s, or \-1 if substr is not present in s.
 
-## func [LastIndexArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L84>)
+## func [LastIndexArray](<https://github.com/goexts/generic/blob/main/slices/array.go#L89>)
 
 ```go
-func LastIndexArray[T ~[]S, S E](s T, c S) int
+func LastIndexArray[T types.Slice[S], S E](s T, c S) int
 ```
 
 LastIndexArray returns the index of the last instance of c in s, or \-1 if c is not present in s.
 
-## func [OverWithError](<https://github.com/goexts/generic/blob/main/slices/array.go#L360>)
+## func [OverWithError](<https://github.com/goexts/generic/blob/main/slices/array.go#L365>)
 
 ```go
 func OverWithError[S any](s []S, err error) func(func(int, S) bool)
 ```
 
-## func [Read](<https://github.com/goexts/generic/blob/main/slices/array.go#L22>)
+## func [Read](<https://github.com/goexts/generic/blob/main/slices/array.go#L27>)
 
 ```go
-func Read[T ~[]S, S E](arr T, offset int, limit int) T
+func Read[T types.Slice[S], S E](arr T, offset int, limit int) T
 ```
 
 Read returns a slice of the Array\[S\] s beginning at offset and length limit. If offset or limit is negative, it is treated as if it were zero.
 
-## func [RemoveWith](<https://github.com/goexts/generic/blob/main/slices/array.go#L336>)
+## func [RemoveWith](<https://github.com/goexts/generic/blob/main/slices/array.go#L341>)
 
 ```go
-func RemoveWith[T ~[]S, S E](s T, fn func(a S) bool) T
+func RemoveWith[T types.Slice[S], S E](s T, fn func(a S) bool) T
 ```
 
 RemoveWith removes the first index where fn\(a, b\) is true.
 
-## func [Repeat](<https://github.com/goexts/generic/blob/main/slices/array.go#L121>)
+## func [Repeat](<https://github.com/goexts/generic/blob/main/slices/array.go#L126>)
 
 ```go
-func Repeat[T ~[]S, S E](b T, count int) T
+func Repeat[T types.Slice[S], S E](b T, count int) T
 ```
 
 Repeat returns a new Array\[S\] consisting of count copies of the Array\[S\] s.
 
 It panics if count is negative or if the result of \(len\(s\) \* count\) overflows.
 
-## func [ToLowerRune](<https://github.com/goexts/generic/blob/main/slices/runes.go#L152>)
+## func [Transform](<https://github.com/goexts/generic/blob/main/slices/slice.go#L8>)
 
 ```go
-func ToLowerRune(s []rune) []rune
+func Transform[TS types.Slice[S], S any, T any](s TS, f func(S) (T, bool)) []T
 ```
-
-ToLowerRune returns s with all Unicode letters mapped to their lower case.
-
-## func [ToUpperRune](<https://github.com/goexts/generic/blob/main/slices/runes.go#L51>)
-
-```go
-func ToUpperRune(s []rune) []rune
-```
-
-ToUpperRune returns s with all Unicode letters mapped to their upper case.
 
 ## type [Bytes](<https://github.com/goexts/generic/blob/main/slices/bytes.go#L7>)
 
@@ -959,7 +1437,7 @@ func (r Bytes) String() string
 func (r Bytes) StringArray() []string
 ```
 
-## type [E](<https://github.com/goexts/generic/blob/main/slices/array.go#L9>)
+## type [E](<https://github.com/goexts/generic/blob/main/slices/array.go#L11>)
 
 E is comparable type of slice element
 
@@ -967,52 +1445,60 @@ E is comparable type of slice element
 type E = comparable
 ```
 
-## type [Runes](<https://github.com/goexts/generic/blob/main/slices/runes.go#L9>)
+## type [Runes](<https://github.com/goexts/generic/blob/main/slices/runes.go#L7>)
 
 ```go
 type Runes []rune
 ```
 
-### func [StringToRunes](<https://github.com/goexts/generic/blob/main/slices/runes.go#L46>)
+### func [StringToRunes](<https://github.com/goexts/generic/blob/main/slices/runes.go#L44>)
 
 ```go
 func StringToRunes(s string) Runes
 ```
 
-### func \(Runes\) [FindString](<https://github.com/goexts/generic/blob/main/slices/runes.go#L30>)
+### func \(Runes\) [FindString](<https://github.com/goexts/generic/blob/main/slices/runes.go#L28>)
 
 ```go
 func (r Runes) FindString(s string) int
 ```
 
-### func \(Runes\) [Index](<https://github.com/goexts/generic/blob/main/slices/runes.go#L26>)
+### func \(Runes\) [Index](<https://github.com/goexts/generic/blob/main/slices/runes.go#L24>)
 
 ```go
 func (r Runes) Index(sub []rune) int
 ```
 
-### func \(Runes\) [Read](<https://github.com/goexts/generic/blob/main/slices/runes.go#L11>)
+### func \(Runes\) [Read](<https://github.com/goexts/generic/blob/main/slices/runes.go#L9>)
 
 ```go
 func (r Runes) Read(offset int, limit int) Runes
 ```
 
-### func \(Runes\) [ReadString](<https://github.com/goexts/generic/blob/main/slices/runes.go#L22>)
+### func \(Runes\) [ReadString](<https://github.com/goexts/generic/blob/main/slices/runes.go#L20>)
 
 ```go
 func (r Runes) ReadString(offset int, limit int) string
 ```
 
-### func \(Runes\) [String](<https://github.com/goexts/generic/blob/main/slices/runes.go#L42>)
+### func \(Runes\) [String](<https://github.com/goexts/generic/blob/main/slices/runes.go#L40>)
 
 ```go
 func (r Runes) String() string
 ```
 
-### func \(Runes\) [StringArray](<https://github.com/goexts/generic/blob/main/slices/runes.go#L34>)
+### func \(Runes\) [StringArray](<https://github.com/goexts/generic/blob/main/slices/runes.go#L32>)
 
 ```go
 func (r Runes) StringArray() []string
+```
+
+## type [Slicer](<https://github.com/goexts/generic/blob/main/slices/array.go#L12-L14>)
+
+```go
+type Slicer[T any] interface {
+    // contains filtered or unexported methods
+}
 ```
 
 # sync
@@ -1292,7 +1778,7 @@ Package trans implements the functions, types, and interfaces for the module.
 
 - [func Cast[T any](v any) (ret T, ok bool)](<#func-cast>)
 - [func CastOr[T any](v any, def T) T](<#func-castor>)
-- [func CastOrZero[T comparable](v any) T](<#func-castorzero>)
+- [func CastOrZero[T comparable](v any) (zero T)](<#func-castorzero>)
 - [func MustCast[T any](v any) T](<#func-mustcast>)
 - [func Pointer[T any](v T) *T](<#func-pointer>)
 - [func Value[T any](v *T) T](<#func-value>)
@@ -1317,12 +1803,12 @@ CastOr attempts to convert a value to the specified type. If the conversion is s
 ## func [CastOrZero](<https://github.com/goexts/generic/blob/main/trans/types.go#L35>)
 
 ```go
-func CastOrZero[T comparable](v any) T
+func CastOrZero[T comparable](v any) (zero T)
 ```
 
 CastOrZero attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value. If the conversion fails, it returns a zero value of the specified type.
 
-## func [MustCast](<https://github.com/goexts/generic/blob/main/trans/types.go#L46>)
+## func [MustCast](<https://github.com/goexts/generic/blob/main/trans/types.go#L45>)
 
 ```go
 func MustCast[T any](v any) T
@@ -1364,6 +1850,8 @@ Package types implements the functions, types, and interfaces for the module.
 
 Package types implements the functions, types, and interfaces for the module.
 
+Package types implements the functions, types, and interfaces for the module.
+
 ## Index
 
 - [func Stringer[T String](t T) string](<#func-stringer>)
@@ -1374,7 +1862,9 @@ Package types implements the functions, types, and interfaces for the module.
 - [type Const](<#type-const>)
 - [type Float](<#type-float>)
 - [type Integer](<#type-integer>)
+- [type Map](<#type-map>)
 - [type Number](<#type-number>)
+- [type Object](<#type-object>)
 - [type Ordered](<#type-ordered>)
 - [type Signed](<#type-signed>)
 - [type Slice](<#type-slice>)
@@ -1382,7 +1872,7 @@ Package types implements the functions, types, and interfaces for the module.
 - [type Unsigned](<#type-unsigned>)
 
 
-## func [Stringer](<https://github.com/goexts/generic/blob/main/types/string.go#L15>)
+## func [Stringer](<https://github.com/goexts/generic/blob/main/types/string.go#L16>)
 
 ```go
 func Stringer[T String](t T) string
@@ -1406,25 +1896,29 @@ func ZeroOr[T comparable](v T, def T) T
 
 ZeroOr returns def if v is the zero value. Decrypted: use cmp.ZeroOr instead.
 
-## type [Boolean](<https://github.com/goexts/generic/blob/main/types/boolean.go#L10-L13>)
+## type [Boolean](<https://github.com/goexts/generic/blob/main/types/boolean.go#L10-L14>)
 
 Boolean is an interface that represents a boolean type. It is implemented by the built\-in bool type.
 
 ```go
 type Boolean interface {
+    Object
     // contains filtered or unexported methods
 }
 ```
 
-## type [Complex](<https://github.com/goexts/generic/blob/main/types/number.go#L25>)
+## type [Complex](<https://github.com/goexts/generic/blob/main/types/number.go#L37-L40>)
 
 Complex is an interface that represents a complex64 or complex128 number.
 
 ```go
-type Complex = constraints.Complex
+type Complex = interface {
+    Object
+    constraints.Complex
+}
 ```
 
-## type [Const](<https://github.com/goexts/generic/blob/main/types/const.go#L10-L12>)
+## type [Const](<https://github.com/goexts/generic/blob/main/types/consts.go#L10-L12>)
 
 Const is an interface that represents a value that is either a Number, a Boolean, or a string. It is used to define constants in Go.
 
@@ -1434,49 +1928,79 @@ type Const interface {
 }
 ```
 
-## type [Float](<https://github.com/goexts/generic/blob/main/types/number.go#L13>)
+## type [Float](<https://github.com/goexts/generic/blob/main/types/number.go#L13-L16>)
 
 Float is an interface that represents a float32 or float64.
 
 ```go
-type Float = constraints.Float
+type Float = interface {
+    Object
+    constraints.Float
+}
 ```
 
-## type [Integer](<https://github.com/goexts/generic/blob/main/types/number.go#L22>)
+## type [Integer](<https://github.com/goexts/generic/blob/main/types/number.go#L31-L34>)
 
 Integer is an interface that represents an integer type.
 
 ```go
-type Integer = constraints.Integer
+type Integer = interface {
+    Object
+    constraints.Integer
+}
 ```
 
-## type [Number](<https://github.com/goexts/generic/blob/main/types/number.go#L32-L34>)
+## type [Map](<https://github.com/goexts/generic/blob/main/types/map.go#L4-L7>)
+
+```go
+type Map[K comparable, V any] interface {
+    Object
+    // contains filtered or unexported methods
+}
+```
+
+## type [Number](<https://github.com/goexts/generic/blob/main/types/number.go#L50-L53>)
 
 Number is an interface that represents any number type. It includes all the interfaces defined above.
 
 ```go
 type Number interface {
+    Object
     // contains filtered or unexported methods
 }
 ```
 
-## type [Ordered](<https://github.com/goexts/generic/blob/main/types/number.go#L28>)
+## type [Object](<https://github.com/goexts/generic/blob/main/types/consts.go#L14-L16>)
+
+```go
+type Object interface {
+    // contains filtered or unexported methods
+}
+```
+
+## type [Ordered](<https://github.com/goexts/generic/blob/main/types/number.go#L43-L46>)
 
 Ordered is an interface that represents any ordered type.
 
 ```go
-type Ordered = constraints.Ordered
+type Ordered = interface {
+    Object
+    constraints.Ordered
+}
 ```
 
-## type [Signed](<https://github.com/goexts/generic/blob/main/types/number.go#L19>)
+## type [Signed](<https://github.com/goexts/generic/blob/main/types/number.go#L25-L28>)
 
 Signed is an interface that represents a signed integer type.
 
 ```go
-type Signed = constraints.Signed
+type Signed = interface {
+    Object
+    constraints.Signed
+}
 ```
 
-## type [Slice](<https://github.com/goexts/generic/blob/main/types/slice.go#L11>)
+## type [Slice](<https://github.com/goexts/generic/blob/main/types/slice.go#L11-L13>)
 
 ```go
 type Slice[T any] interface {
@@ -1484,22 +2008,26 @@ type Slice[T any] interface {
 }
 ```
 
-## type [String](<https://github.com/goexts/generic/blob/main/types/string.go#L10-L12>)
+## type [String](<https://github.com/goexts/generic/blob/main/types/string.go#L10-L13>)
 
 String is an interface that represents a string\-like type. It can be a string, a byte slice, or a rune slice.
 
 ```go
 type String interface {
+    Object
     // contains filtered or unexported methods
 }
 ```
 
-## type [Unsigned](<https://github.com/goexts/generic/blob/main/types/number.go#L16>)
+## type [Unsigned](<https://github.com/goexts/generic/blob/main/types/number.go#L19-L22>)
 
 Unsigned is an interface that represents an unsigned integer type.
 
 ```go
-type Unsigned = constraints.Unsigned
+type Unsigned = interface {
+    Object
+    constraints.Unsigned
+}
 ```
 
 
