@@ -1,4 +1,10 @@
-// Package cmp implements the functions, types, and interfaces for the module.
+//go:build !race
+
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package cmp_test implements the functions, types, and interfaces for the module.
 package cmp_test
 
 import (

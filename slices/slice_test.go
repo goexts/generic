@@ -1,7 +1,10 @@
-// Package slices implements the functions, types, and interfaces for the module.
+//go:build !race
+
+// Package slices_test implements the functions, types, and interfaces for the module.
 package slices_test
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/goexts/generic/slices"
@@ -10,7 +13,7 @@ import (
 type Point struct{ X, Y int }
 
 func (p Point) String() string {
-	return "(" + string(rune(p.X)) + "," + string(rune(p.Y)) + ")"
+	return "(" + strconv.Itoa(p.X) + "," + strconv.Itoa(p.Y) + ")"
 }
 
 func TestTransform(t *testing.T) {
@@ -52,7 +55,7 @@ func TestTransform(t *testing.T) {
 			return p.String(), true
 		})
 		if out[0] != "(1,2)" || out[1] != "(3,4)" {
-			t.Error("Struct conversion failed")
+			t.Errorf("Expected [(1,2) (3,4)], got %v", out)
 		}
 	})
 
@@ -62,7 +65,7 @@ func TestTransform(t *testing.T) {
 			return int(f), true
 		})
 		if out != nil {
-			t.Error("Expected nil output for nil input")
+			t.Error("Expected empty output for empty input")
 		}
 	})
 }

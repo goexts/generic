@@ -6,6 +6,9 @@ import (
 )
 
 func Transform[TS types.Slice[S], S any, T any](s TS, f func(S) (T, bool)) []T {
+	if len(s) == 0 {
+		return nil
+	}
 	tt := make([]T, 0, len(s))
 	for _, sv := range s {
 		if t, ok := f(sv); ok {

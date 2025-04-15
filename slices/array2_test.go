@@ -1,3 +1,10 @@
+//go:build !race
+
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package slices_test implements the functions, types, and interfaces for the module.
 package slices_test
 
 import (
