@@ -18,7 +18,7 @@ func Wait[T any](v <-chan T) T {
 	return <-v
 }
 
-// WaitWithContext waits for a value to be available on the provided channel
+// WaitContext waits for a value to be available on the provided channel
 // within the given context.
 //
 // The channel v must be a receive-only channel of type T. The function blocks
@@ -31,7 +31,7 @@ func Wait[T any](v <-chan T) T {
 // Returns:
 //   - T: The value received from the channel if successful.
 //   - error: The error that caused the waiting process to be done.
-func WaitWithContext[T any](ctx context.Context, v <-chan T) (T, error) {
+func WaitContext[T any](ctx context.Context, v <-chan T) (T, error) {
 	var ret T
 	select {
 	case ret = <-v: // If a value is received from the channel, return it.
@@ -66,7 +66,7 @@ func WaitOrErr[T any](v <-chan T, err <-chan error) (T, error) {
 	}
 }
 
-// WaitTimeoutOrErr waits for a value to be available on the provided channel within the given context.
+// WaitContextOrErr waits for a value to be available on the provided channel within the given context.
 // If a value is received from the channel, it is returned along with a nil error.
 // If an error is received from the error channel, it is returned along with the received error.
 // If the context is done, the function returns the last received value and an error indicating the context is done.
@@ -79,7 +79,7 @@ func WaitOrErr[T any](v <-chan T, err <-chan error) (T, error) {
 // Returns:
 //   - T: The value received from the channel if successful.
 //   - error: The error that caused the waiting process to be done.
-func WaitTimeoutOrErr[T any](ctx context.Context, v <-chan T, err <-chan error) (T, error) {
+func WaitContextOrErr[T any](ctx context.Context, v <-chan T, err <-chan error) (T, error) {
 	var ret T
 	select {
 	case ret = <-v: // If a value is received from the channel, return it.
