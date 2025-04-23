@@ -5,6 +5,15 @@
 // Package generic implements the functions, types, and interfaces for the module.
 package generic
 
+// Choose returns the left value if cond is true, otherwise it returns the right value.
+// This function is useful when you need to conditionally choose between two values.
+func Choose[T any](cond bool, l, r T) T {
+	if cond {
+		return l
+	}
+	return r
+}
+
 // ChooseRight returns the rightmost value, ignoring the left value.
 // This function is useful when you need to prioritize the right value over the left.
 func ChooseRight[L any, R any](_ L, r R) R {
