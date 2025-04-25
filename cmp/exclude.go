@@ -2,7 +2,7 @@ package cmp
 
 // Excludes returns the elements in src that are not in ts.
 func Excludes[T comparable](src []T, ts ...T) []T {
-	var excludes map[T]struct{}
+	excludes := make(map[T]struct{}, len(src))
 	for _, t := range src {
 		excludes[t] = struct{}{}
 	}

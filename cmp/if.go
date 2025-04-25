@@ -20,7 +20,7 @@ func If[T any](condition bool, trueVal T, falseVal T) T {
 func IfFunc[T any](condition bool, trueFn func() T, falseFn func() T) T {
 	// If the condition is true, execute the trueFn function
 	if condition {
-		trueFn()
+		return trueFn()
 	}
 	// Return the result of the falseFn function
 	return falseFn()
