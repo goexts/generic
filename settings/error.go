@@ -6,23 +6,24 @@ import (
 	"fmt"
 )
 
+type ErrorCode int
+
 // Error types for configuration errors
 const (
-	ErrUnsupportedType = iota
+	ErrUnsupportedType ErrorCode = iota
 	ErrExecutionFailed
 	ErrEmptyTargetValue
 )
 
 type ConfigError struct {
-	Type       int    // Error category
-	TypeString string // Setting type info
-	Err        error  // Original error
+	Code       ErrorCode // Error category
+	TypeString string    // Setting type info
+	Err        error     // Original error
 }
 
-// 创建错误时记录类型信息
-func newConfigError(t int, setting any, err error) *ConfigError {
+func newConfigError(t ErrorCode, setting any, err error) *ConfigError {
 	return &ConfigError{
-		Type:       t,
+		Code:       t,
 		TypeString: fmt.Sprintf("%T", setting),
 		Err:        err,
 	}
@@ -34,7 +35,7 @@ func (e *ConfigError) Unwrap() error {
 
 // Error message display is enhanced
 func (e *ConfigError) Error() string {
-	switch e.Type {
+	switch e.Code {
 	case ErrUnsupportedType:
 		return fmt.Sprintf("unsupported config type: %s", e.TypeString)
 	case ErrExecutionFailed:
@@ -59,6 +60,12 @@ func wrapIfNeeded(err error, setting any) error {
 	return newConfigError(ErrExecutionFailed, setting, err)
 }
 
+// IsConfigError checks if the given error is a *ConfigError instance.
+// Parameters:
+//   - err: error to be checked
+//
+// Returns:
+//   - true if err is *ConfigError type, false otherwise
 func IsConfigError(err error) bool {
 	var configError *ConfigError
 	return errors.As(err, &configError)
@@ -66,15 +73,15 @@ func IsConfigError(err error) bool {
 
 func IsUnsupportedTypeError(err error) bool {
 	var configError *ConfigError
-	return errors.As(err, &configError) && configError.Type == ErrUnsupportedType
+	return errors.As(err, &configError) && configError.Code == ErrUnsupportedType
 }
 
 func IsEmptyTargetValueError(err error) bool {
 	var configError *ConfigError
-	return errors.As(err, &configError) && configError.Type == ErrEmptyTargetValue
+	return errors.As(err, &configError) && configError.Code == ErrEmptyTargetValue
 }
 
 func IsExecutionFailedError(err error) bool {
 	var configError *ConfigError
-	return errors.As(err, &configError) && configError.Type == ErrExecutionFailed
+	return errors.As(err, &configError) && configError.Code == ErrExecutionFailed
 }

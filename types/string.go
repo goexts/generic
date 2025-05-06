@@ -12,7 +12,7 @@ type String interface {
 	~string | ~[]byte | ~[]rune
 }
 
-// Stringer converts a string-like type to a string.
-func Stringer[T String](t T) string {
+// StringLike converts a string-like type to a string.
+func StringLike[T String](t T) string {
 	return string(t)
 }

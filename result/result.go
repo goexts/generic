@@ -1,9 +1,14 @@
+// 创建新文件并迁移代码
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package settings implements the functions, types, and interfaces for the module.
-package settings
+// Package result implements the unified result type for operations
+package result
+
+import (
+	"github.com/goexts/generic/settings"
+)
 
 // Result defines the unified return type for configuration operations
 type Result[S any] interface {
@@ -50,50 +55,43 @@ func NewErrorResult[S any](err error) Result[S] {
 	}
 }
 
-func ResultWith[S any](target *S, settings []func(*S)) Result[S] {
-	for _, setting := range settings {
-		_ = apply(target, setting)
-	}
+func With[S any](target *S, ss []func(*S)) Result[S] {
+	_ = settings.Apply(target, ss)
 	return NewValueResult(target)
 }
 
-// ResultWithZero creates a zero-value instance and applies settings.
+// WithZero creates a zero-value instance and applies settings.
 // Parameters:
 //   - settings: Configuration functions to apply
 //
 // Returns:
 //   - *S: New configured instance
-func ResultWithZero[S any](settings []func(*S)) Result[S] {
+func WithZero[S any](settings []func(*S)) Result[S] {
 	var zero S
-	return ResultWith(&zero, settings)
+	return With(&zero, settings)
 }
 
-func ResultWithE[S any](target *S, settings []func(*S) error) Result[S] {
-	var err error
-	for _, setting := range settings {
-		if _, err = applyWithError(target, setting); err != nil {
-			return NewErrorResult[S](err)
-		}
+func WithZeroE[S any](settings []func(*S) error) Result[S] {
+	var zero S
+	return WithE(&zero, settings)
+}
+
+func WithE[S any](target *S, ss []func(*S) error) Result[S] {
+	if _, err := settings.ApplyE(target, ss); err != nil {
+		return NewErrorResult[S](err)
 	}
 	return NewValueResult[S](target)
 }
 
-func ResultWithZeroE[S any](settings []func(*S) error) Result[S] {
+func WithZeroMixed[S any](settings []any) Result[S] {
 	var zero S
-	return ResultWithE(&zero, settings)
+	return WithMixed(&zero, settings)
 }
 
-func ResultZeroMixed[S any](settings []any) Result[S] {
-	var zero S
-	return ResultMixed(&zero, settings)
-}
-
-func ResultMixed[S any](target *S, settings []any) Result[S] {
-	var err error
-	for _, setting := range settings {
-		if err = mixedApply(target, setting); err != nil {
-			return NewErrorResult[S](err)
-		}
+func WithMixed[S any](target *S, ss []any) Result[S] {
+	_, err := settings.WithMixed(target, ss...)
+	if err != nil {
+		return NewErrorResult[S](err)
 	}
 	return NewValueResult[S](target)
 }

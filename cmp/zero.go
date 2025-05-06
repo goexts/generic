@@ -10,11 +10,11 @@ func IsZero[T comparable](v T) bool {
 	return v == zero
 }
 
-// ZeroOr returns def if v is the zero value.
-func ZeroOr[T comparable](v T, def T) T {
+// ZeroOr returns right value if v is the zero value.
+func ZeroOr[T comparable](v T, rv T) T {
 	var zero T
 	if v == zero {
-		return def
+		return rv
 	}
 	return v
 }

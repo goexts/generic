@@ -91,7 +91,7 @@ func TestApplyStrictPanicsOnInvalidType(t *testing.T) {
 	}
 	s := &Ship{}
 	settings := []interface{}{
-		"Invalid Type",
+		"Invalid Code",
 	}
 	defer func() {
 		if r := recover(); r == nil {

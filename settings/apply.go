@@ -125,6 +125,15 @@ func mixedApply[S any](target *S, setting any) error {
 	return err
 }
 
+// Chain combines multiple configuration functions into a single function
+func Chain[S any](fns ...Func[S]) Func[S] {
+	return func(s *S) {
+		for _, f := range fns {
+			f(s)
+		}
+	}
+}
+
 // Apply configures a target struct with ordered settings.
 // Parameters:
 //   - target: Pointer to the struct being configured (non-nil)

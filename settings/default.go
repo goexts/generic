@@ -4,15 +4,15 @@ package settings
 // Defaulter is an interface that provides a method to apply default settings.
 // Decrypted: use Apply instead of Defaulter
 type Defaulter interface {
-	// ApplyDefaults applies the default settings to the implementing type.
-	ApplyDefaults()
+	// Defaults applies the default settings to the implementing type.
+	Defaults()
 }
 
 // ErrorDefaulter is an interface that provides a method to apply default settings and return an error.
 // Decrypted: use ApplyE instead of ErrorDefaulter
 type ErrorDefaulter interface {
-	// ApplyDefaults applies the default settings to the implementing type and returns an error.
-	ApplyDefaults() error
+	// Defaults applies the default settings to the implementing type and returns an error.
+	Defaults() error
 }
 
 // ApplyDefaults applies the given settings and default settings to the provided value.
@@ -25,10 +25,10 @@ func ApplyDefaults[S any](s *S, fs []func(*S)) *S {
 	s = Apply(s, fs)
 	switch v := any(s).(type) {
 	case ErrorDefaulter:
-		_ = v.ApplyDefaults()
+		_ = v.Defaults()
 		return s
 	case Defaulter:
-		v.ApplyDefaults()
+		v.Defaults()
 		return s
 	}
 	return s
@@ -107,9 +107,34 @@ func WithZeroE[S any](settings ...any) (*S, error) {
 //   - error: Error if any occurred during the configuration process
 func WithMixed[S any](target *S, settings ...any) (*S, error) {
 	var err error
+	var defaults []any
 	for _, setting := range settings {
-		if err = mixedApply(target, setting); err != nil {
-			return nil, err
+		switch v := setting.(type) {
+		case Defaulter:
+			defaults = append(defaults, v)
+		case ErrorDefaulter:
+			defaults = append(defaults, v)
+		default:
+			if err = mixedApply(target, setting); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return WithInterfaces(target, defaults...)
+}
+
+func WithInterfaces[S any](target *S, settings ...any) (*S, error) {
+	var err error
+	for _, setting := range settings {
+		switch v := setting.(type) {
+		case Defaulter:
+			v.Defaults()
+		case ErrorDefaulter:
+			if err = v.Defaults(); err != nil {
+				return nil, err
+			}
+		default:
+			return nil, newConfigError(ErrUnsupportedType, setting, nil)
 		}
 	}
 	return target, nil
@@ -136,13 +161,13 @@ func ApplyErrorDefaults[S any](s *S, fs []func(*S)) (*S, error) {
 	s = Apply(s, fs)
 	switch v := any(s).(type) {
 	case ErrorDefaulter:
-		err := v.ApplyDefaults()
+		err := v.Defaults()
 		if err != nil {
 			return nil, err
 		}
 		return s, nil
 	case Defaulter:
-		v.ApplyDefaults()
+		v.Defaults()
 		return s, nil
 	}
 	return s, nil
