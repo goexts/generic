@@ -30,7 +30,18 @@ func IfFunc[T any](condition bool, trueFn func() T, falseFn func() T) T {
 // a function to execute if the condition is true,
 // and a function to execute if the condition is false.
 // It returns the result of the function that was executed.
+//
+// Decrypted: use IfFuncE instead of IfFuncWithError
 func IfFuncWithError[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error) {
+	// If the condition is true, execute the trueFn function and return its result
+	if condition {
+		return trueFn()
+	}
+	// If the condition is false, execute the falseFn function and return its result
+	return falseFn()
+}
+
+func IfFuncE[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error) {
 	// If the condition is true, execute the trueFn function and return its result
 	if condition {
 		return trueFn()
