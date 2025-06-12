@@ -5,22 +5,20 @@
 // Package generic implements the functions, types, and interfaces for the module.
 package generic
 
+import (
+	"github.com/goexts/generic/cmp"
+)
+
 // ChooseFunc returns the result of the left function if cond is true, otherwise it returns the result of the right function.
 // This function is useful when you need to conditionally choose between two functions.
 func ChooseFunc[T any](cond bool, l, r func() T) T {
-	if cond {
-		return l()
-	}
-	return r()
+	return cmp.IfFunc(cond, l, r)
 }
 
 // Choose returns the left value if cond is true, otherwise it returns the right value.
 // This function is useful when you need to conditionally choose between two values.
 func Choose[T any](cond bool, l, r T) T {
-	if cond {
-		return l
-	}
-	return r
+	return cmp.If(cond, l, r)
 }
 
 // ChooseRight returns the rightmost value, ignoring the left value.
