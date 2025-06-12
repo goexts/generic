@@ -9,9 +9,6 @@ import (
 
 // E is comparable type of slice element
 type E = comparable
-type Slicer[T any] interface {
-	~[]T
-}
 
 var (
 	// ErrTooLarge is an error when number is too large than length
