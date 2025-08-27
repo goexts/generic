@@ -1,5 +1,5 @@
 // Package cmp implements the functions, types, and interfaces for the module.
-package cmp
+package generic
 
 type Comparable interface {
 	Equal(other any) bool

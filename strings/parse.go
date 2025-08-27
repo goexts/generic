@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-// To converts string to specified type with default value support.
+// ParseOr converts string to specified type with default value support.
 // Supported types: all basic types (int/uint variants, float, bool, string)
 // Parameters:
 //   - s: input string
 //   - def: optional default value (returns first default value if conversion fails)
-func To[T any](s string, def ...T) T {
+func ParseOr[T any](s string, def ...T) T {
 	var t T
 	rt := reflect.TypeOf(t)
 	switch rt.Kind() {

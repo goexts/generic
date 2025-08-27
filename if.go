@@ -1,5 +1,5 @@
-// Package cmp implements the functions, types, and interfaces for the module.
-package cmp
+// Package generic implements the functions, types, and interfaces for the module.
+package generic
 
 // If function takes a boolean condition and two values of any type T,
 // and returns the first value if the condition is true,

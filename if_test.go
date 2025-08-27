@@ -5,7 +5,7 @@
  */
 
 // Package cmp_test implements the functions, types, and interfaces for the module.
-package cmp
+package generic
 
 import (
 	"reflect"

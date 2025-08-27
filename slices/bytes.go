@@ -1,6 +1,7 @@
 package slices
 
 import (
+	"bytes"
 	"slices"
 )
 
@@ -22,13 +23,18 @@ func (r Bytes) ReadString(offset int, limit int) string {
 }
 
 func (r Bytes) Index(sub []byte) int {
-	return Index(r, sub)
+	return bytes.Index(r, sub)
 }
 
 func (r Bytes) FindString(s string) int {
 	return r.Index([]byte(s))
 }
 
+// StringArray converts each byte in the slice to a separate string.
+//
+// WARNING: This method operates on individual bytes, not Unicode characters (runes).
+// If the byte slice contains multi-byte UTF-8 characters, the result may be unexpected.
+// For proper Unicode character handling, convert to Runes first using `ToRunes()`.
 func (r Bytes) StringArray() []string {
 	result := make([]string, 0, len(r))
 	for i := range r {
@@ -39,6 +45,11 @@ func (r Bytes) StringArray() []string {
 
 func (r Bytes) String() string {
 	return string(r)
+}
+
+// ToRunes converts the byte slice (assuming it is UTF-8 encoded) to a slice of runes.
+func (r Bytes) ToRunes() Runes {
+	return []rune(string(r))
 }
 
 func StringToBytes(s string) Bytes {

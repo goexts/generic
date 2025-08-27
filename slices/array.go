@@ -2,7 +2,7 @@ package slices
 
 import (
 	"errors"
-	"slices"
+	"sort"
 
 	"github.com/goexts/generic/types"
 )
@@ -11,10 +11,6 @@ import (
 type E = comparable
 
 var (
-	// ErrTooLarge is an error when number is too large than length
-	ErrTooLarge = errors.New("slices.Array: number is too large than length")
-	// ErrTooSmall is an error when number is too small than length
-	ErrTooSmall = errors.New("slices.Array: number is too small than length")
 	// ErrWrongIndex is an error when index is out of range
 	ErrWrongIndex = errors.New("slices.Array: wrong index")
 )
@@ -28,7 +24,7 @@ func Read[T types.Slice[S], S E](arr T, offset int, limit int) T {
 	if len(arr) < offset+limit {
 		return nil
 	}
-	return arr[offset : offset+limit]
+	return clone(arr[offset : offset+limit])
 }
 
 // Append appends the element v to the end of Array[S] s.
@@ -37,55 +33,48 @@ func Append[T types.Slice[S], S E](arr T, v S) (T, int) {
 	return append(arr, v), sz
 }
 
-// Equal reports whether a and b
-// are the same length and contain the same runes.
-// A nil argument is equivalent to an empty slice.
-func Equal[T types.Slice[S], S E](a, b T) bool {
-	return slices.Equal(a, b)
-}
-
-// HasPrefix tests whether the Array[S] s begins with prefix.
-func HasPrefix[T types.Slice[S], S E](s, prefix T) bool {
-	return len(s) >= len(prefix) && Equal[T](s[0:len(prefix)], prefix)
-}
-
-// HasSuffix tests whether the Array[S] s ends with suffix.
-func HasSuffix[T types.Slice[S], S E](s, suffix T) bool {
-	return len(s) >= len(suffix) && Equal(s[len(s)-len(suffix):], suffix)
-}
-
-// LastIndex returns the index of the last instance of substr in s, or -1 if substr is not present in s.
-func LastIndex[T types.Slice[S], S E](s, sep T) int {
+// LastIndexSlice returns the index of the last instance of substr in s, or -1 if substr is not present in s.
+func LastIndexSlice[T types.Slice[S], S E](s, sep T) int {
 	n := len(sep)
 	switch {
 	case n == 0:
 		return len(s)
 	case n == 1:
-		return LastIndexArray(s, sep[0])
+		return lastIndexElement(s, sep[0])
 	case n == len(s):
-		if Equal(s, sep) {
+		if equal(s, sep) {
 			return 0
 		}
 		return -1
 	case n > len(s):
 		return -1
 	}
-	last := len(s) - n
-	if Equal(sep, s[last:]) {
-		return last
-	}
-	for i := last - 1; i >= 0; i-- {
-		if Equal(sep, s[i:i+n]) {
+	for i := len(s) - n; i >= 0; i-- {
+		if equal(s[i:i+n], sep) {
 			return i
 		}
 	}
 	return -1
 }
 
-// LastIndexArray returns the index of the last instance of c in s, or -1 if c is not present in s.
-func LastIndexArray[T types.Slice[S], S E](s T, c S) int {
-	for i := len(s) - 1; i >= 0; i-- {
-		if s[i] == c {
+// IndexSlice returns the index of the first instance of substr in s, or -1 if substr is not present in s.
+func IndexSlice[T types.Slice[S], S E](s, substr T) int {
+	n := len(substr)
+	switch {
+	case n == 0:
+		return 0
+	case n == 1:
+		return indexElement(s, substr[0])
+	case n == len(s):
+		if equal(s, substr) {
+			return 0
+		}
+		return -1
+	case n > len(s):
+		return -1
+	}
+	for i := 0; i <= len(s)-n; i++ {
+		if equal(s[i:i+n], substr) {
 			return i
 		}
 	}
@@ -143,53 +132,6 @@ func Repeat[T types.Slice[S], S E](b T, count int) T {
 	return nb
 }
 
-// IndexArray returns the index of the first instance of the runes point
-// r, or -1 if rune is not present in s.
-func IndexArray[T types.Slice[S], S E](s T, r S) int {
-	for i, c := range s {
-		if c == r {
-			return i
-		}
-	}
-	return -1
-}
-
-// Index returns the index of the first instance of substr in s, or -1 if substr is not present in s.
-func Index[T types.Slice[S], S E](s, sep T) int {
-	n := len(sep)
-	switch {
-	case n == 0:
-		return 0
-	case n == 1:
-		return IndexArray(s, sep[0])
-	case n == len(s):
-		if Equal(sep, s) {
-			return 0
-		}
-		return -1
-	case n > len(s):
-		return -1
-	}
-	c0 := sep[0]
-	c1 := sep[1]
-	i := 0
-	t := len(s) - n + 1
-	for i < t {
-		if s[i] != c0 {
-			o := IndexArray(s[i+1:t], c0)
-			if o < 0 {
-				return -1
-			}
-			i += o + 1
-		}
-		if s[i+1] == c1 && Equal(s[i:i+n], sep) {
-			return i
-		}
-		i++
-	}
-	return -1
-}
-
 // Count counts the number of non-overlapping instances of substr in s.
 // If substr is an empty Array, Count returns 1 + the number of Unicode code points in s.
 func Count[T types.Slice[S], S E](s, sub T) int {
@@ -203,7 +145,7 @@ func Count[T types.Slice[S], S E](s, sub T) int {
 	}
 	n := 0
 	for {
-		i := Index(s, sub)
+		i := IndexSlice(s, sub)
 		if i == -1 {
 			return n
 		}
@@ -223,19 +165,8 @@ func CountArray[T types.Slice[S], S E](ss T, s S) int {
 	return n
 }
 
-// Contains reports whether substr is within s.
-func Contains[T types.Slice[S], S E](s, sub T) bool {
-	return Index(s, sub) >= 0
-}
-
-// ContainsArray reports whether any Unicode code points in chars are within s.
-func ContainsArray[T types.Slice[S], S E](s T, e S) bool {
-	return IndexArray(s, e) >= 0
-}
-
-// explode splits s into a slice of UTF-8 Arrays,
-// one Array per Unicode character up to a maximum of n (n < 0 means no limit).
-// Invalid UTF-8 sequences become correct encodings of U+FFFD.
+// explode splits s into a slice of slices, each of length 1,
+// up to a maximum of n (n < 0 means no limit).
 func explode[T types.Slice[S], S E](s T, n int) []T {
 	l := len(s)
 	if n < 0 || n > l {
@@ -272,7 +203,7 @@ func genSplit[T types.Slice[S], S E](s, sep T, sepSave, n int) []T {
 	n--
 	i := 0
 	for i < n {
-		m := Index(s, sep)
+		m := IndexSlice(s, sep)
 		if m < 0 {
 			break
 		}
@@ -289,7 +220,7 @@ func genSplit[T types.Slice[S], S E](s, sep T, sepSave, n int) []T {
 // The found result reports whether sep appears in s.
 // If sep does not appear in s, cut returns s, "", false.
 func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool) {
-	if i := Index(s, sep); i >= 0 {
+	if i := IndexSlice(s, sep); i >= 0 {
 		return s[:i], s[i+len(sep):], true
 	}
 	return s, nil, false
@@ -297,41 +228,15 @@ func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool) {
 
 // InsertWith inserts v into s at the first index where fn(a, b) is true.
 func InsertWith[T types.Slice[S], S E](s T, v S, fn func(a, b S) bool) T {
-	pos := binarySearch(s, v, fn)
+	// Assumes s is sorted according to fn.
+	// sort.Search finds the first index `i` where the function is true.
+	pos := sort.Search(len(s), func(i int) bool { return fn(s[i], v) })
 
-	// Create the result slice with the appropriate capacity.
-	ret := make(T, 0, len(s)+1)
-	if pos == -1 {
-		return append(s, v)
-	}
-	// Append elements up to the insertion point.
-	ret = append(ret, s[:pos]...)
-
-	// Insert v.
-	ret = append(ret, v)
-
-	// Append the rest of the elements.
-	ret = append(ret, s[pos:]...)
-
-	return ret
-}
-
-// binarySearch performs a binary search to find the insertion point for v in s.
-func binarySearch[S ~[]R, R E](s S, target R, cmp func(a, b R) bool) int {
-	n := len(s)
-	l, r := 0, n
-	for l < r {
-		mid := int(uint(l+r) >> 1)
-		if !cmp(s[mid], target) {
-			l = mid + 1
-		} else {
-			r = mid
-		}
-	}
-	if l < n && cmp(s[l], target) {
-		return l
-	}
-	return -1
+	// Efficiently insert the element.
+	s = append(s, *new(S))   // Grow slice by one (zero value).
+	copy(s[pos+1:], s[pos:]) // Shift elements from pos onwards to the right.
+	s[pos] = v               // Insert the new element at pos.
+	return s
 }
 
 // RemoveWith removes the first index where fn(a, b) is true.
@@ -347,14 +252,16 @@ func RemoveWith[T types.Slice[S], S E](s T, fn func(a S) bool) T {
 
 func CopyAt[T types.Slice[S], S E](s, t T, i int) T {
 	if i < 0 {
-		panic(ErrWrongIndex)
+		panic(ErrWrongIndex) // Or return an error, panic is consistent with stdlib
 	}
-	caps := cap(s)
-	lent := len(s)
-	if caps < lent+i {
-		s = append(s, make([]S, lent+i-caps)...)
+
+	requiredLen := i + len(t)
+	if len(s) < requiredLen {
+		// Grow the slice to the required length, filling with zero values.
+		s = append(s, make(T, requiredLen-len(s))...)
 	}
-	// copy the elements from s to t.
+
+	// Copy the elements from t into s at the specified index.
 	copy(s[i:], t)
 	return s
 }
@@ -370,4 +277,69 @@ func OverWithError[S any](s []S, err error) func(func(int, S) bool) {
 			}
 		}
 	}
+}
+
+// Map transforms a slice of one type to a slice of another type by applying a function to each element.
+func Map[S, T any](s []S, f func(S) T) []T {
+	if s == nil {
+		return nil
+	}
+	result := make([]T, len(s))
+	for i, v := range s {
+		result[i] = f(v)
+	}
+	return result
+}
+
+// Reduce aggregates all elements of a slice into a single value by applying a function.
+// It iterates through the slice, applying the function 'f' to an accumulator and the current element.
+func Reduce[S, T any](s []S, initial T, f func(T, S) T) T {
+	accumulator := initial
+	for _, v := range s {
+		accumulator = f(accumulator, v)
+	}
+	return accumulator
+}
+
+// clone returns a copy of the slice.
+// The elements are copied using assignment, so this is a shallow clone.
+func clone[T types.Slice[S], S E](s T) T {
+	if s == nil {
+		return nil
+	}
+	return append(T(nil), s...)
+}
+
+// equal reports whether two slices are equal: the same length and all
+// elements equal.
+func equal[T types.Slice[S], S E](s1, s2 T) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// indexElement returns the index of the first instance of e in s, or -1 if not found.
+func indexElement[T types.Slice[S], S E](s T, e S) int {
+	for i, v := range s {
+		if v == e {
+			return i
+		}
+	}
+	return -1
+}
+
+// lastIndexElement returns the index of the last instance of e in s, or -1 if not found.
+func lastIndexElement[T types.Slice[S], S E](s T, e S) int {
+	for i := len(s) - 1; i >= 0; i-- {
+		if s[i] == e {
+			return i
+		}
+	}
+	return -1
 }

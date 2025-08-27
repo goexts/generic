@@ -22,7 +22,7 @@ func (r Runes) ReadString(offset int, limit int) string {
 }
 
 func (r Runes) Index(sub []rune) int {
-	return Index(r, sub)
+	return IndexSlice(r, sub)
 }
 
 func (r Runes) FindString(s string) int {
@@ -30,7 +30,7 @@ func (r Runes) FindString(s string) int {
 }
 
 func (r Runes) StringArray() []string {
-	var result []string
+	result := make([]string, 0, len(r))
 	for i := range r {
 		result = append(result, string(r[i]))
 	}
@@ -39,6 +39,11 @@ func (r Runes) StringArray() []string {
 
 func (r Runes) String() string {
 	return string(r)
+}
+
+// ToBytes converts the rune slice back to a UTF-8 encoded byte slice.
+func (r Runes) ToBytes() Bytes {
+	return []byte(string(r))
 }
 
 func StringToRunes(s string) Runes {
