@@ -5,10 +5,6 @@
 // Package cast provides utility functions for type casting and assertion.
 package cast
 
-import (
-	"fmt"
-)
-
 // Try attempts to convert a value to the specified type.
 // If the conversion is successful, it returns the converted value and true.
 // If the conversion fails, it returns the original value and false.
@@ -37,14 +33,4 @@ func OrZero[T comparable](v any) (zero T) {
 		return ret
 	}
 	return zero
-}
-
-// Must attempts to convert a value to the specified type.
-// If the conversion is successful, it returns the converted value.
-// If the conversion fails, it panics with the message.
-func Must[T any](v any) T {
-	if ret, ok := v.(T); ok {
-		return ret
-	}
-	panic(fmt.Sprintf("value is not type of %T", v))
 }

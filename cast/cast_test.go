@@ -3,9 +3,8 @@ package cast_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/goexts/generic/cast"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTry(t *testing.T) {
@@ -43,19 +42,4 @@ func TestOrZero(t *testing.T) {
 	// Failed cast
 	val2 := cast.OrZero[int](i)
 	assert.Equal(t, 0, val2)
-}
-
-func TestMust(t *testing.T) {
-	var i any = "world"
-
-	// Successful cast
-	assert.NotPanics(t, func() {
-		val := cast.Must[string](i)
-		assert.Equal(t, "world", val)
-	})
-
-	// Failed cast
-	assert.Panics(t, func() {
-		cast.Must[int](i)
-	})
 }

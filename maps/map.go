@@ -148,3 +148,40 @@ func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f fu
 	// Return the new map with the transformed key-value pairs.
 	return n
 }
+
+// MustGet is a utility function that simplifies map lookups.
+// It returns the value from a map lookup and panics if the key is not found.
+func MustGet[V any](v V, ok bool) V {
+	if !ok {
+		panic("key not found")
+	}
+	return v
+}
+
+// GetOr is a utility function that simplifies map lookups.
+// It returns the value from a map lookup or a default value if the key is not found.
+func GetOr[V any](v V, ok bool, defaultValue V) V {
+	if !ok {
+		return defaultValue
+	}
+	return v
+}
+
+// GetOrZero is a utility function that simplifies map lookups.
+// It returns the value from a map lookup or the zero value of the type if the key is not found.
+func GetOrZero[V any](v V, ok bool) V {
+	if !ok {
+		var zero V
+		return zero
+	}
+	return v
+}
+
+// GetOrNil is a utility function that simplifies map lookups for pointer types.
+// It returns the value from a map lookup or nil if the key is not found.
+func GetOrNil[V any](v *V, ok bool) *V {
+	if !ok {
+		return nil
+	}
+	return v
+}

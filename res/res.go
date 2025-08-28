@@ -72,3 +72,22 @@ func (r Result[T]) Ok() (T, bool) {
 func (r Result[T]) Err() error {
 	return r.err
 }
+
+// Or is a utility function that simplifies handling of (value, error) returns.
+// It returns the value if err is nil, otherwise it returns the provided default value.
+func Or[T any](v T, err error, defaultValue T) T {
+	if err != nil {
+		return defaultValue
+	}
+	return v
+}
+
+// OrZero is a utility function that simplifies handling of (value, error) returns.
+// It returns the value if err is nil, otherwise it returns the zero value of the type.
+func OrZero[T any](v T, err error) T {
+	if err != nil {
+		var zero T
+		return zero
+	}
+	return v
+}

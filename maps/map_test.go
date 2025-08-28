@@ -311,3 +311,38 @@ func TestRemap(t *testing.T) {
 	})
 	t.Logf("%+v", s)
 }
+
+func TestGetters(t *testing.T) {
+	m := map[string]int{
+		"found": 42,
+	}
+
+	t.Run("MustGet", func(t *testing.T) {
+		assert.NotPanics(t, func() {
+			val := MustGet(m["found"])
+			assert.Equal(t, 42, val)
+		})
+		assert.Panics(t, func() {
+			MustGet(m["missing"])
+		})
+	})
+
+	t.Run("GetOr", func(t *testing.T) {
+		assert.Equal(t, 42, GetOr(m["found"], -1))
+		assert.Equal(t, -1, GetOr(m["missing"], -1))
+	})
+
+	t.Run("GetOrZero", func(t *testing.T) {
+		assert.Equal(t, 42, GetOrZero(m["found"]))
+		assert.Equal(t, 0, GetOrZero(m["missing"]))
+	})
+
+	t.Run("GetOrNil", func(t *testing.T) {
+		ptrMap := map[string]*int{}
+		val := 42
+		ptrMap["found"] = &val
+
+		assert.Equal(t, &val, GetOrNil(ptrMap["found"]))
+		assert.Nil(t, GetOrNil(ptrMap["missing"]))
+	})
+}

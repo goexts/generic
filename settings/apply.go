@@ -38,8 +38,6 @@ type ApplierE[S any] interface {
 // Func defines the standard function type for configuration operations.
 type Func[S any] func(*S)
 
-//type FuncA[S any] = func(*S)
-
 // Apply executes the configuration function with nil safety.
 func (f Func[S]) Apply(target *S) {
 	if f != nil {
@@ -125,15 +123,6 @@ func mixedApply[S any](target *S, setting any) error {
 	return err
 }
 
-// Chain combines multiple configuration functions into a single function
-func Chain[S any](fns ...Func[S]) Func[S] {
-	return func(s *S) {
-		for _, f := range fns {
-			f(s)
-		}
-	}
-}
-
 // Apply configures a target struct with ordered settings.
 // Parameters:
 //   - target: Pointer to the struct being configured (non-nil)
@@ -149,151 +138,6 @@ func Apply[S any, F FuncType[S]](target *S, settings []F) *S {
 		setting(target)
 	}
 	return target
-}
-
-// ApplyWith applies a list of settings to a target struct.
-// Parameters:
-//   - target: Pointer to the struct being configured (non-nil)
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyWith[S any, F FuncType[S]](target *S, settings ...F) *S {
-	return Apply(target, settings)
-}
-
-// ApplyDefault applies a list of settings to a target struct.
-// Parameters:
-//   - s: Struct to be configured
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyDefault[S any, F FuncType[S]](s S, settings []F) *S {
-	return Apply(&s, settings)
-}
-
-// ApplyWithDefault applies a list of settings to a target struct.
-// Parameters:
-//   - s: Struct to be configured
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyWithDefault[S any, F FuncType[S]](s S, settings ...F) *S {
-	return Apply(&s, settings)
-}
-
-// ApplyZero applies a list of settings to a target struct.
-// Parameters:
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyZero[S any, F FuncType[S]](settings []F) *S {
-	var zero S
-	return Apply(&zero, settings)
-}
-
-// ApplyWithZero applies a list of settings to a target struct.
-// Parameters:
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyWithZero[S any, F FuncType[S]](settings ...F) *S {
-	var zero S
-	return Apply(&zero, settings)
-}
-
-// ApplyOr is an apply settings with defaults
-// Decrypted: use WithDefault instead of ApplyOr. Will be removed in v0.3.0
-func ApplyOr[S any](s *S, fs ...func(*S)) *S {
-	return Apply(s, fs)
-}
-
-// ApplyOrZero is an apply settings with defaults
-// Decrypted: use WithZero instead of ApplyOrZero. Will be removed in v0.3.0
-func ApplyOrZero[S any](fs ...func(*S)) *S {
-	var val S
-	return Apply(&val, fs)
-}
-
-// ApplyE applies a list of settings to a target struct.
-// Parameters:
-//   - target: Pointer to the struct being configured (non-nil)
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-//   - error: Any error encountered during configuration
-func ApplyE[S any, Func FuncEType[S]](target *S, settings []Func) (*S, error) {
-	if target == nil {
-		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
-	}
-	var err error
-	for _, setting := range settings {
-		if err = setting(target); err != nil {
-			return nil, err
-		}
-	}
-	return target, nil
-}
-
-// ApplyWithE applies a list of settings to a target struct.
-// Parameters:
-//   - target: Pointer to the struct being configured (non-nil)
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-//   - error: Any error encountered during configuration
-func ApplyWithE[S any, Func FuncEType[S]](target *S, settings ...Func) (*S, error) {
-	return ApplyE(target, settings)
-}
-
-// ApplyDefaultE is an apply settings with
-// Parameters:
-//   - target: Pointer to the struct being configured (non-nil)
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-//   - error: Any error encountered during configuration
-func ApplyDefaultE[S any](target S, settings []FuncE[S]) (*S, error) {
-	return ApplyE(&target, settings)
-}
-
-// ApplyWithDefaultE is an apply settings with defaults
-// Parameters:// Parameters:
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyWithDefaultE[S any](target S, settings ...FuncE[S]) (*S, error) {
-	return ApplyE(&target, settings)
-}
-
-// ApplyZeroE is an apply settings with defaults
-// Parameters:
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyZeroE[S any](settings []FuncE[S]) (*S, error) {
-	var zero S
-	return ApplyE(&zero, settings)
-}
-
-// ApplyWithZeroE is an apply settings with defaults
-// Parameters:
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyWithZeroE[S any](settings ...FuncE[S]) (*S, error) {
-	var zero S
-	return ApplyE(&zero, settings)
 }
 
 // ApplyStrict is a version for strict type safety
@@ -319,26 +163,6 @@ func ApplyStrict[S any](target *S, settings []any) *S {
 	return target
 }
 
-// ApplyStrictE applies a list of settings to a target struct.
-// Parameters:
-//   - target: Pointer to the struct being configured (non-nil)
-//   - settings: Ordered list of configuration functions
-//
-// Returns:
-//   - *S: Configured struct pointer (same as input)
-func ApplyStrictE[S any](target *S, settings []any) (*S, error) {
-	if target == nil {
-		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
-	}
-	for _, setting := range settings {
-		applied, err := applyWithError(target, setting)
-		if !applied {
-			return nil, err
-		}
-	}
-	return target, nil
-}
-
 // ApplyMixed applies a list of settings to a target struct.
 // Parameters:
 //   - target: Pointer to the struct being configured (non-nil)
@@ -357,29 +181,4 @@ func ApplyMixed[S any](target *S, settings []any) (*S, error) {
 		}
 	}
 	return target, nil
-}
-
-// New creates a zero-value instance and applies settings.
-// Parameters:
-//   - settings: Configuration functions to apply
-//
-// Retur
-// Returns:
-//   - *S: New configured instance
-func New[S any, F FuncType[S]](settings []F) *S {
-	var zero S
-	for _, setting := range settings {
-		_ = apply(&zero, setting)
-	}
-	return &zero
-}
-
-// ApplyAny applies a list of settings to a target struct.
-// Deprecated: Use ApplyMixed with slice syntax. Will be removed in v0.3.0
-//
-//	Before: ApplyAny(&obj, []interface{}{f1, f2})
-//	After:  ApplyMixed(&obj, []interface{}{f1, f2}) (*obj, error)
-func ApplyAny[S any](target *S, settings []any) *S {
-	_, _ = ApplyMixed(target, settings)
-	return target
 }

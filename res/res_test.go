@@ -85,3 +85,25 @@ func TestResult(t *testing.T) {
 		fmt.Println(result2.Err()) // Prints: division by zero
 	})
 }
+
+func TestHelpers(t *testing.T) {
+	t.Run("Or", func(t *testing.T) {
+		// Success case
+		val1 := res.Or("value", nil, "default")
+		assert.Equal(t, "value", val1)
+
+		// Error case
+		val2 := res.Or("", errors.New("error"), "default")
+		assert.Equal(t, "default", val2)
+	})
+
+	t.Run("OrZero", func(t *testing.T) {
+		// Success case
+		val1 := res.OrZero(123, nil)
+		assert.Equal(t, 123, val1)
+
+		// Error case
+		val2 := res.OrZero(0, errors.New("error"))
+		assert.Equal(t, 0, val2)
+	})
+}
