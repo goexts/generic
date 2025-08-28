@@ -2,7 +2,7 @@ package promise
 
 import (
 	"errors"
-	"fmt"
+	"strings"
 	"testing"
 	"time"
 )
