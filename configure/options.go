@@ -1,22 +1,23 @@
-// Package configure provides utilities for applying functional options to objects.
 package configure
 
 // Option represents a function that configures an object of type T.
-// This is the core type for the Functional Options Pattern.
+// It is the primary, non-error-returning type for the Functional Options Pattern.
 type Option[T any] func(*T)
 
-// Apply allows Option[T] to satisfy the Applier[T] interface.
+// Apply implements the Applier[T] interface, allowing an Option[T] to be used
+// as a flexible option type with functions like ApplyAny.
 func (o Option[T]) Apply(target *T) {
 	if o != nil {
 		o(target)
 	}
 }
 
-// OptionE represents a function that configures an object of type T and may return an error.
-// 'E' stands for "Error".
+// OptionE represents a function that configures an object of type T and may
+// return an error. The 'E' suffix is a convention for "Error".
 type OptionE[T any] func(*T) error
 
-// Apply allows OptionE[T] to satisfy the ApplierE[T] interface.
+// Apply implements the ApplierE[T] interface, allowing an OptionE[T] to be used
+// as a flexible option type with functions like ApplyAny.
 func (o OptionE[T]) Apply(target *T) error {
 	if o != nil {
 		return o(target)
@@ -24,14 +25,16 @@ func (o OptionE[T]) Apply(target *T) error {
 	return nil
 }
 
-// OptionConstraint is a generic interface that constrains a type to have an
-// underlying type of func(*T). This is used to create flexible Apply functions.
+// OptionConstraint is a generic constraint that permits any function type
+// whose underlying type is func(*T). This enables the top-level Apply function
+// to accept custom-defined option types, such as `type MyOption func(*T)`.
 type OptionConstraint[T any] interface {
 	~func(*T)
 }
 
-// OptionEConstraint is a generic interface that constrains a type to have an
-// underlying type of func(*T) error.
+// OptionEConstraint is a generic constraint that permits any function type
+// whose underlying type is func(*T) error. This enables the top-level ApplyE
+// function to accept custom-defined, error-returning option types.
 type OptionEConstraint[T any] interface {
 	~func(*T) error
 }

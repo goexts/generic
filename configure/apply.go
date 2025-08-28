@@ -1,20 +1,20 @@
-// Package configure provides a robust and type-safe way to apply functional options to objects.
 package configure
 
 // Applier is an interface for types that can apply a configuration to an object.
-// It provides a way for ApplyAny to handle custom configuration types without reflection.
+// It provides an extension point for ApplyAny, allowing custom types to be
+// used as options without reflection.
 type Applier[T any] interface {
 	Apply(*T)
 }
 
 // ApplierE is an interface for types that can apply a configuration and return an error.
-// It provides a way for ApplyAny to handle custom configuration types without reflection.
+// It provides an extension point for ApplyAny, allowing custom types to be
+// used as options without reflection.
 type ApplierE[T any] interface {
 	Apply(*T) error
 }
 
 // apply is a private helper that applies a single non-error-returning option.
-// It uses a type switch to handle various supported option formats.
 func apply[T any](target *T, opt any) bool {
 	var applier Applier[T]
 	switch o := opt.(type) {
@@ -32,7 +32,6 @@ func apply[T any](target *T, opt any) bool {
 }
 
 // applyE is a private helper that applies a single error-returning option.
-// It uses a type switch to handle various supported option formats.
 func applyE[T any](target *T, opt any) (bool, error) {
 	var applier ApplierE[T]
 	switch o := opt.(type) {
@@ -53,7 +52,6 @@ func applyE[T any](target *T, opt any) (bool, error) {
 }
 
 // applyAny is a private helper that attempts to apply an option of unknown type.
-// It first tries error-returning formats, then falls back to non-error formats.
 func applyAny[T any](target *T, opt any) error {
 	applied, err := applyE(target, opt)
 	if applied {
@@ -62,12 +60,15 @@ func applyAny[T any](target *T, opt any) error {
 	if apply(target, opt) {
 		return nil
 	}
-	// If we reach here, 'err' is the ErrUnsupportedType from applyE.
 	return err
 }
 
 // Apply applies a slice of options to the target.
-// This is the core, high-performance function for type-safe options.
+// It is the core, high-performance function for applying a homogeneous set of
+// type-safe options. Its generic constraint allows for custom-defined option
+// types, such as `type MyOption func(*T)`.
+//
+// For handling mixed option types, see ApplyAny.
 func Apply[T any, O OptionConstraint[T]](target *T, opts []O) *T {
 	if target == nil {
 		return nil
@@ -84,7 +85,11 @@ func ApplyWith[T any](target *T, opts ...Option[T]) *T {
 }
 
 // ApplyE applies a slice of error-returning options to the target.
-// This is the core, high-performance function for type-safe, error-returning options.
+// It is the core, high-performance function for applying a homogeneous set of
+// type-safe, error-returning options. Its generic constraint allows for
+// custom-defined option types.
+//
+// For handling mixed option types, see ApplyAny.
 func ApplyE[T any, O OptionEConstraint[T]](target *T, opts []O) (*T, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
@@ -103,7 +108,11 @@ func ApplyWithE[T any](target *T, opts ...OptionE[T]) (*T, error) {
 }
 
 // ApplyAny applies a slice of options of various types (any).
-// This is the flexible, reflection-based function for heterogeneous options.
+// This function provides flexibility by using type assertions to handle
+// heterogeneous options, at the cost of compile-time type safety and a minor
+// performance overhead.
+//
+// For type-safe, high-performance application, see Apply or ApplyE.
 func ApplyAny[T any](target *T, opts []any) (*T, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
@@ -121,29 +130,11 @@ func ApplyAnyWith[T any](target *T, opts ...any) (*T, error) {
 	return ApplyAny(target, opts)
 }
 
-// FromConfig creates a "super option" from a factory function and a set of configuration options.
-// It allows using a configuration object `C` to produce a final product `P`,
-// while still being compatible with the `New` function.
-func FromConfig[C any, P any](factory func(c *C) (*P, error), opts ...any) OptionE[P] {
-	return func(p *P) error {
-		var cfg C
-		if _, err := ApplyAny(&cfg, opts); err != nil {
-			return err
-		}
-
-		newProduct, err := factory(&cfg)
-		if err != nil {
-			return err
-		}
-
-		// Replace the target product with the newly created one.
-		*p = *newProduct
-		return nil
-	}
-}
-
 // New creates a new instance of T, applies the given options, and returns it.
-// It uses ApplyAnyWith for maximum flexibility.
+// It is a convenient top-level constructor for simple object creation where the
+// configuration type and the product type are the same.
+//
+// It uses ApplyAnyWith for maximum flexibility in accepting options.
 func New[T any](opts ...any) (*T, error) {
 	var zero T
 	return ApplyAnyWith(&zero, opts...)
