@@ -15,78 +15,92 @@ import (
 //   - def: optional default value (returns first default value if conversion fails)
 func ParseOr[T any](s string, def ...T) T {
 	var t T
-	rt := reflect.TypeOf(t)
-	switch rt.Kind() {
-	case reflect.String:
-		return any(s).(T)
-	case reflect.Bool:
+	switch p := any(&t).(type) {
+	case *string:
+		*p = s
+		return t
+	case *bool:
 		v, err := strconv.ParseBool(s)
 		if err == nil {
-			return any(v).(T)
+			*p = v
+			return t
 		}
-	case reflect.Int:
+	case *int:
 		v, err := strconv.ParseInt(s, 10, 0)
 		if err == nil {
-			return any(int(v)).(T)
+			*p = int(v)
+			return t
 		}
-	case reflect.Int8:
+	case *int8:
 		v, err := strconv.ParseInt(s, 10, 8)
 		if err == nil {
-			return any(int8(v)).(T)
+			*p = int8(v)
+			return t
 		}
-	case reflect.Int16:
+	case *int16:
 		v, err := strconv.ParseInt(s, 10, 16)
 		if err == nil {
-			return any(int16(v)).(T)
+			*p = int16(v)
+			return t
 		}
-	case reflect.Int32:
+	case *int32:
 		v, err := strconv.ParseInt(s, 10, 32)
 		if err == nil {
-			return any(int32(v)).(T)
+			*p = int32(v)
+			return t
 		}
-	case reflect.Int64:
+	case *int64:
 		v, err := strconv.ParseInt(s, 10, 64)
 		if err == nil {
-			return any(v).(T)
+			*p = v
+			return t
 		}
-	case reflect.Uint:
+	case *uint:
 		v, err := strconv.ParseUint(s, 10, 0)
 		if err == nil {
-			return any(uint(v)).(T)
+			*p = uint(v)
+			return t
 		}
-	case reflect.Uint8:
+	case *uint8:
 		v, err := strconv.ParseUint(s, 10, 8)
 		if err == nil {
-			return any(uint8(v)).(T)
+			*p = uint8(v)
+			return t
 		}
-	case reflect.Uint16:
+	case *uint16:
 		v, err := strconv.ParseUint(s, 10, 16)
 		if err == nil {
-			return any(uint16(v)).(T)
+			*p = uint16(v)
+			return t
 		}
-	case reflect.Uint32:
+	case *uint32:
 		v, err := strconv.ParseUint(s, 10, 32)
 		if err == nil {
-			return any(uint32(v)).(T)
+			*p = uint32(v)
+			return t
 		}
-	case reflect.Uint64:
+	case *uint64:
 		v, err := strconv.ParseUint(s, 10, 64)
 		if err == nil {
-			return any(v).(T)
+			*p = v
+			return t
 		}
-	case reflect.Float32:
+	case *float32:
 		v, err := strconv.ParseFloat(s, 32)
 		if err == nil {
-			return any(float32(v)).(T)
+			*p = float32(v)
+			return t
 		}
-	case reflect.Float64:
+	case *float64:
 		v, err := strconv.ParseFloat(s, 64)
 		if err == nil {
-			return any(v).(T)
+			*p = v
+			return t
 		}
 	default:
+		rt := reflect.TypeOf(t)
 		if isJSONDeserializable(rt) {
-			v, err := jsonUnmarshal[T](s, rt)
+			v, err := jsonUnmarshal[T](s)
 			if err == nil {
 				return v
 			}
@@ -106,16 +120,13 @@ func isJSONDeserializable(rt reflect.Type) bool {
 		return true
 	case reflect.Ptr:
 		return isJSONDeserializable(rt.Elem())
+	default:
+		return false
 	}
-	return false
 }
 
-func jsonUnmarshal[T any](s string, rt reflect.Type) (T, error) {
+func jsonUnmarshal[T any](s string) (T, error) {
 	var t T
-	target := any(t)
-	if rt.Kind() != reflect.Ptr {
-		target = &t
-	}
-	err := json.Unmarshal([]byte(s), target)
+	err := json.Unmarshal([]byte(s), &t)
 	return t, err
 }
