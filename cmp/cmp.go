@@ -1,9 +1,13 @@
-// Package cmp provides utility functions for comparing ordered types.
 package cmp
 
 import "golang.org/x/exp/constraints"
 
-// Compare returns -1, 0, or 1 if a is less than, equal to, or greater than b, respectively.
+// Compare returns an integer comparing two values.
+// The result will be 0 if a == b, -1 if a < b, and +1 if a > b.
+//
+// This function is designed to be fully compatible with the standard library's
+// `slices.SortFunc`, making it a convenient tool for sorting slices of any
+// ordered type.
 func Compare[T constraints.Ordered](a, b T) int {
 	if a < b {
 		return -1
@@ -30,7 +34,10 @@ func Max[T constraints.Ordered](a, b T) T {
 	return b
 }
 
-// Clamp returns v clamped to the range [lo, hi].
+// Clamp returns v clamped to the inclusive range [lo, hi].
+// If v is less than lo, it returns lo.
+// If v is greater than hi, it returns hi.
+// Otherwise, it returns v.
 func Clamp[T constraints.Ordered](v, lo, hi T) T {
 	if v < lo {
 		return lo
@@ -42,6 +49,7 @@ func Clamp[T constraints.Ordered](v, lo, hi T) T {
 }
 
 // IsZero returns true if v is the zero value for its type.
+// It is a generic-safe way to check for zero values.
 func IsZero[T comparable](v T) bool {
 	var zero T
 	return v == zero
