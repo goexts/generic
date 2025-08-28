@@ -2,6 +2,13 @@ package generic
 
 // Includes returns the elements in src that are in ts.
 func Includes[T comparable](src []T, ts ...T) []T {
+	return includes(src, ts)
+}
+func Include[T comparable](src []T, ts []T) []T {
+	return includes(src, ts)
+}
+
+func includes[T comparable](src []T, ts []T) []T {
 	includes := make(map[T]struct{}, len(src))
 	for _, t := range src {
 		includes[t] = struct{}{}
