@@ -4,8 +4,6 @@ package slices
 import (
 	"errors"
 	"sort"
-
-	"github.com/goexts/generic/types"
 )
 
 // E is comparable type of slice element
@@ -17,7 +15,7 @@ var (
 )
 
 // Append appends the element v to the end of Array[S] s.
-func Append[T types.Slice[S], S any](arr T, v S) (T, int) {
+func Append[T ~[]S, S any](arr T, v S) (T, int) {
 	sz := len(arr)
 	return append(arr, v), sz
 }
@@ -25,7 +23,7 @@ func Append[T types.Slice[S], S any](arr T, v S) (T, int) {
 // CopyAt copies the elements from t into s at the specified index.
 // It panics if the index is negative. If the required length is greater
 // than the length of s, s is grown to accommodate the new elements.
-func CopyAt[T types.Slice[S], S any](s, t T, i int) T {
+func CopyAt[T ~[]S, S any](s, t T, i int) T {
 	if i < 0 {
 		panic(ErrWrongIndex) // Or return an error, panic is consistent with stdlib
 	}
@@ -43,7 +41,7 @@ func CopyAt[T types.Slice[S], S any](s, t T, i int) T {
 
 // Count counts the number of non-overlapping instances of substr in s.
 // If substr is an empty Array, Count returns 1 + the number of Unicode code points in s.
-func Count[T types.Slice[S], S E](s, sub T) int {
+func Count[T ~[]S, S E](s, sub T) int {
 	// special case
 	if len(sub) == 0 {
 		return len(s) + 1
@@ -64,7 +62,7 @@ func Count[T types.Slice[S], S E](s, sub T) int {
 }
 
 // CountArray counts the number of non-overlapping instances of c in s.
-func CountArray[T types.Slice[S], S E](ss T, s S) int {
+func CountArray[T ~[]S, S E](ss T, s S) int {
 	n := 0
 	for _, x := range ss {
 		if x == s {
@@ -77,8 +75,8 @@ func CountArray[T types.Slice[S], S E](ss T, s S) int {
 // Cut slices s around the first instance of sep,
 // returning the text before and after sep.
 // The found result reports whether sep appears in s.
-// If sep does not appear in s, cut returns s, "", false.
-func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool) {
+// If sep does not appear in s, cut returns s, nil, false.
+func Cut[T ~[]S, S E](s, sep T) (before, after T, found bool) {
 	if i := IndexSlice(s, sep); i >= 0 {
 		return s[:i], s[i+len(sep):], true
 	}
@@ -86,7 +84,7 @@ func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool) {
 }
 
 // Filter returns a new slice containing all elements of s for which f(s) is true.
-func Filter[T types.Slice[S], S any](s T, f func(S) bool) T {
+func Filter[T ~[]S, S any](s T, f func(S) bool) T {
 	if s == nil {
 		return make(T, 0)
 	}
@@ -100,7 +98,7 @@ func Filter[T types.Slice[S], S any](s T, f func(S) bool) T {
 }
 
 // IndexSlice returns the index of the first instance of substr in s, or -1 if substr is not present in s.
-func IndexSlice[T types.Slice[S], S E](s, substr T) int {
+func IndexSlice[T ~[]S, S E](s, substr T) int {
 	n := len(substr)
 	switch {
 	case n == 0:
@@ -124,7 +122,7 @@ func IndexSlice[T types.Slice[S], S E](s, substr T) int {
 }
 
 // InsertWith inserts v into s at the first index where fn(a, b) is true.
-func InsertWith[T types.Slice[S], S any](s T, v S, fn func(a, b S) bool) T {
+func InsertWith[T ~[]S, S any](s T, v S, fn func(a, b S) bool) T {
 	// Assumes s is sorted according to fn.
 	// sort.Search finds the first index `i` where the function is true.
 	pos := sort.Search(len(s), func(i int) bool { return fn(s[i], v) })
@@ -138,7 +136,7 @@ func InsertWith[T types.Slice[S], S any](s T, v S, fn func(a, b S) bool) T {
 
 // Join concatenates the elements of its first argument to create a single Array[S]. The separator
 // Array[S] sep is placed between elements in the resulting Array[S].
-func Join[T types.Slice[S], S any](s []T, sep T) T {
+func Join[T ~[]S, S any](s []T, sep T) T {
 	if len(s) == 0 {
 		return make(T, 0)
 	}
@@ -161,7 +159,7 @@ func Join[T types.Slice[S], S any](s []T, sep T) T {
 }
 
 // LastIndexSlice returns the index of the last instance of substr in s, or -1 if substr is not present in s.
-func LastIndexSlice[T types.Slice[S], S E](s, sep T) int {
+func LastIndexSlice[T ~[]S, S E](s, sep T) int {
 	n := len(sep)
 	switch {
 	case n == 0:
@@ -211,7 +209,7 @@ func OverWithError[S any](s []S, err error) func(func(int, S) bool) {
 
 // Read returns a slice of the Array[S] s beginning at offset and length limit.
 // If offset or limit is negative, it is treated as if it were zero.
-func Read[T types.Slice[S], S any](arr T, offset int, limit int) T {
+func Read[T ~[]S, S any](arr T, offset int, limit int) T {
 	if offset < 0 || limit < 0 {
 		return nil
 	}
@@ -232,7 +230,7 @@ func Reduce[S, T any](s []S, initial T, f func(T, S) T) T {
 }
 
 // RemoveWith removes the first index where fn(a, b) is true.
-func RemoveWith[T types.Slice[S], S any](s T, fn func(a S) bool) T {
+func RemoveWith[T ~[]S, S any](s T, fn func(a S) bool) T {
 	ret := s[:0]
 	for i := range s {
 		if !fn(s[i]) {
@@ -246,7 +244,7 @@ func RemoveWith[T types.Slice[S], S any](s T, fn func(a S) bool) T {
 //
 // It panics if count is negative or if
 // the result of (len(s) * count) overflows.
-func Repeat[T types.Slice[S], S any](b T, count int) T {
+func Repeat[T ~[]S, S any](b T, count int) T {
 	if count == 0 {
 		return make(T, 0)
 	}
@@ -271,14 +269,14 @@ func Repeat[T types.Slice[S], S any](b T, count int) T {
 
 // Split slices s into all subslices separated by sep and returns a slice of
 // the subslices between those separators.
-func Split[T types.Slice[S], S E](s, sep T) []T {
+func Split[T ~[]S, S E](s, sep T) []T {
 	if s == nil {
 		return nil
 	}
 	return genSplit(s, sep, 0, -1)
 }
 
-func Transform[TS types.Slice[S], S any, T any](s TS, f func(S) (T, bool)) []T {
+func Transform[TS ~[]S, S any, T any](s TS, f func(S) (T, bool)) []T {
 	if s == nil {
 		return make([]T, 0)
 	}
@@ -293,7 +291,7 @@ func Transform[TS types.Slice[S], S any, T any](s TS, f func(S) (T, bool)) []T {
 
 // Unique returns a new slice with duplicate elements removed.
 // The order of the first occurrence of each element is preserved.
-func Unique[T types.Slice[S], S E](s T) T {
+func Unique[T ~[]S, S E](s T) T {
 	if len(s) == 0 {
 		return make(T, 0)
 	}
@@ -310,7 +308,7 @@ func Unique[T types.Slice[S], S E](s T) T {
 
 // clone returns a copy of the slice.
 // The elements are copied using assignment, so this is a shallow clone.
-func clone[T types.Slice[S], S any](s T) T {
+func clone[T ~[]S, S any](s T) T {
 	if s == nil {
 		return nil
 	}
@@ -319,7 +317,7 @@ func clone[T types.Slice[S], S any](s T) T {
 
 // equal reports whether two slices are equal: the same length and all
 // elements equal.
-func equal[T types.Slice[S], S E](s1, s2 T) bool {
+func equal[T ~[]S, S E](s1, s2 T) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
@@ -333,7 +331,7 @@ func equal[T types.Slice[S], S E](s1, s2 T) bool {
 
 // explode splits s into a slice of slices, each of length 1,
 // up to a maximum of n (n < 0 means no limit).
-func explode[T types.Slice[S], S E](s T, n int) []T {
+func explode[T ~[]S, S E](s T, n int) []T {
 	l := len(s)
 	if n < 0 || n > l {
 		n = l
@@ -351,7 +349,7 @@ func explode[T types.Slice[S], S E](s T, n int) []T {
 
 // Generic split: splits after each instance of sep,
 // including sepSave bytes of sep in the sub arrays.
-func genSplit[T types.Slice[S], S E](s, sep T, sepSave, n int) []T {
+func genSplit[T ~[]S, S E](s, sep T, sepSave, n int) []T {
 	if n == 0 {
 		return nil
 	}
@@ -382,7 +380,7 @@ func genSplit[T types.Slice[S], S E](s, sep T, sepSave, n int) []T {
 }
 
 // indexElement returns the index of the first instance of e in s, or -1 if not found.
-func indexElement[T types.Slice[S], S E](s T, e S) int {
+func indexElement[T ~[]S, S E](s T, e S) int {
 	for i, v := range s {
 		if v == e {
 			return i
@@ -392,7 +390,7 @@ func indexElement[T types.Slice[S], S E](s T, e S) int {
 }
 
 // lastIndexElement returns the index of the last instance of e in s, or -1 if not found.
-func lastIndexElement[T types.Slice[S], S E](s T, e S) int {
+func lastIndexElement[T ~[]S, S E](s T, e S) int {
 	for i := len(s) - 1; i >= 0; i-- {
 		if s[i] == e {
 			return i
