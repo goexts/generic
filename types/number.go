@@ -1,53 +1,18 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
-// Package types implements the functions, types, and interfaces for the module.
 package types
 
-import (
-	"golang.org/x/exp/constraints"
-)
+import "github.com/goexts/generic/object"
 
-// Float is an interface that represents a float32 or float64.
-type Float = interface {
-	Object
-	constraints.Float
-}
-
-// Unsigned is an interface that represents an unsigned integer type.
-type Unsigned = interface {
-	Object
-	constraints.Unsigned
-}
-
-// Signed is an interface that represents a signed integer type.
-type Signed = interface {
-	Object
-	constraints.Signed
-}
-
-// Integer is an interface that represents an integer type.
-type Integer = interface {
-	Object
-	constraints.Integer
-}
-
-// Complex is an interface that represents a complex64 or complex128 number.
-type Complex = interface {
-	Object
-	constraints.Complex
-}
-
-// Ordered is an interface that represents any ordered type.
-type Ordered = interface {
-	Object
-	constraints.Ordered
-}
-
-// Number is an interface that represents any number type.
-// It includes all the interfaces defined above.
+// Number is an interface for all numeric types.
+// It is the equivalent of java.lang.Number.
 type Number interface {
-	Object
-	Float | Integer | Complex
+	object.Object
+
+	// IntValue returns the value of the number as an int.
+	IntValue() int
+	// Int64Value returns the value of the number as an int64.
+	Int64Value() int64
+	// Float32Value returns the value of the number as a float32.
+	Float32Value() float32
+	// Float64Value returns the value of the number as a float64.
+	Float64Value() float64
 }

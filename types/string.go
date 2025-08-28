@@ -1,18 +1,42 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
-// Package types implements the functions, types, and interfaces for the module.
 package types
 
-// String is an interface that represents a string-like type.
-// It can be a string, a byte slice, or a rune slice.
-type String interface {
-	Object
-	~string | ~[]byte | ~[]rune
+import (
+	"github.com/goexts/generic/object"
+)
+
+// String is a wrapper for the built-in string type, implementing the Object interface.
+type String struct {
+	object.BaseObject
+	Value string
 }
 
-// StringLike converts a string-like type to a string.
-func StringLike[T String](t T) string {
-	return string(t)
+// NewString creates a new String object.
+func NewString(value string) *String {
+	return &String{Value: value}
+}
+
+// String returns the string representation of the String object.
+func (s *String) String() string {
+	return s.Value
+}
+
+// Equals checks if two String objects are equal.
+func (s *String) Equals(other object.Object) bool {
+	if other == nil {
+		return false
+	}
+	if s2, ok := other.(*String); ok {
+		return s.Value == s2.Value
+	}
+	return false
+}
+
+// HashCode returns the hash code for the String object.
+// This implementation is inspired by Java's String.hashCode().
+func (s *String) HashCode() int {
+	h := 0
+	for _, r := range s.Value {
+		h = 31*h + int(r)
+	}
+	return h
 }
