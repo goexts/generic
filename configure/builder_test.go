@@ -67,6 +67,22 @@ func TestBuilder(t *testing.T) {
 		assert.Equal(t, "Inner", ship.Name)
 		assert.Equal(t, 99, ship.Speed)
 	})
+
+	t.Run("builder with pointer type should fail", func(t *testing.T) {
+		// Using a pointer type for the builder is not allowed.
+		builder := configure.NewBuilder[*Ship]()
+
+		// Test Build method
+		_, err := builder.Build()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "configure: Builder does not support pointer types for C")
+
+		// Test ApplyTo method
+		var ship *Ship
+		_, err = builder.ApplyTo(&ship)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "configure: Builder does not support pointer types for C")
+	})
 }
 
 func TestCompile(t *testing.T) {

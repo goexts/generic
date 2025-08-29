@@ -25,16 +25,24 @@ func (o OptionE[T]) Apply(target *T) error {
 	return nil
 }
 
-// OptionConstraint is a generic constraint that permits any function type
+// FuncOption is a generic constraint that permits any function type
 // whose underlying type is func(*T). This enables the top-level Apply function
 // to accept custom-defined option types, such as `type MyOption func(*T)`.
-type OptionConstraint[T any] interface {
+type FuncOption[T any] interface {
 	~func(*T)
 }
 
-// OptionEConstraint is a generic constraint that permits any function type
+// FuncOptionE is a generic constraint that permits any function type
 // whose underlying type is func(*T) error. This enables the top-level ApplyE
 // function to accept custom-defined, error-returning option types.
-type OptionEConstraint[T any] interface {
+type FuncOptionE[T any] interface {
 	~func(*T) error
+}
+
+// AnyOption is a generic constraint that permits any function type
+// whose underlying type is either func(*T) or func(*T) error.
+// This provides a convenient way to create functions that can accept
+// both error-returning and non-error-returning function options.
+type AnyOption[T any] interface {
+	FuncOptionE[T] | FuncOption[T] | any
 }

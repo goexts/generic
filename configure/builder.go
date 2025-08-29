@@ -1,10 +1,17 @@
 package configure
 
+import (
+	"fmt"
+	"reflect"
+)
+
 // Builder provides a fluent interface for collecting and applying options.
 // It is ideal for scenarios where configuration options are gathered progressively
 // from different parts of an application.
 //
-// The generic type C represents the configuration type being built.
+// The generic type C represents the configuration type being built, and is
+// expected to be a struct type. Using a pointer type for C is not recommended
+// as it can lead to unexpected behavior.
 type Builder[C any] struct {
 	opts []any
 }
@@ -29,8 +36,23 @@ func (b *Builder[C]) AddWhen(condition bool, opt any) *Builder[C] {
 	return b
 }
 
+// checkType performs a runtime check to ensure that the generic type C is not a pointer.
+func (b *Builder[C]) checkType() error {
+	// We use reflection to check the kind of C.
+	// reflect.TypeOf((*C)(nil)) gives us the type of a pointer to C (e.g., *MyStruct or **MyStruct).
+	// .Elem() then gives us the type of C itself.
+	cType := reflect.TypeOf((*C)(nil)).Elem()
+	if cType.Kind() == reflect.Ptr {
+		return fmt.Errorf("configure: Builder does not support pointer types for C, but got %s", cType)
+	}
+	return nil
+}
+
 // ApplyTo applies all collected options to an existing target object.
 func (b *Builder[C]) ApplyTo(target *C) (*C, error) {
+	if err := b.checkType(); err != nil {
+		return nil, err
+	}
 	return ApplyAny(target, b.opts)
 }
 
@@ -38,6 +60,9 @@ func (b *Builder[C]) ApplyTo(target *C) (*C, error) {
 // applies all collected options to it.
 // The resulting object can then be used directly or passed to a factory.
 func (b *Builder[C]) Build() (*C, error) {
+	if err := b.checkType(); err != nil {
+		return nil, err
+	}
 	var zero C
 	return ApplyAny(&zero, b.opts)
 }

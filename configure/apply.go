@@ -1,5 +1,9 @@
 package configure
 
+import (
+	"reflect"
+)
+
 // Applier is an interface for types that can apply a configuration to an object.
 // It provides an extension point for ApplyAny, allowing custom types to be
 // used as options without reflection.
@@ -51,15 +55,55 @@ func applyE[T any](target *T, opt any) (bool, error) {
 	return true, nil
 }
 
+// applyReflect uses reflection to apply a function-based option.
+// It returns whether the option was applied and any error that occurred.
+func applyReflect[T any](target *T, opt any) (bool, error) {
+	v := reflect.ValueOf(opt)
+	if v.Kind() != reflect.Func {
+		return false, nil
+	}
+
+	// Check for error-returning function: func(*T) error
+	if v.Type().ConvertibleTo(reflect.TypeOf(OptionE[T](nil))) {
+		converted := v.Convert(reflect.TypeOf(OptionE[T](nil))).Interface().(OptionE[T])
+		err := converted(target)
+		if err != nil {
+			return true, newConfigError(ErrExecutionFailed, opt, err)
+		}
+		return true, nil
+	}
+
+	// Check for non-error-returning function: func(*T)
+	if v.Type().ConvertibleTo(reflect.TypeOf(Option[T](nil))) {
+		converted := v.Convert(reflect.TypeOf(Option[T](nil))).Interface().(Option[T])
+		converted(target)
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // applyAny is a private helper that attempts to apply an option of unknown type.
 func applyAny[T any](target *T, opt any) error {
+	// 1. Try ApplierE (error-returning, type-asserted)
 	applied, err := applyE(target, opt)
 	if applied {
 		return err
 	}
+
+	// 2. Try Applier (non-error-returning, type-asserted)
 	if apply(target, opt) {
 		return nil
 	}
+
+	// 3. Fallback to reflection for convertible function types
+	applied, err = applyReflect(target, opt)
+	if applied {
+		return err
+	}
+
+	// If nothing applied, return the original error from applyE,
+	// which indicates an unsupported type.
 	return err
 }
 
@@ -69,7 +113,7 @@ func applyAny[T any](target *T, opt any) error {
 // types, such as `type MyOption func(*T)`.
 //
 // For handling mixed option types, see ApplyAny.
-func Apply[T any, O OptionConstraint[T]](target *T, opts []O) *T {
+func Apply[T any, O FuncOption[T]](target *T, opts []O) *T {
 	if target == nil {
 		return nil
 	}
@@ -90,7 +134,7 @@ func ApplyWith[T any](target *T, opts ...Option[T]) *T {
 // custom-defined option types.
 //
 // For handling mixed option types, see ApplyAny.
-func ApplyE[T any, O OptionEConstraint[T]](target *T, opts []O) (*T, error) {
+func ApplyE[T any, O FuncOptionE[T]](target *T, opts []O) (*T, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
 	}
@@ -108,7 +152,7 @@ func ApplyWithE[T any](target *T, opts ...OptionE[T]) (*T, error) {
 }
 
 // ApplyAny applies a slice of options of various types (any).
-// This function provides flexibility by using type assertions to handle
+// This function provides flexibility by using reflection to handle
 // heterogeneous options, at the cost of compile-time type safety and a minor
 // performance overhead.
 //
@@ -130,6 +174,23 @@ func ApplyAnyWith[T any](target *T, opts ...any) (*T, error) {
 	return ApplyAny(target, opts)
 }
 
+// OptionSet bundles multiple options into a single option.
+// This allows for creating reusable and modular sets of configurations.
+func OptionSet[T any](opts ...Option[T]) Option[T] {
+	return func(t *T) {
+		Apply(t, opts)
+	}
+}
+
+// OptionSetE bundles multiple error-returning options into a single option.
+// If any option in the set returns an error, the application stops and the error is returned.
+func OptionSetE[T any](opts ...OptionE[T]) OptionE[T] {
+	return func(t *T) error {
+		_, err := ApplyE(t, opts)
+		return err
+	}
+}
+
 // New creates a new instance of T, applies the given options, and returns it.
 // It is a convenient top-level constructor for simple object creation where the
 // configuration type and the product type are the same.
@@ -137,5 +198,5 @@ func ApplyAnyWith[T any](target *T, opts ...any) (*T, error) {
 // It uses ApplyAnyWith for maximum flexibility in accepting options.
 func New[T any](opts ...any) (*T, error) {
 	var zero T
-	return ApplyAnyWith(&zero, opts...)
+	return ApplyAny(&zero, opts)
 }
