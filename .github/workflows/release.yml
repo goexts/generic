@@ -1,53 +1,48 @@
-name: Manual Release
+name: Test and Release
 
-# This workflow is triggered manually from the GitHub Actions UI.
-# It ensures that a release is only created from a commit that has passed all tests.
+# This workflow runs on every push to the main branch.
+# It always runs tests. A release is only triggered if the commit message
+# contains the string "[release]".
 on:
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: 'The git ref (branch, tag, or commit SHA) to release from. Must have a successful "Run Tests" status check.'
-        required: true
-        default: 'main'
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
   pull-requests: write
-  # Required to read the status of checks
-  statuses: read
 
 jobs:
-  # This job ensures that the selected ref has a successful test run associated with it.
-  check-test-status:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for successful test run
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          # The name of the workflow to check, as defined in test.yml
-          check-name: 'Run Tests'
-          # The git ref to check, passed from the manual trigger
-          ref: ${{ github.event.inputs.ref }}
-          # A token with statuses:read permission
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          # Wait for the check to complete, with a timeout
-          wait-interval: 10 # seconds
-          allowed-conclusions: success
-
-  # This job will only run if the check-test-status job succeeds.
-  release:
-    needs: [check-test-status]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the specific ref for release
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.ref }}
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # Use the Go version from go.mod for reproducible builds
+          go-version: '1.23.x'
+
+      - name: Run tests
+        run: go test -v ./...
+
+  release:
+    # The release job depends on the test job succeeding.
+    needs: [test]
+    # It only runs on the main branch and if the commit message includes "[release]".
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]')
+    runs-on: ubuntu-latest
+    steps:
       - name: Create Release and Changelog
+        # This action automates the entire release process based on
+        # Conventional Commit messages.
         uses: google-github-actions/release-please-action@v4
         with:
           # The release-type for a standard Go module.
+          # It automatically finds the go.mod file, reads the module path,
+          # and creates tags like `v1.2.3`.
           release-type: go
           # The token is required for release-please to create releases.
           token: ${{ secrets.GITHUB_TOKEN }}
