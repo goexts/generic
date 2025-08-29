@@ -9,11 +9,62 @@ import (
 	"github.com/goexts/generic/configure"
 )
 
+// Ship is a simple struct used for basic tests.
+
 type Ship struct {
 	Name  string
 	Speed int
 	Crew  int
 }
+
+// MegaShip is a large struct used in TestApplyAny_Variations to ensure each option
+// type can modify a unique field, making verification straightforward.
+type MegaShip struct {
+	F1RawFunc         string
+	F2RawFuncE        string
+	F3Option          string
+	F4OptionE         string
+	F5Applier         string
+	F6ApplierE        string
+	F7CustomFunc      string
+	F8CustomFuncE     string
+	F9CustomOption    string
+	F10CustomOptionE  string
+	F11CustomApplier  string
+	F12CustomApplierE string
+	F13AliasFunc      string
+	F14AliasFuncE     string
+	F15AliasOption    string
+	F16AliasOptionE   string
+	F17AliasApplier   string
+	F18AliasApplierE  string
+}
+
+// --- Helper types for TestApplyAny_Variations ---
+
+type ( // Base Applier Implementations
+	BaseApplierImpl  struct{}
+	BaseApplierEImpl struct{}
+)
+
+func (a BaseApplierImpl) Apply(s *MegaShip)        { s.F5Applier = "ok" }
+func (a BaseApplierEImpl) Apply(s *MegaShip) error { s.F6ApplierE = "ok"; return nil }
+
+type ( // Custom Applier Implementations
+	CustomApplierImpl  struct{}
+	CustomApplierEImpl struct{}
+)
+
+func (a CustomApplierImpl) Apply(s *MegaShip)        { s.F11CustomApplier = "ok" }
+func (a CustomApplierEImpl) Apply(s *MegaShip) error { s.F12CustomApplierE = "ok"; return nil }
+
+type ( // Alias Applier Implementations
+	AliasApplierImpl  struct{}
+	AliasApplierEImpl struct{}
+)
+
+func (a AliasApplierImpl) Apply(s *MegaShip)        { s.F17AliasApplier = "ok" }
+func (a AliasApplierEImpl) Apply(s *MegaShip) error { s.F18AliasApplierE = "ok"; return nil }
 
 // TestApplyAny is the core test for the reflection-based implementation.
 func TestApplyAny(t *testing.T) {
@@ -43,86 +94,99 @@ func TestApplyAny(t *testing.T) {
 		assert.Equal(t, 0, ship.Speed)
 	})
 
-	// TODO: Test custom defined option types.
-	t.Run("handles custom defined option types", func(t *testing.T) {
-		type CustomOption func(*Ship)
-		withPort := func(p int) CustomOption {
-			return func(s *Ship) { s.Crew = p }
-		}
-
-		ship := &Ship{}
-		opts := []any{withPort(80)}
-		_, err := configure.ApplyAny(ship, opts)
-		assert.NoError(t, err)
-		assert.Equal(t, 80, ship.Crew)
-	})
-
-	t.Run("handles alias option types", func(t *testing.T) {
-		type AliasOption = func(*Ship)
-		withCrew := func(c int) AliasOption {
-			return func(s *Ship) { s.Crew = c }
-		}
-
-		ship := &Ship{}
-		opts := []any{withCrew(120)}
-		_, err := configure.ApplyAny(ship, opts)
-		assert.NoError(t, err)
-		assert.Equal(t, 120, ship.Crew)
-	})
-
-	t.Run("handles new type from configure.Option", func(t *testing.T) {
-		type ShipOption configure.Option[Ship]
-		withName := func(name string) ShipOption {
-			return func(s *Ship) {
-				s.Name = name
-			}
-		}
-
-		ship := &Ship{}
-		opts := []any{withName("The Flying Dutchman")}
-		_, err := configure.ApplyAny(ship, opts)
-		assert.NoError(t, err)
-		assert.Equal(t, "The Flying Dutchman", ship.Name)
-	})
-
-	t.Run("handles new type from configure.OptionE", func(t *testing.T) {
-		type ShipOptionE configure.OptionE[Ship]
-		withCrewE := func(c int) ShipOptionE {
-			return func(s *Ship) error {
-				s.Crew = c
-				return nil
-			}
-		}
-
-		ship := &Ship{}
-		opts := []any{withCrewE(250)}
-		_, err := configure.ApplyAny(ship, opts)
-		assert.NoError(t, err)
-		assert.Equal(t, 250, ship.Crew)
-	})
-
-	t.Run("handles error from new type from configure.OptionE", func(t *testing.T) {
-		type ShipOptionE configure.OptionE[Ship]
-		testErr := errors.New("iceberg")
-		withCrewE := func(c int) ShipOptionE {
-			return func(s *Ship) error {
-				s.Crew = c
-				return testErr
-			}
-		}
-
-		ship := &Ship{}
-		opts := []any{withCrewE(300)}
-		_, err := configure.ApplyAny(ship, opts)
-		assert.ErrorIs(t, err, testErr)
-		assert.Equal(t, 300, ship.Crew) // Value should be set before error is returned
-	})
-
 	t.Run("returns error for invalid option type", func(t *testing.T) {
 		ship := &Ship{}
 		opts := []any{"not a function"}
 		_, err := configure.ApplyAny(ship, opts)
 		assert.Error(t, err)
+	})
+}
+
+// TestApplyAny_Variations provides the most comprehensive testing for ApplyAny,
+// ensuring that all supported option types, including their custom and alias variations,
+// are handled correctly.
+func TestApplyAny_Variations(t *testing.T) {
+	// --- 1. Base Types ---
+	opt1 := func(s *MegaShip) { s.F1RawFunc = "ok" }
+	opt2 := func(s *MegaShip) error { s.F2RawFuncE = "ok"; return nil }
+	opt3 := configure.Option[MegaShip](func(s *MegaShip) { s.F3Option = "ok" })
+	opt4 := configure.OptionE[MegaShip](func(s *MegaShip) error { s.F4OptionE = "ok"; return nil })
+	opt5 := BaseApplierImpl{}
+	opt6 := BaseApplierEImpl{}
+
+	// --- 2. Custom Types (type MyType ...)
+	type CustomFunc func(*MegaShip)
+	opt7 := CustomFunc(func(s *MegaShip) { s.F7CustomFunc = "ok" })
+	type CustomFuncE func(*MegaShip) error
+	opt8 := CustomFuncE(func(s *MegaShip) error { s.F8CustomFuncE = "ok"; return nil })
+	type CustomOption configure.Option[MegaShip]
+	opt9 := CustomOption(func(s *MegaShip) { s.F9CustomOption = "ok" })
+	type CustomOptionE configure.OptionE[MegaShip]
+	opt10 := CustomOptionE(func(s *MegaShip) error { s.F10CustomOptionE = "ok"; return nil })
+	opt11 := CustomApplierImpl{}
+	opt12 := CustomApplierEImpl{}
+
+	// --- 3. Type Aliases (type MyAlias = ...)
+	type AliasFunc = func(*MegaShip)
+	opt13 := AliasFunc(func(s *MegaShip) { s.F13AliasFunc = "ok" })
+	type AliasFuncE = func(*MegaShip) error
+	opt14 := AliasFuncE(func(s *MegaShip) error { s.F14AliasFuncE = "ok"; return nil })
+	type AliasOption = configure.Option[MegaShip]
+	opt15 := AliasOption(func(s *MegaShip) { s.F15AliasOption = "ok" })
+	type AliasOptionE = configure.OptionE[MegaShip]
+	opt16 := AliasOptionE(func(s *MegaShip) error { s.F16AliasOptionE = "ok"; return nil })
+	type AliasApplier = AliasApplierImpl
+	opt17 := AliasApplier{}
+	type AliasApplierE = AliasApplierEImpl
+	opt18 := AliasApplierE{}
+
+	t.Run("successfully applies a mix of all 18 variations", func(t *testing.T) {
+		ship := &MegaShip{}
+		opts := []any{
+			opt1, opt2, opt3, opt4, opt5, opt6,
+			opt7, opt8, opt9, opt10, opt11, opt12,
+			opt13, opt14, opt15, opt16, opt17, opt18,
+		}
+
+		_, err := configure.ApplyAny(ship, opts)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "ok", ship.F1RawFunc)
+		assert.Equal(t, "ok", ship.F2RawFuncE)
+		assert.Equal(t, "ok", ship.F3Option)
+		assert.Equal(t, "ok", ship.F4OptionE)
+		assert.Equal(t, "ok", ship.F5Applier)
+		assert.Equal(t, "ok", ship.F6ApplierE)
+		assert.Equal(t, "ok", ship.F7CustomFunc)
+		assert.Equal(t, "ok", ship.F8CustomFuncE)
+		assert.Equal(t, "ok", ship.F9CustomOption)
+		assert.Equal(t, "ok", ship.F10CustomOptionE)
+		assert.Equal(t, "ok", ship.F11CustomApplier)
+		assert.Equal(t, "ok", ship.F12CustomApplierE)
+		assert.Equal(t, "ok", ship.F13AliasFunc)
+		assert.Equal(t, "ok", ship.F14AliasFuncE)
+		assert.Equal(t, "ok", ship.F15AliasOption)
+		assert.Equal(t, "ok", ship.F16AliasOptionE)
+		assert.Equal(t, "ok", ship.F17AliasApplier)
+		assert.Equal(t, "ok", ship.F18AliasApplierE)
+	})
+
+	t.Run("stops on first error in a comprehensive mix", func(t *testing.T) {
+		ship := &MegaShip{}
+		testErr := errors.New("engine failure")
+		failingOpt := configure.OptionE[MegaShip](func(s *MegaShip) error { return testErr })
+
+		opts := []any{
+			opt1,       // Should apply
+			failingOpt, // Should fail here
+			opt3,       // Should NOT apply
+		}
+
+		_, err := configure.ApplyAny(ship, opts)
+
+		assert.ErrorIs(t, err, testErr)
+		assert.Equal(t, "ok", ship.F1RawFunc, "Should be applied before error")
+		assert.Empty(t, ship.F3Option, "Should not be applied after error")
 	})
 }
 
