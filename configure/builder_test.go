@@ -109,12 +109,11 @@ func TestCompile(t *testing.T) {
 	})
 
 	t.Run("fail compilation when factory fails", func(t *testing.T) {
-		factoryErr := errors.New("fuel type cannot be empty")
 		builder := configure.NewBuilder[EngineConfig]().
 			Add(func(c *EngineConfig) { c.Horsepower = 100 }) // Fuel is missing
 
 		_, err := configure.Compile(builder, factory)
-		assert.ErrorIs(t, err, factoryErr)
+		assert.EqualError(t, err, "fuel type cannot be empty")
 	})
 }
 
