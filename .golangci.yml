@@ -1,69 +1,62 @@
-run:
-  go: '1.18.10'
-  timeout: 5m
+version: "2"
 
-linters-settings:
-  errcheck:
-    # List of functions to exclude from checking, where each entry is a single function to exclude.
-    # See https://github.com/kisielk/errcheck#excluding-functions for details.
-    exclude-functions:
-      - ioutil.ReadFile
-      - io.ReadFile
-      - io.Copy(*bytes.Buffer)
-      - io.Copy(os.Stdout)
-      - fmt.Read
-      - fmt.Write
-      - fmt.Close
-      - fmt.Exec
-  #  dupl:
-  #    threshold: 100
-  funlen:
-    lines: 140
-    statements: 140
-  #  goheader:
-  #    template: |-
-  #      Copyright (c) 2024 OrigAdmin. All rights reserved.
+run:
+  timeout: 5m
+  tests: true
+
 linters:
-  disable-all: true
+  # Disables all linters by default, so we can explicitly enable the ones we want.
+  default: none
   enable:
-    - asciicheck
+    # --- Core Linters (Highly Recommended) ---
     - bodyclose
-    - dogsled
-    #    - dupl
+    - dupl
     - errcheck
-    - funlen
+    - exportloopref
+    # --- Style & Formatting Linters ---
+    - goconst
     - gocritic
-    #    - gofmt; Enable back when upgrading CI to Go 1.20.
-    #    - goheader
-    - gosec
+    - gocyclo
     - gosimple
     - govet
+    # --- Complexity & Maintainability ---
+    - funlen
     - ineffassign
     - misspell
+    - revive
     - staticcheck
     - stylecheck
-    #    - typecheck
     - unconvert
     - unused
     - whitespace
-  fast: true
 
-issues:
-  exclude-rules:
-#    - path: _test\.go
-#      linters:
-#        - goheader
-    - path: _test\.go
-      linters:
-        - dupl
-        - funlen
-        - gosec
-        - gocritic
-    - linters:
-        - unused
-      source: ent.Schema
-  exclude-dirs:
-    - example
-  exclude-files:
-    - _default\.go
+  # Settings for specific linters are nested under linters.settings.
+  settings:
+    errcheck:
+      check-type-assertions: true
+    gocyclo:
+      min-complexity: 15
+    # stylecheck:
+    #   checks: ["all", "-ST1003"]
+    misspell:
+      locale: US
+    funlen:
+      lines: 100
+      statements: 50
 
+  # Exclusions are now configured under linters.exclusions.
+  exclusions:
+    rules:
+      # Exclude some linters from running on test files.
+      - path: _test\.go
+        linters:
+          - funlen
+          - errcheck
+          - goconst
+
+formatters:
+  settings:
+    goimports:
+      # Group local imports separately. This is a best practice.
+      local-prefixes:
+        - github.com/goexts/generic

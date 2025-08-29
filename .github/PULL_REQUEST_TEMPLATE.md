@@ -1,24 +1,31 @@
-**IMPORTANT: Please do not create a Pull Request without creating an issue first.**
+<!--
+Thank you for your contribution!
 
-*Any change needs to be discussed before proceeding. Failure to do so may result in the rejection of the pull request.*
+To help us review this pull request, please make sure you have created an issue and linked it below.
+A good pull request is small, focused, and avoids making unrelated changes.
+-->
 
-Please provide enough information so that others can review your pull request:
+**Related Issue**
 
-<!-- You can skip this if you're fixing a typo or adding an app to the Showcase. -->
+Closes: #XXXX
 
-Explain the **details** for making this change. What existing problem does the pull request solve?
+---
 
-<!-- Example: When "Adding a function to do X", explain why it is necessary to have a way to do X. -->
+### ✅ Pre-flight Checklist
 
-**Test plan (required)**
-Demonstrate the code is solid. Example: The exact commands you ran and their output, screenshots / videos if the pull request changes UI.
+Please tick all the boxes that apply.
 
-<!-- Make sure tests pass on both Travis and Circle CI. -->
+- [ ] I have read the [Contributing Guide](https://github.com/goexts/generic/blob/main/.github/CONTRIBUTING.md).
+- [ ] My code follows the style guidelines of this project.
+- [ ] I have run `gofmt -s -w .` to format my code.
+- [ ] I have added tests that prove my fix is effective or that my feature works.
+- [ ] All new and existing tests passed locally with my changes.
+- [ ] Any dependent changes have been merged and published in downstream modules.
 
-**Code formatting**
-Run `gofmt -s -w .` to format your code.
+### 📝 Description
 
-<!-- See the simple style guide. -->
+Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context.
 
-**Closing issues**
-Put `closes #XXXX` in your comment to auto-close the issue that your PR fixes (if such).
+### 🧪 Test Plan
+
+Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
