@@ -43,7 +43,7 @@ func TestRunes(t *testing.T) {
 	})
 
 	t.Run("StringToRunes", func(t *testing.T) {
-		assert.Equal(t, runes.Runes{'a', 'b', 'c'}, runes.StringToRunes("abc"))
+		assert.Equal(t, runes.Runes{'a', 'b', 'c'}, runes.FromString("abc"))
 	})
 }
 
