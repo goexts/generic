@@ -8,123 +8,73 @@ import (
 	"strconv"
 )
 
-// ParseOr converts string to specified type with default value support.
-// Supported types: all basic types (int/uint variants, float, bool, string)
-// Parameters:
-//   - s: input string
-//   - def: optional default value (returns first default value if conversion fails)
+// ParseOr converts a string to a specified type, with support for a default value.
+// It supports all basic types (int/uint variants, float, bool, string) and JSON-deserializable types.
+// If parsing fails and a default value is provided, it returns the default value.
+// If parsing fails and no default is provided, it panics.
 func ParseOr[T any](s string, def ...T) T {
 	var t T
-	switch p := any(&t).(type) {
-	case *string:
-		*p = s
-		return t
-	case *bool:
-		v, err := strconv.ParseBool(s)
-		if err == nil {
-			*p = v
-			return t
-		}
-	case *int:
-		v, err := strconv.ParseInt(s, 10, 0)
-		if err == nil {
-			*p = int(v)
-			return t
-		}
-	case *int8:
-		v, err := strconv.ParseInt(s, 10, 8)
-		if err == nil {
-			*p = int8(v)
-			return t
-		}
-	case *int16:
-		v, err := strconv.ParseInt(s, 10, 16)
-		if err == nil {
-			*p = int16(v)
-			return t
-		}
-	case *int32:
-		v, err := strconv.ParseInt(s, 10, 32)
-		if err == nil {
-			*p = int32(v)
-			return t
-		}
-	case *int64:
-		v, err := strconv.ParseInt(s, 10, 64)
-		if err == nil {
-			*p = v
-			return t
-		}
-	case *uint:
-		v, err := strconv.ParseUint(s, 10, 0)
-		if err == nil {
-			*p = uint(v)
-			return t
-		}
-	case *uint8:
-		v, err := strconv.ParseUint(s, 10, 8)
-		if err == nil {
-			*p = uint8(v)
-			return t
-		}
-	case *uint16:
-		v, err := strconv.ParseUint(s, 10, 16)
-		if err == nil {
-			*p = uint16(v)
-			return t
-		}
-	case *uint32:
-		v, err := strconv.ParseUint(s, 10, 32)
-		if err == nil {
-			*p = uint32(v)
-			return t
-		}
-	case *uint64:
-		v, err := strconv.ParseUint(s, 10, 64)
-		if err == nil {
-			*p = v
-			return t
-		}
-	case *float32:
-		v, err := strconv.ParseFloat(s, 32)
-		if err == nil {
-			*p = float32(v)
-			return t
-		}
-	case *float64:
-		v, err := strconv.ParseFloat(s, 64)
-		if err == nil {
-			*p = v
-			return t
-		}
+	rt := reflect.TypeOf(t)
+
+	var val any
+	var err error
+
+	switch rt.Kind() {
+	case reflect.String:
+		// For string types, no conversion is needed.
+		// We must cast `s` to `any` first before casting to the generic type `T`.
+		return any(s).(T) //nolint:errcheck
+	case reflect.Bool:
+		val, err = strconv.ParseBool(s)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		// Use the bit size of the target type for correct parsing.
+		bitSize := rt.Bits()
+		val, err = strconv.ParseInt(s, 10, bitSize)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		bitSize := rt.Bits()
+		val, err = strconv.ParseUint(s, 10, bitSize)
+	case reflect.Float32, reflect.Float64:
+		bitSize := rt.Bits()
+		val, err = strconv.ParseFloat(s, bitSize)
 	default:
-		rt := reflect.TypeOf(t)
+		// For complex types, attempt to unmarshal from JSON.
 		if isJSONDeserializable(rt) {
-			v, err := jsonUnmarshal[T](s)
-			if err == nil {
+			v, jsonErr := jsonUnmarshal[T](s)
+			if jsonErr == nil {
 				return v
 			}
 		}
+		// If JSON fails or the type is not supported, fall through to the default/panic logic.
+		err = fmt.Errorf("unsupported type for parsing: %T", t)
 	}
 
-	if len(def) > 0 {
-		return def[0]
+	// If any parsing error occurred...
+	if err != nil {
+		if len(def) > 0 {
+			return def[0]
+		}
+		panic(fmt.Sprintf("convert %q to %T failed: %v", s, t, err))
 	}
 
-	panic(fmt.Sprintf("convert %q to %T failed", s, t))
+	// If parsing was successful, convert the parsed value (which is int64, uint64, float64, or bool)
+	// to the actual target type T.
+	return reflect.ValueOf(val).Convert(rt).Interface().(T) //nolint:errcheck
 }
 
+// isJSONDeserializable checks if a type is likely to be unmarshaled from JSON.
 func isJSONDeserializable(rt reflect.Type) bool {
 	switch rt.Kind() {
 	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
 		return true
 	case reflect.Ptr:
+		// Recurse on pointer element types.
 		return isJSONDeserializable(rt.Elem())
 	default:
 		return false
 	}
 }
 
+// jsonUnmarshal is a helper to unmarshal a string into a generic type.
 func jsonUnmarshal[T any](s string) (T, error) {
 	var t T
 	err := json.Unmarshal([]byte(s), &t)

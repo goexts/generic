@@ -61,9 +61,9 @@ func (b Bytes) TrimSuffix(suffix []byte) []byte {
 	return TrimSuffix(b, suffix)
 }
 
-// Replace returns a copy of the slice with the first n non-overlapping instances of old replaced by new.
-func (b Bytes) Replace(old, new []byte, n int) []byte {
-	return Replace(b, old, new, n)
+// Replace returns a copy of the slice with the first n non-overlapping instances of old replaced by replacement.
+func (b Bytes) Replace(old, replacement []byte, n int) []byte {
+	return Replace(b, old, replacement, n)
 }
 
 // Contains reports whether sub is within b.

@@ -41,7 +41,7 @@ func TestBuilder(t *testing.T) {
 	t.Run("builder with failing option", func(t *testing.T) {
 		testErr := errors.New("cannot build")
 		builder := configure.NewBuilder[Ship]().
-			Add(func(s *Ship) error { return testErr })
+			Add(func(_ *Ship) error { return testErr })
 
 		// Test ApplyTo method with error
 		_, err := builder.ApplyTo(&Ship{})
@@ -118,7 +118,7 @@ func TestCompile(t *testing.T) {
 	t.Run("fail compilation when config build fails", func(t *testing.T) {
 		testErr := errors.New("config build failed")
 		builder := configure.NewBuilder[EngineConfig]().
-			Add(func(c *EngineConfig) error { return testErr })
+			Add(func(_ *EngineConfig) error { return testErr })
 
 		_, err := configure.Compile(builder, factory)
 		assert.Error(t, err)
@@ -147,7 +147,7 @@ func TestNew(t *testing.T) {
 
 	t.Run("create new object with failing option", func(t *testing.T) {
 		testErr := errors.New("construction failed")
-		_, err := configure.New[Ship](func(s *Ship) error { return testErr })
+		_, err := configure.New[Ship](func(_ *Ship) error { return testErr })
 		assert.Error(t, err)
 	})
 }

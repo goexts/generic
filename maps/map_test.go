@@ -266,7 +266,7 @@ func TestMapToTypesInterfaceValues(t *testing.T) {
 		"bool": true,
 	}
 
-	result := MapToTypes(m, func(k string, v interface{}) string {
+	result := MapToTypes(m, func(_ string, v interface{}) string {
 		return fmt.Sprintf("%v", v)
 	})
 
@@ -291,7 +291,7 @@ func TestMapToTypesStruct(t *testing.T) {
 		"bool": true,
 	}
 
-	result := MapToTypes(m, func(k string, v interface{}) string {
+	result := MapToTypes(m, func(_ string, v interface{}) string {
 		return fmt.Sprintf("%v", v)
 	})
 

@@ -87,7 +87,7 @@ func TestPromise_Catch(t *testing.T) {
 		newErr := errors.New("new error")
 		p := Async(func() (int, error) {
 			return 0, errors.New("original error")
-		}).Catch(func(err error) (int, error) {
+		}).Catch(func(_ error) (int, error) {
 			// Return a new error
 			return 0, newErr
 		})
@@ -102,7 +102,7 @@ func TestPromise_Catch(t *testing.T) {
 
 func TestPromise_PanicSafety(t *testing.T) {
 	t.Run("Executor panics", func(t *testing.T) {
-		p := New(func(resolve func(int), reject func(error)) {
+		p := New(func(_ func(int), _ func(error)) {
 			panic("executor panic")
 		})
 

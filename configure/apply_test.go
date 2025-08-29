@@ -85,7 +85,7 @@ func TestApplyAny(t *testing.T) {
 		testErr := errors.New("mutiny")
 		opts := []any{
 			func(s *Ship) { s.Name = "Bounty" },
-			func(s *Ship) error { return testErr },
+			func(_ *Ship) error { return testErr },
 			func(s *Ship) { s.Speed = 10 },
 		}
 		_, err := configure.ApplyAny(ship, opts)
@@ -127,10 +127,8 @@ func TestApplyAny_Variations(t *testing.T) {
 	opt12 := CustomApplierEImpl{}
 
 	// --- 3. Type Aliases (type MyAlias = ...)
-	type AliasFunc = func(*MegaShip)
-	opt13 := AliasFunc(func(s *MegaShip) { s.F13AliasFunc = "ok" })
-	type AliasFuncE = func(*MegaShip) error
-	opt14 := AliasFuncE(func(s *MegaShip) error { s.F14AliasFuncE = "ok"; return nil })
+	opt13 := func(s *MegaShip) { s.F13AliasFunc = "ok" }
+	opt14 := func(s *MegaShip) error { s.F14AliasFuncE = "ok"; return nil }
 	type AliasOption = configure.Option[MegaShip]
 	opt15 := AliasOption(func(s *MegaShip) { s.F15AliasOption = "ok" })
 	type AliasOptionE = configure.OptionE[MegaShip]
@@ -174,7 +172,7 @@ func TestApplyAny_Variations(t *testing.T) {
 	t.Run("stops on first error in a comprehensive mix", func(t *testing.T) {
 		ship := &MegaShip{}
 		testErr := errors.New("engine failure")
-		failingOpt := configure.OptionE[MegaShip](func(s *MegaShip) error { return testErr })
+		failingOpt := configure.OptionE[MegaShip](func(_ *MegaShip) error { return testErr })
 
 		opts := []any{
 			opt1,       // Should apply
@@ -194,8 +192,8 @@ func TestApplyAny_Variations(t *testing.T) {
 func TestApplyAndApplyE(t *testing.T) {
 	t.Run("Apply with standard options", func(t *testing.T) {
 		ship := &Ship{}
-		configure.Apply(ship, []configure.Option[Ship]{func(s *Ship) { s.Name = "Endeavour" }})
-		assert.Equal(t, "Endeavour", ship.Name)
+		configure.Apply(ship, []configure.Option[Ship]{func(s *Ship) { s.Name = "Endeavor" }})
+		assert.Equal(t, "Endeavor", ship.Name)
 	})
 
 	t.Run("Apply with custom defined option type", func(t *testing.T) {
@@ -218,7 +216,7 @@ func TestApplyAndApplyE(t *testing.T) {
 	t.Run("ApplyE with failing option", func(t *testing.T) {
 		testErr := errors.New("cannon exploded")
 		ship := &Ship{}
-		_, err := configure.ApplyE(ship, []configure.OptionE[Ship]{func(s *Ship) error { return testErr }})
+		_, err := configure.ApplyE(ship, []configure.OptionE[Ship]{func(_ *Ship) error { return testErr }})
 		assert.ErrorIs(t, err, testErr)
 	})
 }
@@ -254,7 +252,7 @@ func TestOptionSet(t *testing.T) {
 		testErr := errors.New("kraken")
 		options := []configure.OptionE[Ship]{
 			func(s *Ship) error { s.Name = "The Dauntless"; return nil },
-			func(s *Ship) error { return testErr },
+			func(_ *Ship) error { return testErr },
 			func(s *Ship) error { s.Speed = 30; return nil },
 		}
 		set := configure.OptionSetE(options...)

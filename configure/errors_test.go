@@ -15,7 +15,7 @@ func TestErrorHandling(t *testing.T) {
 
 	t.Run("ApplyE returns wrapped execution error", func(t *testing.T) {
 		originalErr := errors.New("engine failure")
-		failingOpt := func(s *Ship) error { return originalErr }
+		failingOpt := func(_ *Ship) error { return originalErr }
 
 		_, err := configure.ApplyE(&Ship{}, []configure.OptionE[Ship]{failingOpt})
 
@@ -37,7 +37,7 @@ func TestErrorHandling(t *testing.T) {
 
 	t.Run("ApplyAny returns wrapped execution error", func(t *testing.T) {
 		originalErr := errors.New("cannon misfire")
-		failingOpt := configure.OptionE[Ship](func(s *Ship) error { return originalErr })
+		failingOpt := configure.OptionE[Ship](func(_ *Ship) error { return originalErr })
 
 		_, err := configure.ApplyAnyWith(&Ship{}, failingOpt)
 

@@ -56,9 +56,7 @@ func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, 
 // Filter removes all key/value pairs from m for which f returns false.
 func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K) {
 	for i := range keys {
-		if _, ok := m[keys[i]]; ok {
-			delete(m, keys[i])
-		}
+		delete(m, keys[i])
 	}
 }
 

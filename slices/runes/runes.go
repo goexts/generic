@@ -110,8 +110,8 @@ func (r Runes) TrimSuffix(suffix []rune) []rune {
 	return r
 }
 
-// Replace returns a copy of the slice with the first n non-overlapping instances of old replaced by new.
-func (r Runes) Replace(old, new []rune, n int) []rune {
+// Replace returns a copy of the slice with the first n non-overlapping instances of old replaced by replacement.
+func (r Runes) Replace(old, replacement []rune, n int) []rune {
 	if len(old) == 0 || n == 0 {
 		return gslices.Clone(r)
 	}
@@ -124,7 +124,7 @@ func (r Runes) Replace(old, new []rune, n int) []rune {
 		return gslices.Clone(r)
 	}
 
-	newLen := len(r) + n*(len(new)-len(old))
+	newLen := len(r) + n*(len(replacement)-len(old))
 	if newLen < 0 {
 		newLen = 0
 	}
@@ -137,7 +137,7 @@ func (r Runes) Replace(old, new []rune, n int) []rune {
 			break
 		}
 		result = append(result, r[start:start+j]...)
-		result = append(result, new...)
+		result = append(result, replacement...)
 		start += j + len(old)
 	}
 	result = append(result, r[start:]...)

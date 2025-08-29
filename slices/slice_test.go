@@ -205,8 +205,8 @@ func TestFilter(t *testing.T) {
 		{"filter even", []int{1, 2, 3, 4, 5}, func(i int) bool { return i%2 == 0 }, []int{2, 4}},
 		{"filter none", []int{1, 3, 5}, func(i int) bool { return i%2 == 0 }, []int{}},
 		{"filter all", []int{2, 4, 6}, func(i int) bool { return i%2 == 0 }, []int{2, 4, 6}},
-		{"empty slice", []int{}, func(i int) bool { return true }, []int{}},
-		{"nil slice", nil, func(i int) bool { return true }, []int{}},
+		{"empty slice", []int{}, func(_ int) bool { return true }, []int{}},
+		{"nil slice", nil, func(_ int) bool { return true }, []int{}},
 	}
 
 	for _, tc := range testCases {
@@ -288,14 +288,14 @@ func TestInsertWith(t *testing.T) {
 			name:     "comparison is always true",
 			slice:    []int{1, 2, 3},
 			value:    0,
-			fn:       func(a, b int) bool { return true },
+			fn:       func(_, _ int) bool { return true },
 			expected: []int{0, 1, 2, 3},
 		},
 		{
 			name:     "comparison is always false",
 			slice:    []int{1, 2, 3},
 			value:    4,
-			fn:       func(a, b int) bool { return false },
+			fn:       func(_, _ int) bool { return false },
 			expected: []int{1, 2, 3, 4},
 		},
 		{
@@ -389,7 +389,7 @@ func TestOverWithError(t *testing.T) {
 		s := []int{1, 2, 3}
 		var result []int
 		iterator := slices.OverWithError(s, nil)
-		iterator(func(i int, v int) bool {
+		iterator(func(_ int, v int) bool {
 			result = append(result, v*2)
 			return true
 		})
@@ -400,7 +400,7 @@ func TestOverWithError(t *testing.T) {
 		s := []int{1, 2, 3}
 		var result []int
 		iterator := slices.OverWithError(s, errors.New("test error"))
-		iterator(func(i int, v int) bool {
+		iterator(func(_ int, v int) bool {
 			result = append(result, v)
 			return true
 		})
@@ -411,7 +411,7 @@ func TestOverWithError(t *testing.T) {
 		s := []int{}
 		var result []int
 		iterator := slices.OverWithError(s, nil)
-		iterator(func(i int, v int) bool {
+		iterator(func(_ int, v int) bool {
 			result = append(result, v)
 			return true
 		})
@@ -422,7 +422,7 @@ func TestOverWithError(t *testing.T) {
 		s := []int{1, 2, 3}
 		var result []int
 		iterator := slices.OverWithError(s, nil)
-		iterator(func(i int, v int) bool {
+		iterator(func(_ int, v int) bool {
 			result = append(result, v)
 			return v != 2
 		})
@@ -624,7 +624,6 @@ func TestTransform(t *testing.T) {
 	})
 
 	t.Run("struct conversion", func(t *testing.T) {
-
 		in := []Point{{1, 2}, {3, 4}}
 		out := slices.Transform(in, func(p Point) (string, bool) {
 			return p.String(), true

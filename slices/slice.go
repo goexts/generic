@@ -194,6 +194,9 @@ func Map[S, T any](s []S, f func(S) T) []T {
 	return result
 }
 
+// OverWithError returns an iterator function for a slice that may have an associated error.
+// The returned iterator will only yield values if the provided error is nil and the slice is not empty.
+// This is useful for chaining operations that can fail.
 func OverWithError[S any](s []S, err error) func(func(int, S) bool) {
 	return func(yield func(int, S) bool) {
 		if err != nil || len(s) == 0 {
@@ -276,6 +279,9 @@ func Split[T ~[]S, S E](s, sep T) []T {
 	return genSplit(s, sep, 0, -1)
 }
 
+// Transform combines the behavior of mapping and filtering a slice.
+// It iterates over each element of the input slice `s`, applies the function `f`,
+// and if the function returns `true`, the transformed element is included in the result.
 func Transform[TS ~[]S, S any, T any](s TS, f func(S) (T, bool)) []T {
 	if s == nil {
 		return make([]T, 0)

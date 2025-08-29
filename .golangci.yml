@@ -12,12 +12,12 @@ linters:
     - bodyclose
     - dupl
     - errcheck
-    - exportloopref
+    # - exportloopref # Removed: Not supported by your golangci-lint version
     # --- Style & Formatting Linters ---
     - goconst
     - gocritic
     - gocyclo
-    - gosimple
+    # - gosimple      # Removed: Not supported by your golangci-lint version
     - govet
     # --- Complexity & Maintainability ---
     - funlen
@@ -25,7 +25,7 @@ linters:
     - misspell
     - revive
     - staticcheck
-    - stylecheck
+    # - stylecheck    # Removed: Not supported by your golangci-lint version
     - unconvert
     - unused
     - whitespace
@@ -36,8 +36,6 @@ linters:
       check-type-assertions: true
     gocyclo:
       min-complexity: 15
-    # stylecheck:
-    #   checks: ["all", "-ST1003"]
     misspell:
       locale: US
     funlen:
@@ -50,6 +48,8 @@ linters:
       # Exclude some linters from running on test files.
       - path: _test\.go
         linters:
+          - dupl
+          - gocritic
           - funlen
           - errcheck
           - goconst

@@ -65,7 +65,7 @@ func applyReflect[T any](target *T, opt any) (bool, error) {
 
 	// Check for error-returning function: func(*T) error
 	if v.Type().ConvertibleTo(reflect.TypeOf(OptionE[T](nil))) {
-		converted := v.Convert(reflect.TypeOf(OptionE[T](nil))).Interface().(OptionE[T])
+		converted := v.Convert(reflect.TypeOf(OptionE[T](nil))).Interface().(OptionE[T]) //nolint:errcheck
 		err := converted(target)
 		if err != nil {
 			return true, newConfigError(ErrExecutionFailed, opt, err)
@@ -75,7 +75,7 @@ func applyReflect[T any](target *T, opt any) (bool, error) {
 
 	// Check for non-error-returning function: func(*T)
 	if v.Type().ConvertibleTo(reflect.TypeOf(Option[T](nil))) {
-		converted := v.Convert(reflect.TypeOf(Option[T](nil))).Interface().(Option[T])
+		converted := v.Convert(reflect.TypeOf(Option[T](nil))).Interface().(Option[T]) //nolint:errcheck
 		converted(target)
 		return true, nil
 	}
