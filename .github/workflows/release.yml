@@ -1,0 +1,53 @@
+name: Manual Release
+
+# This workflow is triggered manually from the GitHub Actions UI.
+# It ensures that a release is only created from a commit that has passed all tests.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'The git ref (branch, tag, or commit SHA) to release from. Must have a successful "Run Tests" status check.'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: write
+  pull-requests: write
+  # Required to read the status of checks
+  statuses: read
+
+jobs:
+  # This job ensures that the selected ref has a successful test run associated with it.
+  check-test-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for successful test run
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          # The name of the workflow to check, as defined in test.yml
+          check-name: 'Run Tests'
+          # The git ref to check, passed from the manual trigger
+          ref: ${{ github.event.inputs.ref }}
+          # A token with statuses:read permission
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Wait for the check to complete, with a timeout
+          wait-interval: 10 # seconds
+          allowed-conclusions: success
+
+  # This job will only run if the check-test-status job succeeds.
+  release:
+    needs: [check-test-status]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the specific ref for release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref }}
+
+      - name: Create Release and Changelog
+        uses: google-github-actions/release-please-action@v4
+        with:
+          # The release-type for a standard Go module.
+          release-type: go
+          # The token is required for release-please to create releases.
+          token: ${{ secrets.GITHUB_TOKEN }}
