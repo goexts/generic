@@ -60,7 +60,7 @@ func applyE[T any](target *T, opt any) (bool, error) {
 func applyReflect[T any](target *T, opt any) (bool, error) {
 	v := reflect.ValueOf(opt)
 	if v.Kind() != reflect.Func {
-		return false, nil
+		return false, newConfigError(ErrUnsupportedType, opt, nil)
 	}
 
 	// Check for error-returning function: func(*T) error

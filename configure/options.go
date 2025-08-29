@@ -39,10 +39,10 @@ type FuncOptionE[T any] interface {
 	~func(*T) error
 }
 
-// AnyOption is a generic constraint that permits any function type
+// FuncOptionAny is a generic constraint that permits any function type
 // whose underlying type is either func(*T) or func(*T) error.
 // This provides a convenient way to create functions that can accept
 // both error-returning and non-error-returning function options.
-type AnyOption[T any] interface {
+type FuncOptionAny[T any] interface {
 	FuncOptionE[T] | FuncOption[T] | any
 }
