@@ -22,7 +22,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.23.x'
+          go-version: '^1.23.0'
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v8
@@ -54,7 +54,7 @@ jobs:
       - name: Create Release and Changelog
         # This action automates the entire release process based on
         # Conventional Commit messages.
-        uses: googleapis/release-please-action@v3
+        uses: googleapis/release-please-action@v4
         with:
           # The release-type for a standard Go module.
           # It automatically finds the go.mod file, reads the module path,
