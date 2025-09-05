@@ -3,8 +3,68 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/goexts/generic)](https://goreportcard.com/report/github.com/goexts/generic)
 [![GoDoc](https://godoc.org/github.com/goexts/generic?status.svg)](https://godoc.org/github.com/goexts/generic)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/release/goexts/generic.svg)](https://github.com/goexts/generic/releases)
+[![Go version](https://img.shields.io/github/go-mod/go-version/goexts/generic)](go.mod)
+[![GitHub stars](https://img.shields.io/github/stars/goexts/generic?style=social)](https://github.com/goexts/generic/stargazers)
 
 A modern, robust, and type-safe collection of generic utilities for Go, designed to solve common problems with elegant, high-performance APIs. This library aims to be the foundational toolkit for modern Go development.
+
+> **Status**: **Stable** - This project is production-ready and follows semantic versioning.
+
+## Features
+
+- 🚀 **Type-Safe**: Built with Go 1.18+ generics for type safety
+- ⚡ **High Performance**: Optimized for performance with zero or minimal allocations
+- 🧩 **Modular**: Independent packages that can be used separately
+- 🛠 **Well-Tested**: Comprehensive test coverage
+- 📚 **Well-Documented**: Complete API documentation and examples
+
+## Quick Start
+
+### Installation
+
+```bash
+go get github.com/goexts/generic@latest
+```
+
+### Basic Usage
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/goexts/generic/maps"
+	"github.com/goexts/generic/slices"
+)
+
+func main() {
+	// Working with slices
+	nums := []int{1, 2, 3, 4, 5}
+	doubled := slices.Map(nums, func(x int) int { return x * 2 })
+	filtered := slices.Filter(doubled, func(x int) bool { return x > 5 })
+	
+	fmt.Println("Original:", nums)      // [1 2 3 4 5]
+	fmt.Println("Doubled:", doubled)    // [2 4 6 8 10]
+	fmt.Println("Filtered:", filtered)  // [6 8 10]
+
+	// Working with maps
+	m := map[string]int{"a": 1, "b": 2, "c": 3}
+	keys := maps.Keys(m)  // [a b c] (order not guaranteed)
+	values := maps.Values(m)  // [1 2 3] (order not guaranteed)
+	
+	fmt.Println("Keys:", keys)      // [a b c]
+	fmt.Println("Values:", values)  // [1 2 3]
+}
+```
+
+## Documentation
+
+For complete documentation, please visit:
+
+- [API Documentation](https://pkg.go.dev/github.com/goexts/generic)
+- [Examples](docs/examples/)
+- [Contributing Guide](.github/CONTRIBUTING.md)
 
 ## Core Packages
 
@@ -87,7 +147,35 @@ func main() {
 
 ## Contributing
 
-Contributions of all kinds are welcome! Please see our Contributing Guide for details on our code of conduct and the process for submitting pull requests.
+We welcome all contributions! Here's how you can help:
+
+1. Report bugs by [opening an issue](https://github.com/goexts/generic/issues/new/choose)
+2. Suggest new features or improvements
+3. Submit pull requests
+
+Please read our [Contributing Guide](.github/CONTRIBUTING.md) and [Code of Conduct](.github/CODE_OF_CONDUCT.md) for details on the process for submitting pull requests and how we work together.
+
+### Development Setup
+
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/your-username/generic.git`
+3. Run tests: `go test ./...`
+4. Make your changes and submit a pull request
+
+## Community
+
+- **Issues**: [GitHub Issues](https://github.com/goexts/generic/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/goexts/generic/discussions)
+- **Chat**: [Gitter](https://gitter.im/goexts/community) (coming soon)
+
+## Related Projects
+
+- [GoExts](https://github.com/goexts) - Collection of Go extensions and utilities
+- [Go Standard Library](https://pkg.go.dev/std) - The Go standard library that this project extends
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/goexts/generic.svg)](https://starchart.cc/goexts/generic)
 
 ## License
 
