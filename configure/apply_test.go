@@ -262,3 +262,99 @@ func TestOptionSet(t *testing.T) {
 		assert.Equal(t, 0, ship.Speed)
 	})
 }
+
+func TestNewConstructors(t *testing.T) {
+	t.Run("NewWith creates object with standard options", func(t *testing.T) {
+		ship := configure.NewWith[Ship](
+			func(s *Ship) { s.Name = "Millennium Falcon" },
+			func(s *Ship) { s.Speed = 99 },
+		)
+		assert.NotNil(t, ship)
+		assert.Equal(t, "Millennium Falcon", ship.Name)
+		assert.Equal(t, 99, ship.Speed)
+	})
+
+	t.Run("New (non-variadic) creates object with standard options", func(t *testing.T) {
+		opts := []configure.Option[Ship]{
+			func(s *Ship) { s.Name = "Normandy" },
+		}
+		ship := configure.New(opts)
+		assert.Equal(t, "Normandy", ship.Name)
+	})
+
+	t.Run("NewWith handles empty options", func(t *testing.T) {
+		ship := configure.NewWith[Ship]()
+		assert.NotNil(t, ship)
+		assert.Equal(t, "", ship.Name) // Should be zero-valued
+	})
+
+	t.Run("NewWithE creates object with successful error-returning options", func(t *testing.T) {
+		ship, err := configure.NewWithE[Ship](
+			func(s *Ship) error { s.Name = "Endeavour"; return nil },
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, "Endeavour", ship.Name)
+	})
+
+	t.Run("NewE (non-variadic) handles failing option", func(t *testing.T) {
+		testErr := errors.New("construction failed")
+		opts := []configure.OptionE[Ship]{
+			func(s *Ship) error { s.Name = "Titanic"; return nil },
+			func(_ *Ship) error { return testErr },
+		}
+		ship, err := configure.NewE(opts)
+		assert.ErrorIs(t, err, testErr)
+		assert.Nil(t, ship) // Object should not be returned on error
+	})
+
+	t.Run("NewWithE handles failing option", func(t *testing.T) {
+		testErr := errors.New("construction failed")
+		ship, err := configure.NewWithE[Ship](
+			func(s *Ship) error { s.Name = "Titanic"; return nil },
+			func(_ *Ship) error { return testErr },
+		)
+		assert.ErrorIs(t, err, testErr)
+		assert.Nil(t, ship) // Object should not be returned on error
+	})
+
+	t.Run("NewAny creates object with mixed options", func(t *testing.T) {
+		ship, err := configure.NewAny[Ship](
+			func(s *Ship) { s.Name = "Mixed" },
+			func(s *Ship) error { s.Speed = 10; return nil },
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, "Mixed", ship.Name)
+		assert.Equal(t, 10, ship.Speed)
+	})
+
+	t.Run("NewAny handles failing mixed option", func(t *testing.T) {
+		testErr := errors.New("any construction failed")
+		ship, err := configure.NewAny[Ship](
+			func(s *Ship) { s.Name = "Partial" },
+			func(_ *Ship) error { return testErr },
+		)
+		assert.ErrorIs(t, err, testErr)
+		assert.Nil(t, ship) // Object should not be returned on error
+	})
+
+	t.Run("NewWith using OptionSet", func(t *testing.T) {
+		set := configure.OptionSet(
+			func(s *Ship) { s.Name = "SetShip" },
+			func(s *Ship) { s.Speed = 42 },
+		)
+		ship := configure.NewWith(set)
+		assert.Equal(t, "SetShip", ship.Name)
+		assert.Equal(t, 42, ship.Speed)
+	})
+
+	t.Run("NewWithE using OptionSetE with error", func(t *testing.T) {
+		testErr := errors.New("set error")
+		set := configure.OptionSetE(
+			func(s *Ship) error { s.Name = "Should be set"; return nil },
+			func(_ *Ship) error { return testErr },
+		)
+		ship, err := configure.NewWithE(set)
+		assert.ErrorIs(t, err, testErr)
+		assert.Nil(t, ship)
+	})
+}

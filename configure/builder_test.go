@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/goexts/generic/configure"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goexts/generic/configure"
 )
 
 // Using the same Ship struct from apply_test.go
@@ -130,54 +131,5 @@ func TestCompile(t *testing.T) {
 
 		_, err := configure.Compile(builder, factory)
 		assert.EqualError(t, err, "fuel type cannot be empty")
-	})
-}
-
-func TestNewConstructors(t *testing.T) {
-	t.Run("NewWith creates object with standard options", func(t *testing.T) {
-		ship := configure.NewWith[Ship](
-			func(s *Ship) { s.Name = "Millennium Falcon" },
-			func(s *Ship) { s.Speed = 99 },
-		)
-		assert.NotNil(t, ship)
-		assert.Equal(t, "Millennium Falcon", ship.Name)
-		assert.Equal(t, 99, ship.Speed)
-	})
-
-	t.Run("NewWithE creates object with error-returning options", func(t *testing.T) {
-		ship, err := configure.NewWithE[Ship](
-			func(s *Ship) error { s.Name = "Endeavour"; return nil },
-		)
-		assert.NoError(t, err)
-		assert.Equal(t, "Endeavour", ship.Name)
-	})
-
-	t.Run("NewWithE handles failing option", func(t *testing.T) {
-		testErr := errors.New("construction failed")
-		_, err := configure.NewWithE[Ship](
-			func(s *Ship) error { s.Name = "Titanic"; return nil }, // this should be applied
-			func(_ *Ship) error { return testErr },
-		)
-		assert.Error(t, err)
-		// Note: With NewE/ApplyE, if an error occurs, the partially configured object is not returned.
-	})
-
-	t.Run("NewAny creates object with mixed options", func(t *testing.T) {
-		ship, err := configure.NewAny[Ship](
-			func(s *Ship) { s.Name = "Mixed" },
-			func(s *Ship) error { s.Speed = 10; return nil },
-		)
-		assert.NoError(t, err)
-		assert.Equal(t, "Mixed", ship.Name)
-		assert.Equal(t, 10, ship.Speed)
-	})
-
-	t.Run("NewAny handles failing mixed option", func(t *testing.T) {
-		testErr := errors.New("any construction failed")
-		_, err := configure.NewAny[Ship](
-			func(s *Ship) { s.Name = "Partial" },
-			func(_ *Ship) error { return testErr },
-		)
-		assert.Error(t, err)
 	})
 }
