@@ -290,10 +290,10 @@ func TestNewConstructors(t *testing.T) {
 
 	t.Run("NewWithE creates object with successful error-returning options", func(t *testing.T) {
 		ship, err := configure.NewWithE[Ship](
-			func(s *Ship) error { s.Name = "Endeavour"; return nil },
+			func(s *Ship) error { s.Name = "Endeavor"; return nil },
 		)
 		assert.NoError(t, err)
-		assert.Equal(t, "Endeavour", ship.Name)
+		assert.Equal(t, "Endeavor", ship.Name)
 	})
 
 	t.Run("NewE (non-variadic) handles failing option", func(t *testing.T) {
