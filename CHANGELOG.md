@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/goexts/generic/compare/v0.4.0...v0.5.0) (2025-09-28)
+
+
+### Features
+
+* **configure:** add OptionSet and OptionSetE constructors and move tests to apply_test.go ([e9195a3](https://github.com/goexts/generic/commit/e9195a35396a56562bb84e73d1e5ca132667a86e))
+* **configure:** add type-safe constructors New, NewWith, NewE, NewWithE and rename New to NewAny ([e8e6b16](https://github.com/goexts/generic/commit/e8e6b1678c8c09285a9d9a08f608b3e437cb806d))
+
+
+### Bug Fixes
+
+* **configure:** correct spelling of "Endeavor" in test case ([3ce7744](https://github.com/goexts/generic/commit/3ce77445f008eda8d877e90fc839c53233127d7a))
+
 ## [0.4.0](https://github.com/goexts/generic/compare/v0.3.0...v0.4.0) (2025-09-05)
 
 
