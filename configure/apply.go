@@ -191,12 +191,40 @@ func OptionSetE[T any](opts ...OptionE[T]) OptionE[T] {
 	}
 }
 
-// New creates a new instance of T, applies the given options, and returns it.
+// New creates a new instance of T and applies the given options.
+// It is a convenient, type-safe constructor for creating objects with
+// homogeneous options. For mixed-type or error-returning options, see NewAny or NewE.
+func New[T any, O FuncOption[T]](opts []O) *T {
+	var zero T
+	return Apply(&zero, opts)
+}
+
+// NewWith is the variadic convenience wrapper for New.
+func NewWith[T any](opts ...Option[T]) *T {
+	var zero T
+	return Apply(&zero, opts)
+}
+
+// NewE creates a new instance of T, applies the error-returning options, and
+// returns the configured instance or an error. It is a convenient, type-safe
+// constructor for creating objects with homogeneous, error-returning options.
+func NewE[T any, O FuncOptionE[T]](opts []O) (*T, error) {
+	var zero T
+	return ApplyE(&zero, opts)
+}
+
+// NewWithE is the variadic convenience wrapper for NewE.
+func NewWithE[T any](opts ...OptionE[T]) (*T, error) {
+	var zero T
+	return ApplyE(&zero, opts)
+}
+
+// NewAny creates a new instance of T, applies the given options of any type, and returns it.
 // It is a convenient top-level constructor for simple object creation where the
 // configuration type and the product type are the same.
 //
-// It uses ApplyAnyWith for maximum flexibility in accepting options.
-func New[T any](opts ...any) (*T, error) {
+// It uses ApplyAny for maximum flexibility in accepting options.
+func NewAny[T any](opts ...any) (*T, error) {
 	var zero T
 	return ApplyAny(&zero, opts)
 }

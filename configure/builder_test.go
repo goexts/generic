@@ -57,8 +57,8 @@ func TestBuilder(t *testing.T) {
 		innerBuilder := configure.NewBuilder[Ship]().
 			Add(func(s *Ship) { s.Name = "Inner" })
 
-		// Use this builder as an option within the New function
-		ship, err := configure.New[Ship](
+		// Use this builder as an option within the NewAny function
+		ship, err := configure.NewAny[Ship](
 			func(s *Ship) { s.Speed = 99 },
 			innerBuilder, // The builder implements ApplierE and can be passed directly
 		)
@@ -133,21 +133,51 @@ func TestCompile(t *testing.T) {
 	})
 }
 
-func TestNew(t *testing.T) {
-	t.Run("create new object with options", func(t *testing.T) {
-		ship, err := configure.New[Ship](
+func TestNewConstructors(t *testing.T) {
+	t.Run("NewWith creates object with standard options", func(t *testing.T) {
+		ship := configure.NewWith[Ship](
 			func(s *Ship) { s.Name = "Millennium Falcon" },
 			func(s *Ship) { s.Speed = 99 },
 		)
-		assert.NoError(t, err)
 		assert.NotNil(t, ship)
 		assert.Equal(t, "Millennium Falcon", ship.Name)
 		assert.Equal(t, 99, ship.Speed)
 	})
 
-	t.Run("create new object with failing option", func(t *testing.T) {
+	t.Run("NewWithE creates object with error-returning options", func(t *testing.T) {
+		ship, err := configure.NewWithE[Ship](
+			func(s *Ship) error { s.Name = "Endeavour"; return nil },
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, "Endeavour", ship.Name)
+	})
+
+	t.Run("NewWithE handles failing option", func(t *testing.T) {
 		testErr := errors.New("construction failed")
-		_, err := configure.New[Ship](func(_ *Ship) error { return testErr })
+		_, err := configure.NewWithE[Ship](
+			func(s *Ship) error { s.Name = "Titanic"; return nil }, // this should be applied
+			func(_ *Ship) error { return testErr },
+		)
+		assert.Error(t, err)
+		// Note: With NewE/ApplyE, if an error occurs, the partially configured object is not returned.
+	})
+
+	t.Run("NewAny creates object with mixed options", func(t *testing.T) {
+		ship, err := configure.NewAny[Ship](
+			func(s *Ship) { s.Name = "Mixed" },
+			func(s *Ship) error { s.Speed = 10; return nil },
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, "Mixed", ship.Name)
+		assert.Equal(t, 10, ship.Speed)
+	})
+
+	t.Run("NewAny handles failing mixed option", func(t *testing.T) {
+		testErr := errors.New("any construction failed")
+		_, err := configure.NewAny[Ship](
+			func(s *Ship) { s.Name = "Partial" },
+			func(_ *Ship) error { return testErr },
+		)
 		assert.Error(t, err)
 	})
 }
