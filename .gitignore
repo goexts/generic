@@ -525,6 +525,7 @@ FodyWeavers.xsd
 !README.md
 !LICENSE
 !Makefile
+!release-please-config.json
 
 # ...even if they are in subdirectories
 !*/

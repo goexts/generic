@@ -1,0 +1,12 @@
+{
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "packages": {
+    ".": {
+      "release-type": "go",
+      "package-name": "github.com/goexts/generic",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true
+    }
+  }
+}
