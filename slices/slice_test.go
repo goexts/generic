@@ -217,6 +217,58 @@ func TestFilter(t *testing.T) {
 	}
 }
 
+func TestFilterIncluded(t *testing.T) {
+	testCases := []struct {
+		name    string
+		slice   []int
+		include []int
+		want    []int
+	}{
+		{"basic inclusion", []int{1, 2, 3, 4, 5}, []int{2, 4, 6}, []int{2, 4}},
+		{"no matches", []int{1, 2, 3}, []int{4, 5}, []int{}},
+		{"all match", []int{1, 2, 3}, []int{1, 2, 3}, []int{1, 2, 3}},
+		{"empty include", []int{1, 2, 3}, []int{}, []int{}},
+		{"empty slice", []int{}, []int{1, 2, 3}, []int{}},
+		{"duplicates in source", []int{1, 2, 2, 3, 3, 3}, []int{2, 4}, []int{2, 2}},
+		{"large include list", []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+			[]int{2, 4, 6, 8, 10, 12},
+			[]int{2, 4, 6, 8, 10}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := slices.FilterIncluded(tc.slice, tc.include)
+			assert.Equal(t, tc.want, result)
+		})
+	}
+}
+
+func TestFilterExcluded(t *testing.T) {
+	testCases := []struct {
+		name    string
+		slice   []int
+		exclude []int
+		want    []int
+	}{
+		{"basic exclusion", []int{1, 2, 3, 4, 5}, []int{2, 4, 6}, []int{1, 3, 5}},
+		{"no matches", []int{1, 2, 3}, []int{4, 5}, []int{1, 2, 3}},
+		{"all match", []int{1, 2, 3}, []int{1, 2, 3}, []int{}},
+		{"empty exclude", []int{1, 2, 3}, []int{}, []int{1, 2, 3}},
+		{"empty slice", []int{}, []int{1, 2, 3}, []int{}},
+		{"duplicates in source", []int{1, 2, 2, 3, 3, 3}, []int{2}, []int{1, 3, 3, 3}},
+		{"large exclude list", []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+			[]int{2, 4, 6, 8, 10, 12},
+			[]int{1, 3, 5, 7, 9, 11}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := slices.FilterExcluded(tc.slice, tc.exclude)
+			assert.Equal(t, tc.want, result)
+		})
+	}
+}
+
 func TestIndexSlice(t *testing.T) {
 	testCases := []struct {
 		name string

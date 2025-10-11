@@ -90,3 +90,56 @@ func TestDifference(t *testing.T) {
 		assert.Empty(t, set.Difference([]int{1, 2, 3}, []int{}))
 	})
 }
+
+func TestUnion(t *testing.T) {
+	t.Run("int slices", func(t *testing.T) {
+		// Basic union
+		s1 := []int{1, 2, 3}
+		s2 := []int{3, 4, 5}
+		expected := []int{1, 2, 3, 4, 5}
+		assert.ElementsMatch(t, expected, set.Union(s1, s2))
+
+		// With duplicates in input slices
+		s3 := []int{1, 2, 2, 3}
+		s4 := []int{3, 4, 4, 5}
+		expected = []int{1, 2, 3, 4, 5}
+		assert.ElementsMatch(t, expected, set.Union(s3, s4))
+
+		// First slice is empty
+		s5 := []int{}
+		s6 := []int{1, 2, 3}
+		expected = []int{1, 2, 3}
+		assert.ElementsMatch(t, expected, set.Union(s5, s6))
+
+		// Second slice is empty
+		s7 := []int{1, 2, 3}
+		s8 := []int{}
+		expected = []int{1, 2, 3}
+		assert.ElementsMatch(t, expected, set.Union(s7, s8))
+
+		// Both slices are empty
+		s9 := []int{}
+		s10 := []int{}
+		assert.Empty(t, set.Union(s9, s10))
+	})
+
+	t.Run("string slices", func(t *testing.T) {
+		// Basic string union
+		s1 := []string{"apple", "banana"}
+		s2 := []string{"banana", "cherry"}
+		expected := []string{"apple", "banana", "cherry"}
+		assert.ElementsMatch(t, expected, set.Union(s1, s2))
+
+		// Case sensitivity
+		s3 := []string{"Apple", "Banana"}
+		s4 := []string{"apple", "banana"}
+		expected = []string{"Apple", "Banana", "apple", "banana"}
+		assert.ElementsMatch(t, expected, set.Union(s3, s4))
+
+		// With empty strings
+		s5 := []string{"", "a", "b"}
+		s6 := []string{"a", "b", "c", ""}
+		expected = []string{"", "a", "b", "c"}
+		assert.ElementsMatch(t, expected, set.Union(s5, s6))
+	})
+}

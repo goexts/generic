@@ -97,7 +97,76 @@ func Filter[T ~[]S, S any](s T, f func(S) bool) T {
 	return result
 }
 
-// IndexSlice returns the index of the first instance of substr in s, or -1 if substr is not present in s.
+// FilterIncluded returns a new slice containing all elements of s that are present in includes.
+// The order of elements in the result is the same as in the original slice.
+// The function is optimized for small to medium-sized include lists.
+// For very large include lists, consider using a map for better performance.
+func FilterIncluded[S ~[]E, E comparable](s S, includes S) S {
+	if len(includes) == 0 {
+		return make(S, 0)
+	}
+
+	// For small include lists (≤20 elements), use linear search
+	// Benchmark shows better performance for small lists due to lower overhead
+	if len(includes) <= 20 {
+		return Filter(s, func(e E) bool {
+			for _, v := range includes {
+				if v == e {
+					return true
+				}
+			}
+			return false
+		})
+	}
+
+	// For larger include lists, use map for O(1) lookups
+	// The memory overhead is justified by the O(1) lookup time
+	includeSet := make(map[E]struct{}, len(includes))
+	for _, v := range includes {
+		includeSet[v] = struct{}{}
+	}
+
+	return Filter(s, func(e E) bool {
+		_, exists := includeSet[e]
+		return exists
+	})
+}
+
+// FilterExcluded returns a new slice containing all elements of s that are not present in excludes.
+// The order of elements in the result is the same as in the original slice.
+// The function is optimized for small to medium-sized exclude lists.
+// For very large exclude lists, consider using a map for better performance.
+func FilterExcluded[S ~[]E, E comparable](s S, excludes S) S {
+	if len(excludes) == 0 {
+		return s
+	}
+
+	// For small exclude lists (≤20 elements), use linear search
+	// This avoids map allocation overhead for small lists
+	if len(excludes) <= 20 {
+		return Filter(s, func(e E) bool {
+			for _, v := range excludes {
+				if v == e {
+					return false
+				}
+			}
+			return true
+		})
+	}
+
+	// For larger exclude lists, use map for O(1) lookups
+	// The memory overhead is justified by the O(1) lookup time
+	excludeSet := make(map[E]struct{}, len(excludes))
+	for _, v := range excludes {
+		excludeSet[v] = struct{}{}
+	}
+
+	return Filter(s, func(e E) bool {
+		_, exists := excludeSet[e]
+		return !exists
+	})
+}
+
 func IndexSlice[T ~[]S, S E](s, substr T) int {
 	n := len(substr)
 	switch {
