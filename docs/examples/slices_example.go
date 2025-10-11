@@ -1,7 +1,10 @@
+// Package main provides examples for using the slices package.
+// These examples demonstrate common operations like mapping, filtering, and reducing slices.
 package main
 
 import (
 	"fmt"
+
 	"github.com/goexts/generic/slices"
 )
 
