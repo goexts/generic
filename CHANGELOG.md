@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/goexts/generic/compare/v0.5.0...v0.6.0) (2025-10-11)
+
+
+### Features
+
+* **docs:** add slices_example.go and update API documentation with examples and improved descriptions ([c652a63](https://github.com/goexts/generic/commit/c652a635b7b82ef8753def09e408cf745e594b40))
+* **slices:** add FilterIncluded and FilterExcluded functions with benchmarks and tests ([495c227](https://github.com/goexts/generic/commit/495c227bb74d202da6a8d48545501d59615f9b00))
+
 ## [0.5.0](https://github.com/goexts/generic/compare/v0.4.0...v0.5.0) (2025-09-28)
 
 
