@@ -6,7 +6,7 @@ import (
 	gslices "github.com/goexts/generic/slices"
 )
 
-//go:generate adptool .
+//go:generate adptool runes.go
 //go:adapter:package golang.org/x/text/runes
 
 // Runes is a type alias for []rune to provide methods.

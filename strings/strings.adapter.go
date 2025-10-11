@@ -6,6 +6,7 @@
 package strings
 
 import (
+	"iter"
 	strings "strings"
 	"unicode"
 )
@@ -68,6 +69,14 @@ func FieldsFunc(s string, f func(rune) bool) []string {
 	return strings.FieldsFunc(s, f)
 }
 
+func FieldsFuncSeq(s string, f func(rune) bool) iter.Seq[string] {
+	return strings.FieldsFuncSeq(s, f)
+}
+
+func FieldsSeq(s string) iter.Seq[string] {
+	return strings.FieldsSeq(s)
+}
+
 func HasPrefix(s, prefix string) bool {
 	return strings.HasPrefix(s, prefix)
 }
@@ -116,6 +125,10 @@ func LastIndexFunc(s string, f func(rune) bool) int {
 	return strings.LastIndexFunc(s, f)
 }
 
+func Lines(s string) iter.Seq[string] {
+	return strings.Lines(s)
+}
+
 func Map(mapping func(rune) rune, s string) string {
 	return strings.Map(mapping, s)
 }
@@ -152,8 +165,16 @@ func SplitAfterN(s, sep string, n int) []string {
 	return strings.SplitAfterN(s, sep, n)
 }
 
+func SplitAfterSeq(s, sep string) iter.Seq[string] {
+	return strings.SplitAfterSeq(s, sep)
+}
+
 func SplitN(s, sep string, n int) []string {
 	return strings.SplitN(s, sep, n)
+}
+
+func SplitSeq(s, sep string) iter.Seq[string] {
+	return strings.SplitSeq(s, sep)
 }
 
 func Title(s string) string {

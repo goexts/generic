@@ -167,6 +167,10 @@ func FilterExcluded[S ~[]E, E comparable](s S, excludes S) S {
 	})
 }
 
+// IndexSlice returns the index of the first instance of substr in s, or -1 if substr is not present in s.
+// It works similarly to strings.Index but operates on slices of comparable elements.
+// If substr is an empty slice, it returns 0.
+// The time complexity is O(n*m) where n is the length of s and m is the length of substr.
 func IndexSlice[T ~[]S, S E](s, substr T) int {
 	n := len(substr)
 	switch {

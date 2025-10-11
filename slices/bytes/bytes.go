@@ -4,7 +4,7 @@ import (
 	"slices"
 )
 
-//go:generate adptool .
+//go:generate adptool bytes.go
 //go:adapter:package bytes
 
 // Bytes is a type alias for []byte to provide methods.

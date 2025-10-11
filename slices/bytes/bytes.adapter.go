@@ -7,6 +7,7 @@ package bytes
 
 import (
 	bytes "bytes"
+	"iter"
 	"unicode"
 )
 
@@ -75,6 +76,14 @@ func FieldsFunc(s []byte, f func(rune) bool) [][]byte {
 	return bytes.FieldsFunc(s, f)
 }
 
+func FieldsFuncSeq(s []byte, f func(rune) bool) iter.Seq[[]byte] {
+	return bytes.FieldsFuncSeq(s, f)
+}
+
+func FieldsSeq(s []byte) iter.Seq[[]byte] {
+	return bytes.FieldsSeq(s)
+}
+
 func HasPrefix(s, prefix []byte) bool {
 	return bytes.HasPrefix(s, prefix)
 }
@@ -123,6 +132,10 @@ func LastIndexFunc(s []byte, f func(r rune) bool) int {
 	return bytes.LastIndexFunc(s, f)
 }
 
+func Lines(s []byte) iter.Seq[[]byte] {
+	return bytes.Lines(s)
+}
+
 func Map(mapping func(r rune) rune, s []byte) []byte {
 	return bytes.Map(mapping, s)
 }
@@ -167,8 +180,16 @@ func SplitAfterN(s, sep []byte, n int) [][]byte {
 	return bytes.SplitAfterN(s, sep, n)
 }
 
+func SplitAfterSeq(s, sep []byte) iter.Seq[[]byte] {
+	return bytes.SplitAfterSeq(s, sep)
+}
+
 func SplitN(s, sep []byte, n int) [][]byte {
 	return bytes.SplitN(s, sep, n)
+}
+
+func SplitSeq(s, sep []byte) iter.Seq[[]byte] {
+	return bytes.SplitSeq(s, sep)
 }
 
 func Title(s []byte) []byte {

@@ -6,38 +6,58 @@
 import "github.com/goexts/generic/cast"
 ```
 
-Package cast provides utility functions for type casting and assertion.
+Package cast provides safe, generic alternatives to Go's standard type assertion.
+
+This package simplifies type assertions by providing convenient, single\-expression functions that handle the \`value, ok\` idiom in different ways, such as returning a default value or a zero value upon failure.
+
+Example:
+
+```
+var myVal any = "hello"
+
+// Standard Go type assertion
+str, ok := myVal.(string)
+if !ok {
+	str = "default"
+}
+
+// With cast package - cleaner and more concise
+str = cast.Or(myVal, "default")
+```
 
 ## Index
 
-- [func Or[T any](v any, def T) T](<#func-or>)
-- [func OrZero[T comparable](v any) (zero T)](<#func-orzero>)
-- [func Try[T any](v any) (ret T, ok bool)](<#func-try>)
+- [func Or\[T any\]\(v any, def T\) T](<#Or>)
+- [func OrZero\[T any\]\(v any\) T](<#OrZero>)
+- [func Try\[T any\]\(v any\) \(T, bool\)](<#Try>)
 
 
-## func [Or](<https://github.com/goexts/generic/blob/main/cast/cast.go#L21>)
+<a name="Or"></a>
+## func [Or](<https://github.com/goexts/generic/blob/main/cast/cast.go#L15>)
 
 ```go
 func Or[T any](v any, def T) T
 ```
 
-Or attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value. If the conversion fails, it returns the default value.
+Or attempts to perform a type assertion of v to type T. If the assertion is successful, it returns the converted value. If the assertion fails, it returns the provided default value \`def\`.
 
-## func [OrZero](<https://github.com/goexts/generic/blob/main/cast/cast.go#L31>)
-
-```go
-func OrZero[T comparable](v any) (zero T)
-```
-
-OrZero attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value. If the conversion fails, it returns a zero value of the specified type.
-
-## func [Try](<https://github.com/goexts/generic/blob/main/cast/cast.go#L11>)
+<a name="OrZero"></a>
+## func [OrZero](<https://github.com/goexts/generic/blob/main/cast/cast.go#L25>)
 
 ```go
-func Try[T any](v any) (ret T, ok bool)
+func OrZero[T any](v any) T
 ```
 
-Try attempts to convert a value to the specified type. If the conversion is successful, it returns the converted value and true. If the conversion fails, it returns the original value and false.
+OrZero attempts to perform a type assertion of v to type T. If the assertion is successful, it returns the converted value. If the assertion fails, it returns the zero value of type T.
+
+<a name="Try"></a>
+## func [Try](<https://github.com/goexts/generic/blob/main/cast/cast.go#L7>)
+
+```go
+func Try[T any](v any) (T, bool)
+```
+
+Try attempts to perform a type assertion of v to type T. It is a direct, generic wrapper around Go's \`value, ok\` idiom. If the assertion is successful, it returns the converted value and true. If the assertion fails, it returns the zero value of T and false.
 
 # cmp
 
@@ -45,42 +65,72 @@ Try attempts to convert a value to the specified type. If the conversion is succ
 import "github.com/goexts/generic/cmp"
 ```
 
-Package cmp provides utility functions for comparing ordered types.
+Package cmp provides generic, type\-safe functions for comparing ordered types.
+
+This package offers fundamental comparison utilities like Min, Max, and Clamp. Its central function, Compare, is designed to be fully compatible with the \`slices.SortFunc\`, making it easy to sort slices of any ordered type.
+
+Example \(Sorting a custom type\):
+
+```
+type Product struct {
+	ID    int
+	Price float64
+}
+
+products := []Product{
+	{ID: 1, Price: 99.99},
+	{ID: 2, Price: 49.99},
+	{ID: 3, Price: 74.99},
+}
+
+// Sort products by price using cmp.Compare
+slices.SortFunc(products, func(a, b Product) int {
+	return cmp.Compare(a.Price, b.Price)
+})
+
+// products is now sorted by Price: [{2 49.99} {3 74.99} {1 99.99}]
+```
 
 ## Index
 
-- [func Clamp[T constraints.Ordered](v, lo, hi T) T](<#func-clamp>)
-- [func Compare[T constraints.Ordered](a, b T) int](<#func-compare>)
-- [func IsZero[T comparable](v T) bool](<#func-iszero>)
-- [func Max[T constraints.Ordered](a, b T) T](<#func-max>)
-- [func Min[T constraints.Ordered](a, b T) T](<#func-min>)
+- [func Clamp\[T constraints.Ordered\]\(v, lo, hi T\) T](<#Clamp>)
+- [func Compare\[T constraints.Ordered\]\(a, b T\) int](<#Compare>)
+- [func IsZero\[T comparable\]\(v T\) bool](<#IsZero>)
+- [func Max\[T constraints.Ordered\]\(a, b T\) T](<#Max>)
+- [func Min\[T constraints.Ordered\]\(a, b T\) T](<#Min>)
 
 
-## func [Clamp](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L34>)
+<a name="Clamp"></a>
+## func [Clamp](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L41>)
 
 ```go
 func Clamp[T constraints.Ordered](v, lo, hi T) T
 ```
 
-Clamp returns v clamped to the range \[lo, hi\].
+Clamp returns v clamped to the inclusive range \[lo, hi\]. If v is less than lo, it returns lo. If v is greater than hi, it returns hi. Otherwise, it returns v.
 
-## func [Compare](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L7>)
+<a name="Compare"></a>
+## func [Compare](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L11>)
 
 ```go
 func Compare[T constraints.Ordered](a, b T) int
 ```
 
-Compare returns \-1, 0, or 1 if a is less than, equal to, or greater than b, respectively.
+Compare returns an integer comparing two values. The result will be 0 if a == b, \-1 if a \< b, and \+1 if a \> b.
 
-## func [IsZero](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L45>)
+This function is designed to be fully compatible with the standard library's \`slices.SortFunc\`, making it a convenient tool for sorting slices of any ordered type.
+
+<a name="IsZero"></a>
+## func [IsZero](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L53>)
 
 ```go
 func IsZero[T comparable](v T) bool
 ```
 
-IsZero returns true if v is the zero value for its type.
+IsZero returns true if v is the zero value for its type. It is a generic\-safe way to check for zero values.
 
-## func [Max](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L26>)
+<a name="Max"></a>
+## func [Max](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L30>)
 
 ```go
 func Max[T constraints.Ordered](a, b T) T
@@ -88,7 +138,8 @@ func Max[T constraints.Ordered](a, b T) T
 
 Max returns the larger of a or b.
 
-## func [Min](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L18>)
+<a name="Min"></a>
+## func [Min](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L22>)
 
 ```go
 func Min[T constraints.Ordered](a, b T) T
@@ -102,110 +153,66 @@ Min returns the smaller of a or b.
 import "github.com/goexts/generic/cond"
 ```
 
-Package cond provides utility functions for conditional logic, like ternary operators.
+Package cond provides generic, ternary\-like conditional functions.
+
+This package offers a concise way to express simple conditional logic in a single expression, avoiding the need for a more verbose if\-else block. It provides functions for both eagerly\-evaluated values and lazily\-evaluated functions.
+
+Example \(Eager Evaluation\):
+
+```
+// Instead of:
+// var status string
+// if code == 200 {
+// 	status = "OK"
+// } else {
+// 	status = "Error"
+// }
+
+status := cond.If(code == 200, "OK", "Error")
+```
+
+Example \(Lazy Evaluation\):
+
+```
+// The expensive functions are only called when needed.
+result := cond.IfFunc(isComplex, doComplexCalculation, doSimpleCalculation)
+```
 
 ## Index
 
-- [func Choose[T any](cond bool, l, r T) T](<#func-choose>)
-- [func ChooseFunc[T any](cond bool, l, r func() T) T](<#func-choosefunc>)
-- [func ChooseLeft[L, R any](l L, _ R) L](<#func-chooseleft>)
-- [func ChooseRight[L, R any](_ L, r R) R](<#func-chooseright>)
-- [func If[T any](condition bool, trueVal T, falseVal T) T](<#func-if>)
-- [func IfFunc[T any](condition bool, trueFn func() T, falseFn func() T) T](<#func-iffunc>)
-- [func IfFuncE[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error)](<#func-iffunce>)
-- [func IfFuncWithError[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error)](<#func-iffuncwitherror>)
-- [func OnlyLeft[L, R1, R2 any](l L, _ R1, _ R2) L](<#func-onlyleft>)
-- [func OnlyMiddle[L, M, R any](_ L, m M, _ R) M](<#func-onlymiddle>)
-- [func OnlyRight[L1, L2, R any](_ L1, _ L2, r R) R](<#func-onlyright>)
+- [func If\[T any\]\(condition bool, trueVal T, falseVal T\) T](<#If>)
+- [func IfFunc\[T any\]\(condition bool, trueFn func\(\) T, falseFn func\(\) T\) T](<#IfFunc>)
+- [func IfFuncE\[T any\]\(condition bool, trueFn func\(\) \(T, error\), falseFn func\(\) \(T, error\)\) \(T, error\)](<#IfFuncE>)
 
 
-## func [Choose](<https://github.com/goexts/generic/blob/main/cond/cond.go#L55>)
-
-```go
-func Choose[T any](cond bool, l, r T) T
-```
-
-Choose returns the left value if cond is true, otherwise it returns the right value. This function is useful when you need to conditionally choose between two values.
-
-## func [ChooseFunc](<https://github.com/goexts/generic/blob/main/cond/cond.go#L64>)
-
-```go
-func ChooseFunc[T any](cond bool, l, r func() T) T
-```
-
-ChooseFunc returns the result of the left function if cond is true, otherwise it returns the result of the right function. This function is useful when you need to conditionally choose between two functions.
-
-## func [ChooseLeft](<https://github.com/goexts/generic/blob/main/cond/cond.go#L79>)
-
-```go
-func ChooseLeft[L, R any](l L, _ R) L
-```
-
-ChooseLeft returns the leftmost value, ignoring the right value. This function is useful when you need to prioritize the left value over the right.
-
-## func [ChooseRight](<https://github.com/goexts/generic/blob/main/cond/cond.go#L73>)
-
-```go
-func ChooseRight[L, R any](_ L, r R) R
-```
-
-ChooseRight returns the rightmost value, ignoring the left value. This function is useful when you need to prioritize the right value over the left.
-
-## func [If](<https://github.com/goexts/generic/blob/main/cond/cond.go#L7>)
+<a name="If"></a>
+## func [If](<https://github.com/goexts/generic/blob/main/cond/cond.go#L8>)
 
 ```go
 func If[T any](condition bool, trueVal T, falseVal T) T
 ```
 
-If function takes a boolean condition and two values of any type T, and returns the first value if the condition is true, and the second value if the condition is false.
+If returns trueVal if the condition is true, and falseVal otherwise. This is a generic, eagerly\-evaluated ternary\-like expression. Both trueVal and falseVal are evaluated before this function is called.
 
-## func [IfFunc](<https://github.com/goexts/generic/blob/main/cond/cond.go#L20>)
+For lazy evaluation where values are expensive to compute, see IfFunc.
+
+<a name="IfFunc"></a>
+## func [IfFunc](<https://github.com/goexts/generic/blob/main/cond/cond.go#L19>)
 
 ```go
 func IfFunc[T any](condition bool, trueFn func() T, falseFn func() T) T
 ```
 
-IfFunc function takes a boolean condition, a function to execute if the condition is true, and a function to execute if the condition is false. It returns the result of the function that was executed.
+IfFunc returns the result of trueFn if the condition is true, and the result of falseFn otherwise. This is a generic, lazily\-evaluated ternary\-like expression. Only the function corresponding to the condition's outcome is executed.
 
-## func [IfFuncE](<https://github.com/goexts/generic/blob/main/cond/cond.go#L44>)
+<a name="IfFuncE"></a>
+## func [IfFuncE](<https://github.com/goexts/generic/blob/main/cond/cond.go#L30>)
 
 ```go
 func IfFuncE[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error)
 ```
 
-## func [IfFuncWithError](<https://github.com/goexts/generic/blob/main/cond/cond.go#L35>)
-
-```go
-func IfFuncWithError[T any](condition bool, trueFn func() (T, error), falseFn func() (T, error)) (T, error)
-```
-
-IfFuncWithError function takes a boolean condition, a function to execute if the condition is true, and a function to execute if the condition is false. It returns the result of the function that was executed.
-
-Decrypted: use IfFuncE instead of IfFuncWithError
-
-## func [OnlyLeft](<https://github.com/goexts/generic/blob/main/cond/cond.go#L85>)
-
-```go
-func OnlyLeft[L, R1, R2 any](l L, _ R1, _ R2) L
-```
-
-OnlyLeft returns the leftmost value, ignoring all other values. This function is useful when you need to extract the leftmost value from a tuple.
-
-## func [OnlyMiddle](<https://github.com/goexts/generic/blob/main/cond/cond.go#L97>)
-
-```go
-func OnlyMiddle[L, M, R any](_ L, m M, _ R) M
-```
-
-OnlyMiddle returns the middle value, ignoring all other values. This function is useful when you need to extract the middle value from a tuple.
-
-## func [OnlyRight](<https://github.com/goexts/generic/blob/main/cond/cond.go#L91>)
-
-```go
-func OnlyRight[L1, L2, R any](_ L1, _ L2, r R) R
-```
-
-OnlyRight returns the rightmost value, ignoring all other values. This function is useful when you need to extract the rightmost value from a tuple.
+IfFuncE returns the result of trueFn if the condition is true, and the result of falseFn otherwise. It is the error\-returning version of IfFunc. This is a generic, lazily\-evaluated ternary\-like expression. Only the function corresponding to the condition's outcome is executed.
 
 # configure
 
@@ -217,131 +224,103 @@ Package configure provides utilities for applying functional options to objects.
 
 Package configure provides a robust, type\-safe, and flexible implementation of the Functional Options Pattern for Go. It is designed to handle a wide range of configuration scenarios, from simple object initialization to complex, multi\-stage product compilation.
 
-\# Core Concepts
+### Core Concepts
 
 The package is built around a few core ideas:
 
-```
-- **Type-Safe Application**: For the highest performance and compile-time safety,
-  use the `Apply` and `ApplyE` functions. They are ideal when all options
-  are of the same, known type.
+- \*\*Type\-Safe Application\*\*: For the highest performance and compile\-time safety, use the \`Apply\` and \`ApplyE\` functions. They are ideal when all options are of the same, known type.
+  
+  // Example of simple, type\-safe configuration: type Server struct \{ Port int Host string \} type Option func\(\*Server\) func WithPort\(p int\) Option \{ return func\(s \*Server\) \{ s.Port = p \} \} func WithHost\(h string\) Option \{ return func\(s \*Server\) \{ s.Host = h \} \}
+  
+  server := &Server\{\} configure.Apply\(server, \[\]Option\{ WithPort\(8080\), WithHost\("localhost"\), \}\)
 
-  // Example of simple, type-safe configuration:
-  type Server struct {
-  Port int
-  Host string
-  }
-  type Option func(*Server)
-  func WithPort(p int) Option {
-  return func(s *Server) { s.Port = p }
-  }
-  func WithHost(h string) Option {
-  return func(s *Server) { s.Host = h }
-  }
+- \*\*Flexible Application\*\*: When you need to handle a mix of different option types, use \`ApplyAny\`. This function uses type assertions to provide flexibility, at the cost of compile\-time safety and a minor performance overhead.
+  
+  opts := \[\]any\{ WithPort\(8080\), func\(s \*Server\) \{ s.Host = "example.com" \}, // A raw function \} server, err := configure.New\[Server\]\(opts...\)
 
-  server := &Server{}
-  configure.Apply(server, []Option{
-  WithPort(8080),
-  WithHost("localhost"),
-  })
+- \*\*Stateful Builder\*\*: For scenarios where options are collected progressively from different parts of your application, use the \`Builder\`. It provides a fluent, chainable API.
+  
+  builder := configure.NewBuilder\[Server\]\(\). Add\(WithPort\(443\)\). AddWhen\(isProduction, WithHost\("prod.server.com"\)\)
+  
+  server, err := builder.Build\(\)
 
-- **Flexible Application**: When you need to handle a mix of different option
-  types, use `ApplyAny`. This function uses type assertions to provide
-  flexibility, at the cost of compile-time safety and a minor performance overhead.
-
-  opts := []any{
-  WithPort(8080),
-  func(s *Server) { s.Host = "example.com" }, // A raw function
-  }
-  server, err := configure.New[Server](opts...)
-
-- **Stateful Builder**: For scenarios where options are collected progressively
-  from different parts of your application, use the `Builder`. It provides a
-  fluent, chainable API.
-
-  builder := configure.NewBuilder[Server]().
-  Add(WithPort(443)).
-  AddWhen(isProduction, WithHost("prod.server.com"))
-
-  server, err := builder.Build()
-
-- **Compilation**: For the advanced use case of transforming a configuration
-  object `C` into a final product `P`, use the top-level `Compile` function.
-  This separates the configuration logic from the product creation logic.
-
-  // Example: Using a `ClientConfig` to create an `*http.Client`
-  type ClientConfig struct {
-  Timeout time.Duration
-  }
-  factory := func(c *ClientConfig) (*http.Client, error) {
-  return &http.Client{Timeout: c.Timeout}, nil
-  }
-
-  configBuilder := configure.NewBuilder[ClientConfig]().
-  Add(func(c *ClientConfig) { c.Timeout = 20 * time.Second })
-
-  httpClient, err := configure.Compile(configBuilder, factory)
-```
+- \*\*Compilation\*\*: For the advanced use case of transforming a configuration object \`C\` into a final product \`P\`, use the top\-level \`Compile\` function. This separates the configuration logic from the product creation logic.
+  
+  // Example: Using a \`ClientConfig\` to create an \`\*http.Client\` type ClientConfig struct \{ Timeout time.Duration \} factory := func\(c \*ClientConfig\) \(\*http.Client, error\) \{ return &http.Client\{Timeout: c.Timeout\}, nil \}
+  
+  configBuilder := configure.NewBuilder\[ClientConfig\]\(\). Add\(func\(c \*ClientConfig\) \{ c.Timeout = 20 \* time.Second \}\)
+  
+  httpClient, err := configure.Compile\(configBuilder, factory\)
 
 By combining these tools, developers can choose the right approach for their specific needs, ensuring code remains clean, maintainable, and robust.
 
 ## Index
 
-- [func Apply[T any, O OptionConstraint[T]](target *T, opts []O) *T](<#func-apply>)
-- [func ApplyAny[T any](target *T, opts []any) (*T, error)](<#func-applyany>)
-- [func ApplyAnyWith[T any](target *T, opts ...any) (*T, error)](<#func-applyanywith>)
-- [func ApplyE[T any, O OptionEConstraint[T]](target *T, opts []O) (*T, error)](<#func-applye>)
-- [func ApplyWith[T any](target *T, opts ...Option[T]) *T](<#func-applywith>)
-- [func ApplyWithE[T any](target *T, opts ...OptionE[T]) (*T, error)](<#func-applywithe>)
-- [func Compile[C any, P any](builder *Builder[C], factory func(c *C) (*P, error)) (*P, error)](<#func-compile>)
-- [func IsConfigError(err error) bool](<#func-isconfigerror>)
-- [func IsEmptyTargetValueError(err error) bool](<#func-isemptytargetvalueerror>)
-- [func IsExecutionFailedError(err error) bool](<#func-isexecutionfailederror>)
-- [func IsUnsupportedTypeError(err error) bool](<#func-isunsupportedtypeerror>)
-- [func New[T any](opts ...any) (*T, error)](<#func-new>)
-- [type Applier](<#type-applier>)
-- [type ApplierE](<#type-appliere>)
-- [type Builder](<#type-builder>)
-  - [func NewBuilder[C any]() *Builder[C]](<#func-newbuilder>)
-  - [func (b *Builder[C]) Add(opts ...any) *Builder[C]](<#func-builderc-add>)
-  - [func (b *Builder[C]) AddWhen(condition bool, opt any) *Builder[C]](<#func-builderc-addwhen>)
-  - [func (b *Builder[C]) Apply(target *C) error](<#func-builderc-apply>)
-  - [func (b *Builder[C]) ApplyTo(target *C) (*C, error)](<#func-builderc-applyto>)
-  - [func (b *Builder[C]) Build() (*C, error)](<#func-builderc-build>)
-- [type ConfigError](<#type-configerror>)
-  - [func (e *ConfigError) Error() string](<#func-configerror-error>)
-  - [func (e *ConfigError) Unwrap() error](<#func-configerror-unwrap>)
-- [type ErrorCode](<#type-errorcode>)
-- [type Option](<#type-option>)
-  - [func (o Option[T]) Apply(target *T)](<#func-optiont-apply>)
-- [type OptionConstraint](<#type-optionconstraint>)
-- [type OptionE](<#type-optione>)
-  - [func WithValidation[T any](validator func(*T) error) OptionE[T]](<#func-withvalidation>)
-  - [func (o OptionE[T]) Apply(target *T) error](<#func-optionet-apply>)
-- [type OptionEConstraint](<#type-optioneconstraint>)
+- [func Apply\[T any, O FuncOption\[T\]\]\(target \*T, opts \[\]O\) \*T](<#Apply>)
+- [func ApplyAny\[T any\]\(target \*T, opts \[\]any\) \(\*T, error\)](<#ApplyAny>)
+- [func ApplyAnyWith\[T any\]\(target \*T, opts ...any\) \(\*T, error\)](<#ApplyAnyWith>)
+- [func ApplyE\[T any, O FuncOptionE\[T\]\]\(target \*T, opts \[\]O\) \(\*T, error\)](<#ApplyE>)
+- [func ApplyWith\[T any\]\(target \*T, opts ...Option\[T\]\) \*T](<#ApplyWith>)
+- [func ApplyWithE\[T any\]\(target \*T, opts ...OptionE\[T\]\) \(\*T, error\)](<#ApplyWithE>)
+- [func Compile\[C any, P any\]\(builder \*Builder\[C\], factory func\(c \*C\) \(\*P, error\)\) \(\*P, error\)](<#Compile>)
+- [func IsConfigError\(err error\) bool](<#IsConfigError>)
+- [func IsEmptyTargetValueError\(err error\) bool](<#IsEmptyTargetValueError>)
+- [func IsExecutionFailedError\(err error\) bool](<#IsExecutionFailedError>)
+- [func IsUnsupportedTypeError\(err error\) bool](<#IsUnsupportedTypeError>)
+- [func New\[T any, O FuncOption\[T\]\]\(opts \[\]O\) \*T](<#New>)
+- [func NewAny\[T any\]\(opts ...any\) \(\*T, error\)](<#NewAny>)
+- [func NewE\[T any, O FuncOptionE\[T\]\]\(opts \[\]O\) \(\*T, error\)](<#NewE>)
+- [func NewWith\[T any\]\(opts ...Option\[T\]\) \*T](<#NewWith>)
+- [func NewWithE\[T any\]\(opts ...OptionE\[T\]\) \(\*T, error\)](<#NewWithE>)
+- [type Applier](<#Applier>)
+- [type ApplierE](<#ApplierE>)
+- [type Builder](<#Builder>)
+  - [func NewBuilder\[C any\]\(\) \*Builder\[C\]](<#NewBuilder>)
+  - [func \(b \*Builder\[C\]\) Add\(opts ...any\) \*Builder\[C\]](<#Builder[C].Add>)
+  - [func \(b \*Builder\[C\]\) AddWhen\(condition bool, opt any\) \*Builder\[C\]](<#Builder[C].AddWhen>)
+  - [func \(b \*Builder\[C\]\) Apply\(target \*C\) error](<#Builder[C].Apply>)
+  - [func \(b \*Builder\[C\]\) ApplyTo\(target \*C\) \(\*C, error\)](<#Builder[C].ApplyTo>)
+  - [func \(b \*Builder\[C\]\) Build\(\) \(\*C, error\)](<#Builder[C].Build>)
+- [type ConfigError](<#ConfigError>)
+  - [func \(e \*ConfigError\) Error\(\) string](<#ConfigError.Error>)
+  - [func \(e \*ConfigError\) Unwrap\(\) error](<#ConfigError.Unwrap>)
+- [type ErrorCode](<#ErrorCode>)
+- [type FuncOption](<#FuncOption>)
+- [type FuncOptionAny](<#FuncOptionAny>)
+- [type FuncOptionE](<#FuncOptionE>)
+- [type Option](<#Option>)
+  - [func OptionSet\[T any\]\(opts ...Option\[T\]\) Option\[T\]](<#OptionSet>)
+  - [func \(o Option\[T\]\) Apply\(target \*T\)](<#Option[T].Apply>)
+- [type OptionE](<#OptionE>)
+  - [func OptionSetE\[T any\]\(opts ...OptionE\[T\]\) OptionE\[T\]](<#OptionSetE>)
+  - [func WithValidation\[T any\]\(validator func\(\*T\) error\) OptionE\[T\]](<#WithValidation>)
+  - [func \(o OptionE\[T\]\) Apply\(target \*T\) error](<#OptionE[T].Apply>)
 
 
-## func [Apply](<https://github.com/goexts/generic/blob/main/configure/apply.go#L72>)
+<a name="Apply"></a>
+## func [Apply](<https://github.com/goexts/generic/blob/main/configure/apply.go#L116>)
 
 ```go
-func Apply[T any, O OptionConstraint[T]](target *T, opts []O) *T
+func Apply[T any, O FuncOption[T]](target *T, opts []O) *T
 ```
 
 Apply applies a slice of options to the target. It is the core, high\-performance function for applying a homogeneous set of type\-safe options. Its generic constraint allows for custom\-defined option types, such as \`type MyOption func\(\*T\)\`.
 
 For handling mixed option types, see ApplyAny.
 
-## func [ApplyAny](<https://github.com/goexts/generic/blob/main/configure/apply.go#L116>)
+<a name="ApplyAny"></a>
+## func [ApplyAny](<https://github.com/goexts/generic/blob/main/configure/apply.go#L160>)
 
 ```go
 func ApplyAny[T any](target *T, opts []any) (*T, error)
 ```
 
-ApplyAny applies a slice of options of various types \(any\). This function provides flexibility by using type assertions to handle heterogeneous options, at the cost of compile\-time type safety and a minor performance overhead.
+ApplyAny applies a slice of options of various types \(any\). This function provides flexibility by using reflection to handle heterogeneous options, at the cost of compile\-time type safety and a minor performance overhead.
 
 For type\-safe, high\-performance application, see Apply or ApplyE.
 
-## func [ApplyAnyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L129>)
+<a name="ApplyAnyWith"></a>
+## func [ApplyAnyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L173>)
 
 ```go
 func ApplyAnyWith[T any](target *T, opts ...any) (*T, error)
@@ -349,17 +328,19 @@ func ApplyAnyWith[T any](target *T, opts ...any) (*T, error)
 
 ApplyAnyWith is the variadic convenience wrapper for ApplyAny.
 
-## func [ApplyE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L93>)
+<a name="ApplyE"></a>
+## func [ApplyE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L137>)
 
 ```go
-func ApplyE[T any, O OptionEConstraint[T]](target *T, opts []O) (*T, error)
+func ApplyE[T any, O FuncOptionE[T]](target *T, opts []O) (*T, error)
 ```
 
 ApplyE applies a slice of error\-returning options to the target. It is the core, high\-performance function for applying a homogeneous set of type\-safe, error\-returning options. Its generic constraint allows for custom\-defined option types.
 
 For handling mixed option types, see ApplyAny.
 
-## func [ApplyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L83>)
+<a name="ApplyWith"></a>
+## func [ApplyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L127>)
 
 ```go
 func ApplyWith[T any](target *T, opts ...Option[T]) *T
@@ -367,7 +348,8 @@ func ApplyWith[T any](target *T, opts ...Option[T]) *T
 
 ApplyWith is the variadic convenience wrapper for Apply.
 
-## func [ApplyWithE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L106>)
+<a name="ApplyWithE"></a>
+## func [ApplyWithE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L150>)
 
 ```go
 func ApplyWithE[T any](target *T, opts ...OptionE[T]) (*T, error)
@@ -375,7 +357,8 @@ func ApplyWithE[T any](target *T, opts ...OptionE[T]) (*T, error)
 
 ApplyWithE is the variadic convenience wrapper for ApplyE.
 
-## func [Compile](<https://github.com/goexts/generic/blob/main/configure/builder.go#L57>)
+<a name="Compile"></a>
+## func [Compile](<https://github.com/goexts/generic/blob/main/configure/builder.go#L82>)
 
 ```go
 func Compile[C any, P any](builder *Builder[C], factory func(c *C) (*P, error)) (*P, error)
@@ -383,6 +366,7 @@ func Compile[C any, P any](builder *Builder[C], factory func(c *C) (*P, error)) 
 
 Compile creates a final product \`P\` by first building a configuration \`C\` using the provided builder, and then passing the result to a factory function. This is the primary top\-level function for the Config \-\> Product workflow, ensuring a clean separation between configuration and compilation.
 
+<a name="IsConfigError"></a>
 ## func [IsConfigError](<https://github.com/goexts/generic/blob/main/configure/errors.go#L71>)
 
 ```go
@@ -391,6 +375,7 @@ func IsConfigError(err error) bool
 
 IsConfigError checks if the given error is a \*ConfigError.
 
+<a name="IsEmptyTargetValueError"></a>
 ## func [IsEmptyTargetValueError](<https://github.com/goexts/generic/blob/main/configure/errors.go#L92>)
 
 ```go
@@ -399,6 +384,7 @@ func IsEmptyTargetValueError(err error) bool
 
 IsEmptyTargetValueError checks if the error is a ConfigError with the code ErrEmptyTargetValue.
 
+<a name="IsExecutionFailedError"></a>
 ## func [IsExecutionFailedError](<https://github.com/goexts/generic/blob/main/configure/errors.go#L85>)
 
 ```go
@@ -407,6 +393,7 @@ func IsExecutionFailedError(err error) bool
 
 IsExecutionFailedError checks if the error is a ConfigError with the code ErrExecutionFailed.
 
+<a name="IsUnsupportedTypeError"></a>
 ## func [IsUnsupportedTypeError](<https://github.com/goexts/generic/blob/main/configure/errors.go#L78>)
 
 ```go
@@ -415,17 +402,55 @@ func IsUnsupportedTypeError(err error) bool
 
 IsUnsupportedTypeError checks if the error is a ConfigError with the code ErrUnsupportedType.
 
-## func [New](<https://github.com/goexts/generic/blob/main/configure/apply.go#L138>)
+<a name="New"></a>
+## func [New](<https://github.com/goexts/generic/blob/main/configure/apply.go#L197>)
 
 ```go
-func New[T any](opts ...any) (*T, error)
+func New[T any, O FuncOption[T]](opts []O) *T
 ```
 
-New creates a new instance of T, applies the given options, and returns it. It is a convenient top\-level constructor for simple object creation where the configuration type and the product type are the same.
+New creates a new instance of T and applies the given options. It is a convenient, type\-safe constructor for creating objects with homogeneous options. For mixed\-type or error\-returning options, see NewAny or NewE.
 
-It uses ApplyAnyWith for maximum flexibility in accepting options.
+<a name="NewAny"></a>
+## func [NewAny](<https://github.com/goexts/generic/blob/main/configure/apply.go#L227>)
 
-## type [Applier](<https://github.com/goexts/generic/blob/main/configure/apply.go#L6-L8>)
+```go
+func NewAny[T any](opts ...any) (*T, error)
+```
+
+NewAny creates a new instance of T, applies the given options of any type, and returns it. It is a convenient top\-level constructor for simple object creation where the configuration type and the product type are the same.
+
+It uses ApplyAny for maximum flexibility in accepting options.
+
+<a name="NewE"></a>
+## func [NewE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L211>)
+
+```go
+func NewE[T any, O FuncOptionE[T]](opts []O) (*T, error)
+```
+
+NewE creates a new instance of T, applies the error\-returning options, and returns the configured instance or an error. It is a convenient, type\-safe constructor for creating objects with homogeneous, error\-returning options.
+
+<a name="NewWith"></a>
+## func [NewWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L203>)
+
+```go
+func NewWith[T any](opts ...Option[T]) *T
+```
+
+NewWith is the variadic convenience wrapper for New.
+
+<a name="NewWithE"></a>
+## func [NewWithE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L217>)
+
+```go
+func NewWithE[T any](opts ...OptionE[T]) (*T, error)
+```
+
+NewWithE is the variadic convenience wrapper for NewE.
+
+<a name="Applier"></a>
+## type [Applier](<https://github.com/goexts/generic/blob/main/configure/apply.go#L10-L12>)
 
 Applier is an interface for types that can apply a configuration to an object. It provides an extension point for ApplyAny, allowing custom types to be used as options without reflection.
 
@@ -435,7 +460,8 @@ type Applier[T any] interface {
 }
 ```
 
-## type [ApplierE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L13-L15>)
+<a name="ApplierE"></a>
+## type [ApplierE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L17-L19>)
 
 ApplierE is an interface for types that can apply a configuration and return an error. It provides an extension point for ApplyAny, allowing custom types to be used as options without reflection.
 
@@ -445,11 +471,12 @@ type ApplierE[T any] interface {
 }
 ```
 
-## type [Builder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L8-L10>)
+<a name="Builder"></a>
+## type [Builder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L15-L17>)
 
 Builder provides a fluent interface for collecting and applying options. It is ideal for scenarios where configuration options are gathered progressively from different parts of an application.
 
-The generic type C represents the configuration type being built.
+The generic type C represents the configuration type being built, and is expected to be a struct type. Using a pointer type for C is not recommended as it can lead to unexpected behavior.
 
 ```go
 type Builder[C any] struct {
@@ -457,7 +484,8 @@ type Builder[C any] struct {
 }
 ```
 
-### func [NewBuilder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L13>)
+<a name="NewBuilder"></a>
+### func [NewBuilder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L20>)
 
 ```go
 func NewBuilder[C any]() *Builder[C]
@@ -465,7 +493,8 @@ func NewBuilder[C any]() *Builder[C]
 
 NewBuilder creates a new, empty configuration builder.
 
-### func \(\*Builder\[C\]\) [Add](<https://github.com/goexts/generic/blob/main/configure/builder.go#L18>)
+<a name="Builder[C].Add"></a>
+### func \(\*Builder\[C\]\) [Add](<https://github.com/goexts/generic/blob/main/configure/builder.go#L25>)
 
 ```go
 func (b *Builder[C]) Add(opts ...any) *Builder[C]
@@ -473,7 +502,8 @@ func (b *Builder[C]) Add(opts ...any) *Builder[C]
 
 Add adds one or more options to the builder. It supports a fluent, chainable API.
 
-### func \(\*Builder\[C\]\) [AddWhen](<https://github.com/goexts/generic/blob/main/configure/builder.go#L25>)
+<a name="Builder[C].AddWhen"></a>
+### func \(\*Builder\[C\]\) [AddWhen](<https://github.com/goexts/generic/blob/main/configure/builder.go#L32>)
 
 ```go
 func (b *Builder[C]) AddWhen(condition bool, opt any) *Builder[C]
@@ -481,7 +511,8 @@ func (b *Builder[C]) AddWhen(condition bool, opt any) *Builder[C]
 
 AddWhen conditionally adds an option to the builder if the condition is true. It supports a fluent, chainable API.
 
-### func \(\*Builder\[C\]\) [Apply](<https://github.com/goexts/generic/blob/main/configure/builder.go#L48>)
+<a name="Builder[C].Apply"></a>
+### func \(\*Builder\[C\]\) [Apply](<https://github.com/goexts/generic/blob/main/configure/builder.go#L73>)
 
 ```go
 func (b *Builder[C]) Apply(target *C) error
@@ -489,7 +520,8 @@ func (b *Builder[C]) Apply(target *C) error
 
 Apply implements the ApplierE interface. This allows a Builder instance to be passed directly as an option to other functions like New or ApplyAny, acting as a "super option".
 
-### func \(\*Builder\[C\]\) [ApplyTo](<https://github.com/goexts/generic/blob/main/configure/builder.go#L33>)
+<a name="Builder[C].ApplyTo"></a>
+### func \(\*Builder\[C\]\) [ApplyTo](<https://github.com/goexts/generic/blob/main/configure/builder.go#L52>)
 
 ```go
 func (b *Builder[C]) ApplyTo(target *C) (*C, error)
@@ -497,7 +529,8 @@ func (b *Builder[C]) ApplyTo(target *C) (*C, error)
 
 ApplyTo applies all collected options to an existing target object.
 
-### func \(\*Builder\[C\]\) [Build](<https://github.com/goexts/generic/blob/main/configure/builder.go#L40>)
+<a name="Builder[C].Build"></a>
+### func \(\*Builder\[C\]\) [Build](<https://github.com/goexts/generic/blob/main/configure/builder.go#L62>)
 
 ```go
 func (b *Builder[C]) Build() (*C, error)
@@ -505,6 +538,7 @@ func (b *Builder[C]) Build() (*C, error)
 
 Build creates a new, zero\-value instance of the configuration object C and applies all collected options to it. The resulting object can then be used directly or passed to a factory.
 
+<a name="ConfigError"></a>
 ## type [ConfigError](<https://github.com/goexts/generic/blob/main/configure/errors.go#L29-L36>)
 
 ConfigError is a custom error type for the configure package. It wraps an original error while providing additional context, such as the type of option that caused the failure and a specific error code.
@@ -520,6 +554,7 @@ type ConfigError struct {
 }
 ```
 
+<a name="ConfigError.Error"></a>
 ### func \(\*ConfigError\) [Error](<https://github.com/goexts/generic/blob/main/configure/errors.go#L54>)
 
 ```go
@@ -528,6 +563,7 @@ func (e *ConfigError) Error() string
 
 Error implements the standard error interface.
 
+<a name="ConfigError.Unwrap"></a>
 ### func \(\*ConfigError\) [Unwrap](<https://github.com/goexts/generic/blob/main/configure/errors.go#L49>)
 
 ```go
@@ -536,6 +572,7 @@ func (e *ConfigError) Unwrap() error
 
 Unwrap makes ConfigError compatible with the standard library's errors.Is and errors.As functions, allowing for proper error chain inspection.
 
+<a name="ErrorCode"></a>
 ## type [ErrorCode](<https://github.com/goexts/generic/blob/main/configure/errors.go#L9>)
 
 ErrorCode defines the specific category of a configuration error.
@@ -544,7 +581,7 @@ ErrorCode defines the specific category of a configuration error.
 type ErrorCode int
 ```
 
-Error codes for specific configuration failures.
+<a name="ErrUnsupportedType"></a>Error codes for specific configuration failures.
 
 ```go
 const (
@@ -562,6 +599,40 @@ const (
 )
 ```
 
+<a name="FuncOption"></a>
+## type [FuncOption](<https://github.com/goexts/generic/blob/main/configure/options.go#L31-L33>)
+
+FuncOption is a generic constraint that permits any function type whose underlying type is func\(\*T\). This enables the top\-level Apply function to accept custom\-defined option types, such as \`type MyOption func\(\*T\)\`.
+
+```go
+type FuncOption[T any] interface {
+    // contains filtered or unexported methods
+}
+```
+
+<a name="FuncOptionAny"></a>
+## type [FuncOptionAny](<https://github.com/goexts/generic/blob/main/configure/options.go#L46-L48>)
+
+FuncOptionAny is a generic constraint that permits any function type whose underlying type is either func\(\*T\) or func\(\*T\) error. This provides a convenient way to create functions that can accept both error\-returning and non\-error\-returning function options.
+
+```go
+type FuncOptionAny[T any] interface {
+    // contains filtered or unexported methods
+}
+```
+
+<a name="FuncOptionE"></a>
+## type [FuncOptionE](<https://github.com/goexts/generic/blob/main/configure/options.go#L38-L40>)
+
+FuncOptionE is a generic constraint that permits any function type whose underlying type is func\(\*T\) error. This enables the top\-level ApplyE function to accept custom\-defined, error\-returning option types.
+
+```go
+type FuncOptionE[T any] interface {
+    // contains filtered or unexported methods
+}
+```
+
+<a name="Option"></a>
 ## type [Option](<https://github.com/goexts/generic/blob/main/configure/options.go#L5>)
 
 Option represents a function that configures an object of type T. It is the primary, non\-error\-returning type for the Functional Options Pattern.
@@ -570,6 +641,16 @@ Option represents a function that configures an object of type T. It is the prim
 type Option[T any] func(*T)
 ```
 
+<a name="OptionSet"></a>
+### func [OptionSet](<https://github.com/goexts/generic/blob/main/configure/apply.go#L179>)
+
+```go
+func OptionSet[T any](opts ...Option[T]) Option[T]
+```
+
+OptionSet bundles multiple options into a single option. This allows for creating reusable and modular sets of configurations.
+
+<a name="Option[T].Apply"></a>
 ### func \(Option\[T\]\) [Apply](<https://github.com/goexts/generic/blob/main/configure/options.go#L9>)
 
 ```go
@@ -578,16 +659,7 @@ func (o Option[T]) Apply(target *T)
 
 Apply implements the Applier\[T\] interface, allowing an Option\[T\] to be used as a flexible option type with functions like ApplyAny.
 
-## type [OptionConstraint](<https://github.com/goexts/generic/blob/main/configure/options.go#L31-L33>)
-
-OptionConstraint is a generic constraint that permits any function type whose underlying type is func\(\*T\). This enables the top\-level Apply function to accept custom\-defined option types, such as \`type MyOption func\(\*T\)\`.
-
-```go
-type OptionConstraint[T any] interface {
-    // contains filtered or unexported methods
-}
-```
-
+<a name="OptionE"></a>
 ## type [OptionE](<https://github.com/goexts/generic/blob/main/configure/options.go#L17>)
 
 OptionE represents a function that configures an object of type T and may return an error. The 'E' suffix is a convention for "Error".
@@ -596,6 +668,16 @@ OptionE represents a function that configures an object of type T and may return
 type OptionE[T any] func(*T) error
 ```
 
+<a name="OptionSetE"></a>
+### func [OptionSetE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L187>)
+
+```go
+func OptionSetE[T any](opts ...OptionE[T]) OptionE[T]
+```
+
+OptionSetE bundles multiple error\-returning options into a single option. If any option in the set returns an error, the application stops and the error is returned.
+
+<a name="WithValidation"></a>
 ### func [WithValidation](<https://github.com/goexts/generic/blob/main/configure/constructors.go#L6>)
 
 ```go
@@ -604,6 +686,7 @@ func WithValidation[T any](validator func(*T) error) OptionE[T]
 
 WithValidation creates an option that validates the target object. If the validator function returns an error, the configuration process will stop.
 
+<a name="OptionE[T].Apply"></a>
 ### func \(OptionE\[T\]\) [Apply](<https://github.com/goexts/generic/blob/main/configure/options.go#L21>)
 
 ```go
@@ -612,93 +695,121 @@ func (o OptionE[T]) Apply(target *T) error
 
 Apply implements the ApplierE\[T\] interface, allowing an OptionE\[T\] to be used as a flexible option type with functions like ApplyAny.
 
-## type [OptionEConstraint](<https://github.com/goexts/generic/blob/main/configure/options.go#L38-L40>)
-
-OptionEConstraint is a generic constraint that permits any function type whose underlying type is func\(\*T\) error. This enables the top\-level ApplyE function to accept custom\-defined, error\-returning option types.
-
-```go
-type OptionEConstraint[T any] interface {
-    // contains filtered or unexported methods
-}
-```
-
 # maps
 
 ```go
 import "github.com/goexts/generic/maps"
 ```
 
+Package maps provides a set of generic functions for common operations on maps.
+
+This package is a generated adapter and mirrors the public API of the standard Go experimental package \`golang.org/x/exp/maps\`. It offers a convenient way to access these common utilities, such as cloning maps, extracting keys or values, and comparing maps for equality.
+
+Example \(Extracting Keys and Values\):
+
+```
+ages := map[string]int{
+	"Alice": 30,
+	"Bob":   25,
+	"Carol": 35,
+}
+
+names := maps.Keys(ages)   // Returns ["Alice", "Bob", "Carol"] (order is not guaranteed)
+_ = maps.Values(ages) // Returns [30, 25, 35] (order is not guaranteed)
+
+// Sort the names for deterministic output
+slices.Sort(names)
+// names is now ["Alice", "Bob", "Carol"]
+```
+
 Package maps implements the functions, types, and interfaces for the module.
 
 Package maps contains generated code by adptool.
 
-Package maps implements the functions, types, and interfaces for the module.
-
 ## Index
 
-- [func Clear[M ~map[K]V, K comparable, V any](m M)](<#func-clear>)
-- [func Clone[M ~map[K]V, K comparable, V any](m M) M](<#func-clone>)
-- [func Copy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2)](<#func-copy>)
-- [func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool)](<#func-deletefunc>)
-- [func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool](<#func-equal>)
-- [func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M2, eq func(V1, V2) bool) bool](<#func-equalfunc>)
-- [func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K)](<#func-filter>)
-- [func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)](<#func-filterfunc>)
-- [func GetOr[V any](v V, ok bool, defaultValue V) V](<#func-getor>)
-- [func GetOrNil[V any](v *V, ok bool) *V](<#func-getornil>)
-- [func GetOrZero[V any](v V, ok bool) V](<#func-getorzero>)
-- [func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M](<#func-kvstomap>)
-- [func Keys[M ~map[K]V, K comparable, V any](m M) []K](<#func-keys>)
-- [func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV](<#func-maptokvs>)
-- [func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S](<#func-maptostruct>)
-- [func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T](<#func-maptotypes>)
-- [func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)](<#func-merge>)
-- [func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)](<#func-mergefunc>)
-- [func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M)](<#func-mergemaps>)
-- [func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)](<#func-mergemapsfunc>)
-- [func MustGet[V any](v V, ok bool) V](<#func-mustget>)
-- [func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV](<#func-transform>)
-- [func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M](<#func-typestomap>)
-- [func Values[M ~map[K]V, K comparable, V any](m M) []V](<#func-values>)
-- [type KeyValue](<#type-keyvalue>)
+- [func Clear\[M \~map\[K\]V, K comparable, V any\]\(m M\)](<#Clear>)
+- [func Clone\[M \~map\[K\]V, K comparable, V any\]\(m M\) M](<#Clone>)
+- [func Copy\[M1 \~map\[K\]V, M2 \~map\[K\]V, K comparable, V any\]\(dst M1, src M2\)](<#Copy>)
+- [func DeleteFunc\[M \~map\[K\]V, K comparable, V any\]\(m M, del func\(K, V\) bool\)](<#DeleteFunc>)
+- [func Equal\[M1, M2 \~map\[K\]V, K, V comparable\]\(m1 M1, m2 M2\) bool](<#Equal>)
+- [func EqualFunc\[M1 \~map\[K\]V1, M2 \~map\[K\]V2, K comparable, V1, V2 any\]\(m1 M1, m2 M2, eq func\(V1, V2\) bool\) bool](<#EqualFunc>)
+- [func Filter\[M \~map\[K\]V, K comparable, V any\]\(m M, keys ...K\)](<#Filter>)
+- [func FilterFunc\[M \~map\[K\]V, K comparable, V any\]\(m M, f func\(K, V\) bool\)](<#FilterFunc>)
+- [func GetOr\[V any\]\(v V, ok bool, defaultValue V\) V](<#GetOr>)
+- [func GetOrNil\[V any\]\(v \*V, ok bool\) \*V](<#GetOrNil>)
+- [func GetOrZero\[V any\]\(v V, ok bool\) V](<#GetOrZero>)
+- [func KVsToMap\[KV KeyValue\[K, V\], K comparable, V any, M \~map\[K\]V\]\(kvs \[\]KeyValue\[K, V\]\) M](<#KVsToMap>)
+- [func Keys\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]K](<#Keys>)
+- [func MapToKVs\[M \~map\[K\]V, K comparable, V any, KV KeyValue\[K, V\]\]\(m M\) \[\]KV](<#MapToKVs>)
+- [func MapToStruct\[M \~map\[K\]V, K comparable, V any, S any\]\(m M, f func\(\*S, K, V\) \*S\) \*S](<#MapToStruct>)
+- [func MapToTypes\[M \~map\[K\]V, K comparable, V any, T any\]\(m M, f func\(K, V\) T\) \[\]T](<#MapToTypes>)
+- [func Merge\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, overlay bool\)](<#Merge>)
+- [func MergeFunc\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, cmp func\(key K, src V, val V\) V\)](<#MergeFunc>)
+- [func MergeMaps\[M \~map\[K\]V, K comparable, V any\]\(m M, ms ...M\)](<#MergeMaps>)
+- [func MergeMapsFunc\[M \~map\[K\]V, K comparable, V any\]\(merge func\(K, V, V\) V, m M, ms ...M\)](<#MergeMapsFunc>)
+- [func MustGet\[V any\]\(v V, ok bool\) V](<#MustGet>)
+- [func Transform\[M \~map\[K\]V, K comparable, V any, TK comparable, TV any\]\(m M, f func\(K, V\) \(TK, TV, bool\)\) map\[TK\]TV](<#Transform>)
+- [func TypesToMap\[T any, M \~map\[K\]V, K comparable, V any\]\(ts \[\]T, f func\(T\) \(K, V\)\) M](<#TypesToMap>)
+- [func Values\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]V](<#Values>)
+- [type KeyValue](<#KeyValue>)
 
 
+<a name="Clear"></a>
 ## func [Clear](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L12>)
 
 ```go
 func Clear[M ~map[K]V, K comparable, V any](m M)
 ```
 
+
+
+<a name="Clone"></a>
 ## func [Clone](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L16>)
 
 ```go
 func Clone[M ~map[K]V, K comparable, V any](m M) M
 ```
 
+
+
+<a name="Copy"></a>
 ## func [Copy](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L20>)
 
 ```go
 func Copy[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2)
 ```
 
+
+
+<a name="DeleteFunc"></a>
 ## func [DeleteFunc](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L24>)
 
 ```go
 func DeleteFunc[M ~map[K]V, K comparable, V any](m M, del func(K, V) bool)
 ```
 
+
+
+<a name="Equal"></a>
 ## func [Equal](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L28>)
 
 ```go
 func Equal[M1, M2 ~map[K]V, K, V comparable](m1 M1, m2 M2) bool
 ```
 
+
+
+<a name="EqualFunc"></a>
 ## func [EqualFunc](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L32>)
 
 ```go
 func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M2, eq func(V1, V2) bool) bool
 ```
 
+
+
+<a name="Filter"></a>
 ## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L57>)
 
 ```go
@@ -707,7 +818,8 @@ func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K)
 
 Filter removes all key/value pairs from m for which f returns false.
 
-## func [FilterFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L66>)
+<a name="FilterFunc"></a>
+## func [FilterFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L64>)
 
 ```go
 func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
@@ -715,7 +827,8 @@ func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
 
 FilterFunc is like Filter, but uses a function.
 
-## func [GetOr](<https://github.com/goexts/generic/blob/main/maps/map.go#L163>)
+<a name="GetOr"></a>
+## func [GetOr](<https://github.com/goexts/generic/blob/main/maps/map.go#L161>)
 
 ```go
 func GetOr[V any](v V, ok bool, defaultValue V) V
@@ -723,7 +836,8 @@ func GetOr[V any](v V, ok bool, defaultValue V) V
 
 GetOr is a utility function that simplifies map lookups. It returns the value from a map lookup or a default value if the key is not found.
 
-## func [GetOrNil](<https://github.com/goexts/generic/blob/main/maps/map.go#L182>)
+<a name="GetOrNil"></a>
+## func [GetOrNil](<https://github.com/goexts/generic/blob/main/maps/map.go#L180>)
 
 ```go
 func GetOrNil[V any](v *V, ok bool) *V
@@ -731,7 +845,8 @@ func GetOrNil[V any](v *V, ok bool) *V
 
 GetOrNil is a utility function that simplifies map lookups for pointer types. It returns the value from a map lookup or nil if the key is not found.
 
-## func [GetOrZero](<https://github.com/goexts/generic/blob/main/maps/map.go#L172>)
+<a name="GetOrZero"></a>
+## func [GetOrZero](<https://github.com/goexts/generic/blob/main/maps/map.go#L170>)
 
 ```go
 func GetOrZero[V any](v V, ok bool) V
@@ -739,7 +854,8 @@ func GetOrZero[V any](v V, ok bool) V
 
 GetOrZero is a utility function that simplifies map lookups. It returns the value from a map lookup or the zero value of the type if the key is not found.
 
-## func [KVsToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L90>)
+<a name="KVsToMap"></a>
+## func [KVsToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L88>)
 
 ```go
 func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M
@@ -747,13 +863,17 @@ func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue
 
 KVsToMap converts a slice of key\-value pairs to a map.
 
+<a name="Keys"></a>
 ## func [Keys](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L36>)
 
 ```go
 func Keys[M ~map[K]V, K comparable, V any](m M) []K
 ```
 
-## func [MapToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L81>)
+
+
+<a name="MapToKVs"></a>
+## func [MapToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L79>)
 
 ```go
 func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV
@@ -761,7 +881,8 @@ func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV
 
 MapToKVs converts a map to a slice of key\-value pairs.
 
-## func [MapToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L118>)
+<a name="MapToStruct"></a>
+## func [MapToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L116>)
 
 ```go
 func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
@@ -769,7 +890,8 @@ func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *
 
 MapToStruct converts a map to a struct.
 
-## func [MapToTypes](<https://github.com/goexts/generic/blob/main/maps/map.go#L99>)
+<a name="MapToTypes"></a>
+## func [MapToTypes](<https://github.com/goexts/generic/blob/main/maps/map.go#L97>)
 
 ```go
 func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
@@ -777,6 +899,7 @@ func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
 
 MapToTypes converts a map to a slice of types.
 
+<a name="Merge"></a>
 ## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L10>)
 
 ```go
@@ -785,6 +908,7 @@ func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)
 
 Merge merges the values of src into dest. If overlay is true, existing values in dest will be overwritten.
 
+<a name="MergeFunc"></a>
 ## func [MergeFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L20>)
 
 ```go
@@ -793,6 +917,7 @@ func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, s
 
 MergeFunc merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
 
+<a name="MergeMaps"></a>
 ## func [MergeMaps](<https://github.com/goexts/generic/blob/main/maps/map.go#L32>)
 
 ```go
@@ -801,6 +926,7 @@ func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M)
 
 MergeMaps merges multiple maps into a single map. If a key exists in multiple maps, the value from the last map will be used.
 
+<a name="MergeMapsFunc"></a>
 ## func [MergeMapsFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L45>)
 
 ```go
@@ -809,7 +935,8 @@ func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, 
 
 MergeMapsFunc merges multiple maps into a single map using a custom merge function. If a key exists in multiple maps, the merge function will be called to determine the final value.
 
-## func [MustGet](<https://github.com/goexts/generic/blob/main/maps/map.go#L154>)
+<a name="MustGet"></a>
+## func [MustGet](<https://github.com/goexts/generic/blob/main/maps/map.go#L152>)
 
 ```go
 func MustGet[V any](v V, ok bool) V
@@ -817,7 +944,8 @@ func MustGet[V any](v V, ok bool) V
 
 MustGet is a utility function that simplifies map lookups. It returns the value from a map lookup and panics if the key is not found.
 
-## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L130>)
+<a name="Transform"></a>
+## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L128>)
 
 ```go
 func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV
@@ -825,7 +953,8 @@ func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f fu
 
 Transform remaps the keys and values of a map using a custom transformation function. The transformation function is called for each key\-value pair in the original map. If the transformation function returns false as its third return value, the key\-value pair is skipped. Otherwise, the transformed key\-value pair is added to the new map.
 
-## func [TypesToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L108>)
+<a name="TypesToMap"></a>
+## func [TypesToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L106>)
 
 ```go
 func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M
@@ -833,13 +962,17 @@ func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)
 
 TypesToMap converts a slice of types to a map.
 
+<a name="Values"></a>
 ## func [Values](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L40>)
 
 ```go
 func Values[M ~map[K]V, K comparable, V any](m M) []V
 ```
 
-## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L75-L78>)
+
+
+<a name="KeyValue"></a>
+## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L73-L76>)
 
 KeyValue is a key\-value pair.
 
@@ -856,24 +989,49 @@ type KeyValue[K comparable, V any] struct {
 import "github.com/goexts/generic/must"
 ```
 
-Package must provides utility functions that panic on error.
+Package must provides helper functions that wrap calls returning an error and panic if the error is non\-nil. This is intended to reduce boilerplate in specific, controlled contexts.
+
+WARNING: The functions in this package should be used with extreme care. They intentionally convert a recoverable error into a non\-recoverable panic. This is only appropriate in specific situations where an error is considered a bug in the program, not a predictable runtime failure.
+
+Appropriate Use Cases:
+
+- Program initialization \(e.g., in \`init\` functions or \`main\`\): parsing hardcoded configuration, compiling essential regular expressions, or setting up database connections that are required for the application to start.
+
+- Test setup: When setting up test fixtures where a failure indicates a broken test, not a feature to be tested.
+
+Example:
+
+```
+// Instead of:
+// re, err := regexp.Compile(`\w+`)
+// if err != nil {
+// 	panic(err)
+// }
+
+// Use must.Must for cleaner initialization code:
+re := must.Must(regexp.Compile(`\w+`))
+```
+
+DO NOT use these functions for regular application logic where errors are expected \(e.g., handling user input, network requests, file I/O\).
 
 ## Index
 
-- [func Cast[T any](v any) T](<#func-cast>)
-- [func Do[T any](v T, err error) T](<#func-do>)
-- [func Do2[T any, U any](v1 T, v2 U, err error) (T, U)](<#func-do2>)
+- [func Cast\[T any\]\(v any\) T](<#Cast>)
+- [func Do\[T any\]\(v T, err error\) T](<#Do>)
+- [func Do2\[T any, U any\]\(v1 T, v2 U, err error\) \(T, U\)](<#Do2>)
 
 
+<a name="Cast"></a>
 ## func [Cast](<https://github.com/goexts/generic/blob/main/must/must.go#L25>)
 
 ```go
 func Cast[T any](v any) T
 ```
 
-Cast performs a type assertion and panics if it fails.
+Cast performs a type assertion and panics if it fails. It provides a more informative panic message than a raw type assertion.
 
-## func [Do](<https://github.com/goexts/generic/blob/main/must/must.go#L9>)
+<a name="Do"></a>
+## func [Do](<https://github.com/goexts/generic/blob/main/must/must.go#L8>)
 
 ```go
 func Do[T any](v T, err error) T
@@ -881,7 +1039,8 @@ func Do[T any](v T, err error) T
 
 Do panics if err is not nil, otherwise it returns the value v. It is useful for wrapping function calls that return a value and an error, where the error is not expected.
 
-## func [Do2](<https://github.com/goexts/generic/blob/main/must/must.go#L17>)
+<a name="Do2"></a>
+## func [Do2](<https://github.com/goexts/generic/blob/main/must/must.go#L16>)
 
 ```go
 func Do2[T any, U any](v1 T, v2 U, err error) (T, U)
@@ -895,31 +1054,82 @@ Do2 is similar to Do, but for functions that return two values and an error.
 import "github.com/goexts/generic/promise"
 ```
 
+Package promise provides a generic, type\-safe implementation of Promises, inspired by the JavaScript Promise API. It is designed to simplify the management of asynchronous operations and avoid complex callback chains \("callback hell"\).
+
+### Core Concepts
+
+A Promise represents the eventual completion \(or failure\) of an asynchronous operation and its resulting value. A Promise is in one of three states:
+
+- pending: the initial state; neither fulfilled nor rejected.
+- fulfilled: the operation completed successfully, resulting in a value.
+- rejected: the operation failed, resulting in an error.
+
+### Basic Usage
+
+The primary way to create a promise is with the \`New\` function, which takes an \`executor\` function. The executor is run in a new goroutine and receives \`resolve\` and \`reject\` functions to control the promise's outcome.
+
+Example:
+
+```
+// Create a promise that resolves after a delay.
+p := promise.New(func(resolve func(string), reject func(error)) {
+	time.Sleep(100 * time.Millisecond)
+	resolve("Hello, World!")
+})
+
+// The Await method blocks until the promise is settled.
+val, err := p.Await()
+// val is "Hello, World!", err is nil.
+```
+
+### Chaining
+
+Promises can be chained together using methods like \`Then\`, \`Catch\`, and \`Finally\` to create a clean, linear asynchronous workflow.
+
+```
+resultPromise := promise.Async(func() (int, error) {
+	// Simulate an API call
+	return 42, nil
+}).Then(func(val int) int {
+	// Transform the result
+	return val * 2
+}).Catch(func(err error) (int, error) {
+	// Handle any previous errors and potentially recover.
+	fmt.Printf("An error occurred: %v\n", err)
+	return 0, nil // Recover with a default value
+})
+
+finalResult, _ := resultPromise.Await() // finalResult is 84
+```
+
 ## Index
 
-- [func Await[T any](p *Promise[T]) (T, error)](<#func-await>)
-- [type Promise](<#type-promise>)
-  - [func Async[T any](f func() (T, error)) *Promise[T]](<#func-async>)
-  - [func New[T any](executor func(resolve func(T), reject func(error))) *Promise[T]](<#func-new>)
-  - [func (p *Promise[T]) Await() (T, error)](<#func-promiset-await>)
-  - [func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T]](<#func-promiset-catch>)
-  - [func (p *Promise[T]) Reject(err error)](<#func-promiset-reject>)
-  - [func (p *Promise[T]) Resolve(value T)](<#func-promiset-resolve>)
-  - [func (p *Promise[T]) Then(onFulfilled func(T) T) *Promise[T]](<#func-promiset-then>)
-  - [func (p *Promise[T]) ThenWithPromise(onFulfilled func(T) *Promise[T]) *Promise[T]](<#func-promiset-thenwithpromise>)
+- [func Await\[T any\]\(p \*Promise\[T\]\) \(T, error\)](<#Await>)
+- [type Promise](<#Promise>)
+  - [func Async\[T any\]\(f func\(\) \(T, error\)\) \*Promise\[T\]](<#Async>)
+  - [func New\[T any\]\(executor func\(resolve func\(T\), reject func\(error\)\)\) \*Promise\[T\]](<#New>)
+  - [func \(p \*Promise\[T\]\) Await\(\) \(T, error\)](<#Promise[T].Await>)
+  - [func \(p \*Promise\[T\]\) Catch\(onRejected func\(error\) \(T, error\)\) \*Promise\[T\]](<#Promise[T].Catch>)
+  - [func \(p \*Promise\[T\]\) Finally\(onFinally func\(\)\) \*Promise\[T\]](<#Promise[T].Finally>)
+  - [func \(p \*Promise\[T\]\) Reject\(err error\)](<#Promise[T].Reject>)
+  - [func \(p \*Promise\[T\]\) Resolve\(value T\)](<#Promise[T].Resolve>)
+  - [func \(p \*Promise\[T\]\) Then\(onFulfilled func\(T\) T\) \*Promise\[T\]](<#Promise[T].Then>)
+  - [func \(p \*Promise\[T\]\) ThenWithPromise\(onFulfilled func\(T\) \*Promise\[T\]\) \*Promise\[T\]](<#Promise[T].ThenWithPromise>)
 
 
-## func [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L155>)
+<a name="Await"></a>
+## func [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L192>)
 
 ```go
 func Await[T any](p *Promise[T]) (T, error)
 ```
 
-Await is a standalone function to wait for a promise.
+Await is a standalone function that waits for a promise to be settled. It is a functional equivalent of the p.Await\(\) method.
 
-## type [Promise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L9-L15>)
+<a name="Promise"></a>
+## type [Promise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L11-L17>)
 
-Promise represents the eventual completion \(or failure\) of an asynchronous operation and its resulting value.
+Promise represents the eventual completion \(or failure\) of an asynchronous operation and its resulting value. It is a generic, type\-safe implementation inspired by the JavaScript Promise API.
 
 ```go
 type Promise[T any] struct {
@@ -927,69 +1137,86 @@ type Promise[T any] struct {
 }
 ```
 
-### func [Async](<https://github.com/goexts/generic/blob/main/promise/promise.go#L143>)
+<a name="Async"></a>
+### func [Async](<https://github.com/goexts/generic/blob/main/promise/promise.go#L179>)
 
 ```go
 func Async[T any](f func() (T, error)) *Promise[T]
 ```
 
-Async is a helper to create and run a promise for a function that returns a value and an error. This is your \`async\` function.
+Async is a helper function that wraps a function returning \(T, error\) into a new Promise. This is useful for converting existing functions into promise\-based asynchronous operations.
 
-### func [New](<https://github.com/goexts/generic/blob/main/promise/promise.go#L19>)
+<a name="New"></a>
+### func [New](<https://github.com/goexts/generic/blob/main/promise/promise.go#L22>)
 
 ```go
 func New[T any](executor func(resolve func(T), reject func(error))) *Promise[T]
 ```
 
-New creates a new Promise. The provided executor function is executed in a new goroutine. The executor receives resolve and reject functions to control the promise's outcome.
+New creates a new Promise. The provided executor function is executed in a new goroutine. The executor receives \`resolve\` and \`reject\` functions to control the promise's outcome.
 
-### func \(\*Promise\[T\]\) [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L69>)
+<a name="Promise[T].Await"></a>
+### func \(\*Promise\[T\]\) [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L72>)
 
 ```go
 func (p *Promise[T]) Await() (T, error)
 ```
 
-Await waits for the promise to be settled and returns the value and error. This is the equivalent of \`await\` in other languages.
+Await blocks until the promise is settled and returns the resulting value and error. It is the primary way to get the result of a promise.
 
-### func \(\*Promise\[T\]\) [Catch](<https://github.com/goexts/generic/blob/main/promise/promise.go#L120>)
+<a name="Promise[T].Catch"></a>
+### func \(\*Promise\[T\]\) [Catch](<https://github.com/goexts/generic/blob/main/promise/promise.go#L124>)
 
 ```go
 func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T]
 ```
 
-Catch handles promise rejections. It returns a new Promise. If the original promise is fulfilled, the new promise is fulfilled with the same value. If the original promise is rejected, the onRejected handler is called, which can recover from the error.
+Catch attaches a callback that executes when the promise is rejected. It allows for error handling and recovery. The onRejected callback can return a new value to fulfill the promise, or a new error to continue the rejection chain.
 
-### func \(\*Promise\[T\]\) [Reject](<https://github.com/goexts/generic/blob/main/promise/promise.go#L54>)
+<a name="Promise[T].Finally"></a>
+### func \(\*Promise\[T\]\) [Finally](<https://github.com/goexts/generic/blob/main/promise/promise.go#L149>)
+
+```go
+func (p *Promise[T]) Finally(onFinally func()) *Promise[T]
+```
+
+Finally attaches a callback that executes when the promise is settled \(either fulfilled or rejected\). It is useful for cleanup logic. The returned promise will be settled with the same value or error as the original promise, after onFinally has completed.
+
+<a name="Promise[T].Reject"></a>
+### func \(\*Promise\[T\]\) [Reject](<https://github.com/goexts/generic/blob/main/promise/promise.go#L57>)
 
 ```go
 func (p *Promise[T]) Reject(err error)
 ```
 
-Reject rejects the promise with an error. It's safe to call multiple times, but only the first call will have an effect.
+Reject rejects the promise with an error. If the promise is already settled, this call is ignored.
 
-### func \(\*Promise\[T\]\) [Resolve](<https://github.com/goexts/generic/blob/main/promise/promise.go#L39>)
+<a name="Promise[T].Resolve"></a>
+### func \(\*Promise\[T\]\) [Resolve](<https://github.com/goexts/generic/blob/main/promise/promise.go#L42>)
 
 ```go
 func (p *Promise[T]) Resolve(value T)
 ```
 
-Resolve fulfills the promise with a value. It's safe to call multiple times, but only the first call will have an effect.
+Resolve fulfills the promise with a value. If the promise is already settled, this call is ignored.
 
-### func \(\*Promise\[T\]\) [Then](<https://github.com/goexts/generic/blob/main/promise/promise.go#L77>)
+<a name="Promise[T].Then"></a>
+### func \(\*Promise\[T\]\) [Then](<https://github.com/goexts/generic/blob/main/promise/promise.go#L80>)
 
 ```go
 func (p *Promise[T]) Then(onFulfilled func(T) T) *Promise[T]
 ```
 
-Then attaches a callback for the resolution of the Promise. It returns a new Promise resolving with the result of the callback. If the current promise is rejected, the new promise is also rejected with the same error.
+Then attaches a callback that executes when the promise is fulfilled. It returns a new promise that resolves with the result of the onFulfilled callback. If the original promise is rejected, the new promise is rejected with the same error.
 
-### func \(\*Promise\[T\]\) [ThenWithPromise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L94>)
+<a name="Promise[T].ThenWithPromise"></a>
+### func \(\*Promise\[T\]\) [ThenWithPromise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L98>)
 
 ```go
 func (p *Promise[T]) ThenWithPromise(onFulfilled func(T) *Promise[T]) *Promise[T]
 ```
 
-ThenWithPromise is like Then, but the callback returns a new Promise.
+ThenWithPromise is like Then, but the callback returns a new Promise. This allows for chaining of asynchronous operations.
 
 # ptr
 
@@ -997,47 +1224,82 @@ ThenWithPromise is like Then, but the callback returns a new Promise.
 import "github.com/goexts/generic/ptr"
 ```
 
-Package ptr provides utility functions for working with pointers.
+Package ptr provides generic utility functions for working with pointers. It simplifies common operations such as creating a pointer from a literal value or safely dereferencing a pointer that might be nil.
+
+This package is particularly useful in contexts where you need to assign a pointer to a struct field, but you only have a literal value \(e.g., a string, an integer, or a boolean\).
+
+Example:
+
+```
+// Without ptr package
+port := 8080
+config := &ServerConfig{
+	Port: &port,
+}
+
+// With ptr package
+config := &ServerConfig{
+	Port: ptr.Of(8080), // Cleaner and more concise
+}
+```
 
 ## Index
 
-- [func Of[T any](v T) *T](<#func-of>)
-- [func To[T any](v any) *T](<#func-to>)
-- [func ToVal[T any](v any) T](<#func-toval>)
-- [func Val[T any](v *T) T](<#func-val>)
+- [func Of\[T any\]\(v T\) \*T](<#Of>)
+- [func To\[T any\]\(v any\) \*T](<#To>)
+- [func ToVal\[T any\]\(v any\) T](<#ToVal>)
+- [func Val\[T any\]\(v \*T\) T](<#Val>)
 
 
-## func [Of](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L9>)
+<a name="Of"></a>
+## func [Of](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L10>)
 
 ```go
 func Of[T any](v T) *T
 ```
 
-Of returns a pointer to the given value.
+Of returns a pointer to the given value v. This is a convenient helper for creating a pointer to a literal or a variable in a single expression, often used for struct field initialization.
 
-## func [To](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L27>)
+Example:
+
+```
+config := &MyConfig{ Timeout: ptr.Of(5*time.Second) }
+```
+
+<a name="To"></a>
+## func [To](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L30>)
 
 ```go
 func To[T any](v any) *T
 ```
 
-To attempts to convert an any value to a pointer of type \*T. If v is of type T, it returns a pointer to it. If v is already \*T, it returns v directly. Otherwise, it returns a pointer to a new zero value of T.
+To converts an \`any\` value to a pointer of type \*T. It handles three cases:
 
-## func [ToVal](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L43>)
+1. If v is of type T, it returns a pointer to it \(&v\).
+2. If v is already of type \*T, it returns v directly.
+3. Otherwise, it returns a new pointer to a zero value of T.
+
+<a name="ToVal"></a>
+## func [ToVal](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L47>)
 
 ```go
 func ToVal[T any](v any) T
 ```
 
-ToVal attempts to convert an any value to a value of type T. If v is a non\-nil pointer \*T, it returns the dereferenced value. If v is of type T, it returns v directly. Otherwise, it returns the zero value of T.
+ToVal converts an \`any\` value to a value of type T. It handles three cases:
 
-## func [Val](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L15>)
+1. If v is a non\-nil pointer of type \*T, it returns the dereferenced value.
+2. If v is of type T, it returns v directly.
+3. Otherwise, it returns the zero value of T.
+
+<a name="Val"></a>
+## func [Val](<https://github.com/goexts/generic/blob/main/ptr/ptr.go#L17>)
 
 ```go
 func Val[T any](v *T) T
 ```
 
-Val returns the value of the pointer. If the pointer is nil, it returns the zero value of the type.
+Val returns the value that the pointer v points to. If the pointer is nil, it safely returns the zero value of the type T. This avoids a panic when dereferencing a nil pointer.
 
 # res
 
@@ -1045,24 +1307,56 @@ Val returns the value of the pointer. If the pointer is nil, it returns the zero
 import "github.com/goexts/generic/res"
 ```
 
+Package res provides a generic, Rust\-inspired \`Result\[T\]\` type for expressive error handling.
+
+### Core Concept
+
+A \`Result\[T\]\` is a type that represents either a success \(containing a value of type T\) or a failure \(containing an error\). It is a monadic type that allows for chaining operations in a clean, readable way, especially in data processing pipelines where each step can fail.
+
+This pattern provides an alternative to returning \`\(value, error\)\` pairs at each step. Instead of checking for an error after every call, you can chain methods and handle the final result once.
+
+### Warning: Paradigm and Trade\\\-offs
+
+While powerful, the \`Result\` type introduces a paradigm that is not idiomatic Go. Standard Go error handling \(returning \`\(T, error\)\`\) is simpler and more direct for most use cases. The \`Result\` type is best suited for specific scenarios like complex data transformation chains.
+
+Be especially cautious with methods like \`Unwrap\` and \`Expect\`, which panic on an \`Err\` value. They should only be used when an error is considered a fatal, unrecoverable bug, similar to the \`must\` package.
+
+### Example
+
+```
+// A function that returns a Result
+func ParseInt(s string) res.Result[int] {
+	n, err := strconv.Atoi(s)
+	return res.Of(n, err)
+}
+
+// Chaining operations
+result := ParseInt("123").Unwrap() // result is 123
+
+// Safely handling the result
+val, ok := ParseInt("not-a-number").Ok()
+// val is 0, ok is false
+```
+
 ## Index
 
-- [func Or[T any](v T, err error, defaultValue T) T](<#func-or>)
-- [func OrZero[T any](v T, err error) T](<#func-orzero>)
-- [type Result](<#type-result>)
-  - [func Err[T any](err error) Result[T]](<#func-err>)
-  - [func Of[T any](value T, err error) Result[T]](<#func-of>)
-  - [func Ok[T any](value T) Result[T]](<#func-ok>)
-  - [func (r Result[T]) Err() error](<#func-resultt-err>)
-  - [func (r Result[T]) Expect(message string) T](<#func-resultt-expect>)
-  - [func (r Result[T]) IsErr() bool](<#func-resultt-iserr>)
-  - [func (r Result[T]) IsOk() bool](<#func-resultt-isok>)
-  - [func (r Result[T]) Ok() (T, bool)](<#func-resultt-ok>)
-  - [func (r Result[T]) Unwrap() T](<#func-resultt-unwrap>)
-  - [func (r Result[T]) UnwrapOr(defaultValue T) T](<#func-resultt-unwrapor>)
+- [func Or\[T any\]\(v T, err error, defaultValue T\) T](<#Or>)
+- [func OrZero\[T any\]\(v T, err error\) T](<#OrZero>)
+- [type Result](<#Result>)
+  - [func Err\[T any\]\(err error\) Result\[T\]](<#Err>)
+  - [func Of\[T any\]\(value T, err error\) Result\[T\]](<#Of>)
+  - [func Ok\[T any\]\(value T\) Result\[T\]](<#Ok>)
+  - [func \(r Result\[T\]\) Err\(\) error](<#Result[T].Err>)
+  - [func \(r Result\[T\]\) Expect\(message string\) T](<#Result[T].Expect>)
+  - [func \(r Result\[T\]\) IsErr\(\) bool](<#Result[T].IsErr>)
+  - [func \(r Result\[T\]\) IsOk\(\) bool](<#Result[T].IsOk>)
+  - [func \(r Result\[T\]\) Ok\(\) \(T, bool\)](<#Result[T].Ok>)
+  - [func \(r Result\[T\]\) Unwrap\(\) T](<#Result[T].Unwrap>)
+  - [func \(r Result\[T\]\) UnwrapOr\(defaultValue T\) T](<#Result[T].UnwrapOr>)
 
 
-## func [Or](<https://github.com/goexts/generic/blob/main/res/res.go#L78>)
+<a name="Or"></a>
+## func [Or](<https://github.com/goexts/generic/blob/main/res/res.go#L87>)
 
 ```go
 func Or[T any](v T, err error, defaultValue T) T
@@ -1070,7 +1364,8 @@ func Or[T any](v T, err error, defaultValue T) T
 
 Or is a utility function that simplifies handling of \(value, error\) returns. It returns the value if err is nil, otherwise it returns the provided default value.
 
-## func [OrZero](<https://github.com/goexts/generic/blob/main/res/res.go#L87>)
+<a name="OrZero"></a>
+## func [OrZero](<https://github.com/goexts/generic/blob/main/res/res.go#L96>)
 
 ```go
 func OrZero[T any](v T, err error) T
@@ -1078,9 +1373,10 @@ func OrZero[T any](v T, err error) T
 
 OrZero is a utility function that simplifies handling of \(value, error\) returns. It returns the value if err is nil, otherwise it returns the zero value of the type.
 
-## type [Result](<https://github.com/goexts/generic/blob/main/res/res.go#L7-L10>)
+<a name="Result"></a>
+## type [Result](<https://github.com/goexts/generic/blob/main/res/res.go#L9-L12>)
 
-Result is a type that represents either a value of type T or an error. It is a monadic type, similar to Rust's Result or Haskell's Either.
+Result is a type that represents either a success \(containing a value of type T\) or a failure \(containing an error\). It is a monadic type that allows for chaining operations in a clean, readable way. See the package documentation for more details and usage examples.
 
 ```go
 type Result[T any] struct {
@@ -1088,31 +1384,35 @@ type Result[T any] struct {
 }
 ```
 
-### func [Err](<https://github.com/goexts/generic/blob/main/res/res.go#L18>)
+<a name="Err"></a>
+### func [Err](<https://github.com/goexts/generic/blob/main/res/res.go#L20>)
 
 ```go
 func Err[T any](err error) Result[T]
 ```
 
-Err creates a new failed Result with the given error.
+Err creates a new failed Result containing the given error.
 
-### func [Of](<https://github.com/goexts/generic/blob/main/res/res.go#L24>)
+<a name="Of"></a>
+### func [Of](<https://github.com/goexts/generic/blob/main/res/res.go#L27>)
 
 ```go
 func Of[T any](value T, err error) Result[T]
 ```
 
-Of converts a standard Go \(value, error\) pair into a Result.
+Of converts a standard Go \(value, error\) pair into a Result. If err is not nil, it returns an Err result; otherwise, it returns an Ok result.
 
-### func [Ok](<https://github.com/goexts/generic/blob/main/res/res.go#L13>)
+<a name="Ok"></a>
+### func [Ok](<https://github.com/goexts/generic/blob/main/res/res.go#L15>)
 
 ```go
 func Ok[T any](value T) Result[T]
 ```
 
-Ok creates a new successful Result with the given value.
+Ok creates a new successful Result containing the given value.
 
-### func \(Result\[T\]\) [Err](<https://github.com/goexts/generic/blob/main/res/res.go#L72>)
+<a name="Result[T].Err"></a>
+### func \(Result\[T\]\) [Err](<https://github.com/goexts/generic/blob/main/res/res.go#L81>)
 
 ```go
 func (r Result[T]) Err() error
@@ -1120,53 +1420,59 @@ func (r Result[T]) Err() error
 
 Err returns the contained error, or nil if the result is Ok.
 
-### func \(Result\[T\]\) [Expect](<https://github.com/goexts/generic/blob/main/res/res.go#L58>)
+<a name="Result[T].Expect"></a>
+### func \(Result\[T\]\) [Expect](<https://github.com/goexts/generic/blob/main/res/res.go#L67>)
 
 ```go
 func (r Result[T]) Expect(message string) T
 ```
 
-Expect returns the contained Ok value. Panics with a custom message if the value is an error.
+Expect returns the contained Ok value. It panics with a custom message if the result is an Err. This is similar to Unwrap but provides a more context\-specific panic message.
 
-### func \(Result\[T\]\) [IsErr](<https://github.com/goexts/generic/blob/main/res/res.go#L37>)
+<a name="Result[T].IsErr"></a>
+### func \(Result\[T\]\) [IsErr](<https://github.com/goexts/generic/blob/main/res/res.go#L40>)
 
 ```go
 func (r Result[T]) IsErr() bool
 ```
 
-IsErr returns true if the result is an error.
+IsErr returns true if the result is an Err \(i.e., contains an error\).
 
-### func \(Result\[T\]\) [IsOk](<https://github.com/goexts/generic/blob/main/res/res.go#L32>)
+<a name="Result[T].IsOk"></a>
+### func \(Result\[T\]\) [IsOk](<https://github.com/goexts/generic/blob/main/res/res.go#L35>)
 
 ```go
 func (r Result[T]) IsOk() bool
 ```
 
-IsOk returns true if the result is Ok.
+IsOk returns true if the result is Ok \(i.e., does not contain an error\).
 
-### func \(Result\[T\]\) [Ok](<https://github.com/goexts/generic/blob/main/res/res.go#L67>)
+<a name="Result[T].Ok"></a>
+### func \(Result\[T\]\) [Ok](<https://github.com/goexts/generic/blob/main/res/res.go#L76>)
 
 ```go
 func (r Result[T]) Ok() (T, bool)
 ```
 
-Ok returns the contained value and a boolean indicating if it was Ok. This is useful for safely accessing the value in a way that is idiomatic to Go.
+Ok returns the contained value and a boolean indicating if the result was Ok. This provides a safe, idiomatic Go way to access the value.
 
-### func \(Result\[T\]\) [Unwrap](<https://github.com/goexts/generic/blob/main/res/res.go#L42>)
+<a name="Result[T].Unwrap"></a>
+### func \(Result\[T\]\) [Unwrap](<https://github.com/goexts/generic/blob/main/res/res.go#L48>)
 
 ```go
 func (r Result[T]) Unwrap() T
 ```
 
-Unwrap returns the value if the result is Ok, otherwise it panics.
+Unwrap returns the contained Ok value. It panics if the result is an Err. Because this function may panic, it should only be used when the caller is certain that the result is Ok, or when a panic is the desired behavior. See also: Expect, UnwrapOr.
 
-### func \(Result\[T\]\) [UnwrapOr](<https://github.com/goexts/generic/blob/main/res/res.go#L50>)
+<a name="Result[T].UnwrapOr"></a>
+### func \(Result\[T\]\) [UnwrapOr](<https://github.com/goexts/generic/blob/main/res/res.go#L57>)
 
 ```go
 func (r Result[T]) UnwrapOr(defaultValue T) T
 ```
 
-UnwrapOr returns the contained Ok value or a provided default.
+UnwrapOr returns the contained Ok value or a provided default value. It is a safe way to access the value without panicking.
 
 # set
 
@@ -1174,52 +1480,128 @@ UnwrapOr returns the contained Ok value or a provided default.
 import "github.com/goexts/generic/set"
 ```
 
-Package set provides utility functions for treating slices as sets.
+Package set provides a collection of generic, stateless functions for performing set\-like operations on standard Go slices.
+
+### Core Philosophy
+
+Instead of introducing a new \`Set\` data structure, this package provides utilities that treat slices as sets. This approach offers several advantages:
+
+- It is lightweight and requires no new types to learn.
+- It integrates seamlessly with the rest of the Go ecosystem, which heavily relies on slices.
+- It promotes a functional style of programming.
+
+The functions in this package operate on slices of any \`comparable\` type.
+
+### Example
+
+```
+setA := []int{1, 2, 3, 4}
+setB := []int{3, 4, 5, 6}
+
+// Calculate the union of the two sets
+union := set.Union(setA, setB) // Result (order not guaranteed): [1, 2, 3, 4, 5, 6]
+
+// Calculate the intersection of the two sets
+intersection := set.Intersection(setA, setB) // Result (order not guaranteed): [3, 4]
+
+// Calculate the difference (elements in B but not in A)
+difference := set.Difference(setA, setB) // Result (order not guaranteed): [5, 6]
+
+// Remove duplicates from a slice
+unique := set.Unique([]string{"a", "b", "a", "c", "b"}) // Result (order not guaranteed): ["a", "b", "c"]
+```
 
 ## Index
 
-- [func Contains[T comparable](s []T, e T) bool](<#func-contains>)
-- [func Difference[T comparable](s1 []T, s2 []T) []T](<#func-difference>)
-- [func Exists[T any](s []T, f func(T) bool) bool](<#func-exists>)
-- [func Intersection[T comparable](s1 []T, s2 []T) []T](<#func-intersection>)
+- [func Contains\[T comparable\]\(s \[\]T, e T\) bool](<#Contains>)
+- [func Difference\[T comparable\]\(s1, s2 \[\]T\) \[\]T](<#Difference>)
+- [func Exists\[T any\]\(s \[\]T, f func\(T\) bool\) bool](<#Exists>)
+- [func Intersection\[T comparable\]\(s1, s2 \[\]T\) \[\]T](<#Intersection>)
+- [func Union\[T comparable\]\(s1, s2 \[\]T\) \[\]T](<#Union>)
+- [func Unique\[T comparable\]\(s \[\]T\) \[\]T](<#Unique>)
 
 
+<a name="Contains"></a>
 ## func [Contains](<https://github.com/goexts/generic/blob/main/set/set.go#L5>)
 
 ```go
 func Contains[T comparable](s []T, e T) bool
 ```
 
-Contains checks whether a value is in a slice.
+Contains checks if a slice \`s\` contains the element \`e\`. The check is performed using the equality operator \(==\).
 
-## func [Difference](<https://github.com/goexts/generic/blob/main/set/set.go#L43>)
+<a name="Difference"></a>
+## func [Difference](<https://github.com/goexts/generic/blob/main/set/set.go#L77>)
 
 ```go
-func Difference[T comparable](s1 []T, s2 []T) []T
+func Difference[T comparable](s1, s2 []T) []T
 ```
 
-Difference returns a new slice containing the unique elements from s2 that are not present in s1. It effectively computes the set difference \`s2 \- s1\`.
+Difference returns a new slice containing the elements from s2 that are not present in s1 \(s2 \- s1\). The order of elements in the returned slice is not guaranteed.
 
+<a name="Exists"></a>
 ## func [Exists](<https://github.com/goexts/generic/blob/main/set/set.go#L15>)
 
 ```go
 func Exists[T any](s []T, f func(T) bool) bool
 ```
 
-Exists checks whether at least one element in a slice satisfies the predicate f.
+Exists checks if at least one element in a slice \`s\` satisfies the predicate \`f\`.
 
-## func [Intersection](<https://github.com/goexts/generic/blob/main/set/set.go#L25>)
+<a name="Intersection"></a>
+## func [Intersection](<https://github.com/goexts/generic/blob/main/set/set.go#L59>)
 
 ```go
-func Intersection[T comparable](s1 []T, s2 []T) []T
+func Intersection[T comparable](s1, s2 []T) []T
 ```
 
-Intersection returns a new slice containing the elements that exist in both s1 and s2.
+Intersection returns a new slice containing only the elements that exist in both s1 and s2. The order of elements in the returned slice is not guaranteed.
+
+<a name="Union"></a>
+## func [Union](<https://github.com/goexts/generic/blob/main/set/set.go#L41>)
+
+```go
+func Union[T comparable](s1, s2 []T) []T
+```
+
+Union returns a new slice containing the unique elements present in either s1 or s2. The order of elements in the returned slice is not guaranteed.
+
+<a name="Unique"></a>
+## func [Unique](<https://github.com/goexts/generic/blob/main/set/set.go#L26>)
+
+```go
+func Unique[T comparable](s []T) []T
+```
+
+Unique returns a new slice containing only the unique elements of the input slice \`s\`. The order of elements in the returned slice is not guaranteed.
 
 # slices
 
 ```go
 import "github.com/goexts/generic/slices"
+```
+
+Package slices provides a rich set of generic functions for common operations on slices of any element type.
+
+This package is a generated adapter and mirrors the public API of the standard Go experimental package \`golang.org/x/exp/slices\`. It offers a convenient way to access these common utilities for searching, sorting, comparing, and manipulating slices.
+
+For detailed information on the behavior of specific functions, please refer to the official Go documentation for the \`slices\` package.
+
+Example \(Sorting and Searching\):
+
+```
+numbers := []int{3, 1, 4, 1, 5, 9}
+
+// Check if a slice contains a value
+_ = slices.Contains(numbers, 5) // true
+
+// Sort the slice in place
+slices.Sort(numbers)
+// numbers is now [1, 1, 3, 4, 5, 9]
+
+// Find the index of a value in a sorted slice
+idx, found := slices.BinarySearch(numbers, 4)
+// idx is 3, found is true
 ```
 
 Package slices implements the functions, types, and interfaces for the module.
@@ -1231,58 +1613,62 @@ Package slices implements the functions, types, and interfaces for the module.
 ## Index
 
 - [Variables](<#variables>)
-- [func Append[T types.Slice[S], S any](arr T, v S) (T, int)](<#func-append>)
-- [func BinarySearch[S ~[]E, E constraints.Ordered](x S, target E) (int, bool)](<#func-binarysearch>)
-- [func BinarySearchFunc[S ~[]E, E, T any](x S, target T, cmp func(E, T) int) (int, bool)](<#func-binarysearchfunc>)
-- [func Clip[S ~[]E, E any](s S) S](<#func-clip>)
-- [func Clone[S ~[]E, E any](s S) S](<#func-clone>)
-- [func Compact[S ~[]E, E comparable](s S) S](<#func-compact>)
-- [func CompactFunc[S ~[]E, E any](s S, eq func(E, E) bool) S](<#func-compactfunc>)
-- [func Compare[S ~[]E, E constraints.Ordered](s1, s2 S) int](<#func-compare>)
-- [func CompareFunc[S1 ~[]E1, S2 ~[]E2, E1, E2 any](s1 S1, s2 S2, cmp func(E1, E2) int) int](<#func-comparefunc>)
-- [func Contains[S ~[]E, E comparable](s S, v E) bool](<#func-contains>)
-- [func ContainsFunc[S ~[]E, E any](s S, f func(E) bool) bool](<#func-containsfunc>)
-- [func CopyAt[T types.Slice[S], S any](s, t T, i int) T](<#func-copyat>)
-- [func Count[T types.Slice[S], S E](s, sub T) int](<#func-count>)
-- [func CountArray[T types.Slice[S], S E](ss T, s S) int](<#func-countarray>)
-- [func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool)](<#func-cut>)
-- [func Delete[S ~[]E, E any](s S, i, j int) S](<#func-delete>)
-- [func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S](<#func-deletefunc>)
-- [func Equal[S ~[]E, E comparable](s1, s2 S) bool](<#func-equal>)
-- [func EqualFunc[S1 ~[]E1, S2 ~[]E2, E1, E2 any](s1 S1, s2 S2, eq func(E1, E2) bool) bool](<#func-equalfunc>)
-- [func Filter[T types.Slice[S], S any](s T, f func(S) bool) T](<#func-filter>)
-- [func Grow[S ~[]E, E any](s S, n int) S](<#func-grow>)
-- [func Index[S ~[]E, E comparable](s S, v E) int](<#func-index>)
-- [func IndexFunc[S ~[]E, E any](s S, f func(E) bool) int](<#func-indexfunc>)
-- [func IndexSlice[T types.Slice[S], S E](s, substr T) int](<#func-indexslice>)
-- [func Insert[S ~[]E, E any](s S, i int, v ...E) S](<#func-insert>)
-- [func InsertWith[T types.Slice[S], S any](s T, v S, fn func(a, b S) bool) T](<#func-insertwith>)
-- [func IsSorted[S ~[]E, E constraints.Ordered](x S) bool](<#func-issorted>)
-- [func IsSortedFunc[S ~[]E, E any](x S, cmp func(a, b E) int) bool](<#func-issortedfunc>)
-- [func Join[T types.Slice[S], S any](s []T, sep T) T](<#func-join>)
-- [func LastIndexSlice[T types.Slice[S], S E](s, sep T) int](<#func-lastindexslice>)
-- [func Map[S, T any](s []S, f func(S) T) []T](<#func-map>)
-- [func Max[S ~[]E, E constraints.Ordered](x S) E](<#func-max>)
-- [func MaxFunc[S ~[]E, E any](x S, cmp func(a, b E) int) E](<#func-maxfunc>)
-- [func Min[S ~[]E, E constraints.Ordered](x S) E](<#func-min>)
-- [func MinFunc[S ~[]E, E any](x S, cmp func(a, b E) int) E](<#func-minfunc>)
-- [func OverWithError[S any](s []S, err error) func(func(int, S) bool)](<#func-overwitherror>)
-- [func Read[T types.Slice[S], S any](arr T, offset int, limit int) T](<#func-read>)
-- [func Reduce[S, T any](s []S, initial T, f func(T, S) T) T](<#func-reduce>)
-- [func RemoveWith[T types.Slice[S], S any](s T, fn func(a S) bool) T](<#func-removewith>)
-- [func Repeat[T types.Slice[S], S any](b T, count int) T](<#func-repeat>)
-- [func Replace[S ~[]E, E any](s S, i, j int, v ...E) S](<#func-replace>)
-- [func Reverse[S ~[]E, E any](s S)](<#func-reverse>)
-- [func Sort[S ~[]E, E constraints.Ordered](x S)](<#func-sort>)
-- [func SortFunc[S ~[]E, E any](x S, cmp func(a, b E) int)](<#func-sortfunc>)
-- [func SortStableFunc[S ~[]E, E any](x S, cmp func(a, b E) int)](<#func-sortstablefunc>)
-- [func Split[T types.Slice[S], S E](s, sep T) []T](<#func-split>)
-- [func Transform[TS types.Slice[S], S any, T any](s TS, f func(S) (T, bool)) []T](<#func-transform>)
-- [func Unique[T types.Slice[S], S E](s T) T](<#func-unique>)
-- [type E](<#type-e>)
+- [func Append\[T \~\[\]S, S any\]\(arr T, v S\) \(T, int\)](<#Append>)
+- [func BinarySearch\[S \~\[\]E, E constraints.Ordered\]\(x S, target E\) \(int, bool\)](<#BinarySearch>)
+- [func BinarySearchFunc\[S \~\[\]E, E, T any\]\(x S, target T, cmp func\(E, T\) int\) \(int, bool\)](<#BinarySearchFunc>)
+- [func Clip\[S \~\[\]E, E any\]\(s S\) S](<#Clip>)
+- [func Clone\[S \~\[\]E, E any\]\(s S\) S](<#Clone>)
+- [func Compact\[S \~\[\]E, E comparable\]\(s S\) S](<#Compact>)
+- [func CompactFunc\[S \~\[\]E, E any\]\(s S, eq func\(E, E\) bool\) S](<#CompactFunc>)
+- [func Compare\[S \~\[\]E, E constraints.Ordered\]\(s1, s2 S\) int](<#Compare>)
+- [func CompareFunc\[S1 \~\[\]E1, S2 \~\[\]E2, E1, E2 any\]\(s1 S1, s2 S2, cmp func\(E1, E2\) int\) int](<#CompareFunc>)
+- [func Contains\[S \~\[\]E, E comparable\]\(s S, v E\) bool](<#Contains>)
+- [func ContainsFunc\[S \~\[\]E, E any\]\(s S, f func\(E\) bool\) bool](<#ContainsFunc>)
+- [func CopyAt\[T \~\[\]S, S any\]\(s, t T, i int\) T](<#CopyAt>)
+- [func Count\[T \~\[\]S, S E\]\(s, sub T\) int](<#Count>)
+- [func CountArray\[T \~\[\]S, S E\]\(ss T, s S\) int](<#CountArray>)
+- [func Cut\[T \~\[\]S, S E\]\(s, sep T\) \(before, after T, found bool\)](<#Cut>)
+- [func Delete\[S \~\[\]E, E any\]\(s S, i, j int\) S](<#Delete>)
+- [func DeleteFunc\[S \~\[\]E, E any\]\(s S, del func\(E\) bool\) S](<#DeleteFunc>)
+- [func Equal\[S \~\[\]E, E comparable\]\(s1, s2 S\) bool](<#Equal>)
+- [func EqualFunc\[S1 \~\[\]E1, S2 \~\[\]E2, E1, E2 any\]\(s1 S1, s2 S2, eq func\(E1, E2\) bool\) bool](<#EqualFunc>)
+- [func Filter\[T \~\[\]S, S any\]\(s T, f func\(S\) bool\) T](<#Filter>)
+- [func FilterExcluded\[S \~\[\]E, E comparable\]\(s S, excludes S\) S](<#FilterExcluded>)
+- [func FilterIncluded\[S \~\[\]E, E comparable\]\(s S, includes S\) S](<#FilterIncluded>)
+- [func Grow\[S \~\[\]E, E any\]\(s S, n int\) S](<#Grow>)
+- [func Index\[S \~\[\]E, E comparable\]\(s S, v E\) int](<#Index>)
+- [func IndexFunc\[S \~\[\]E, E any\]\(s S, f func\(E\) bool\) int](<#IndexFunc>)
+- [func IndexSlice\[T \~\[\]S, S E\]\(s, substr T\) int](<#IndexSlice>)
+- [func Insert\[S \~\[\]E, E any\]\(s S, i int, v ...E\) S](<#Insert>)
+- [func InsertWith\[T \~\[\]S, S any\]\(s T, v S, fn func\(a, b S\) bool\) T](<#InsertWith>)
+- [func IsSorted\[S \~\[\]E, E constraints.Ordered\]\(x S\) bool](<#IsSorted>)
+- [func IsSortedFunc\[S \~\[\]E, E any\]\(x S, cmp func\(a, b E\) int\) bool](<#IsSortedFunc>)
+- [func Join\[T \~\[\]S, S any\]\(s \[\]T, sep T\) T](<#Join>)
+- [func LastIndexSlice\[T \~\[\]S, S E\]\(s, sep T\) int](<#LastIndexSlice>)
+- [func Map\[S, T any\]\(s \[\]S, f func\(S\) T\) \[\]T](<#Map>)
+- [func Max\[S \~\[\]E, E constraints.Ordered\]\(x S\) E](<#Max>)
+- [func MaxFunc\[S \~\[\]E, E any\]\(x S, cmp func\(a, b E\) int\) E](<#MaxFunc>)
+- [func Min\[S \~\[\]E, E constraints.Ordered\]\(x S\) E](<#Min>)
+- [func MinFunc\[S \~\[\]E, E any\]\(x S, cmp func\(a, b E\) int\) E](<#MinFunc>)
+- [func OverWithError\[S any\]\(s \[\]S, err error\) func\(func\(int, S\) bool\)](<#OverWithError>)
+- [func Read\[T \~\[\]S, S any\]\(arr T, offset int, limit int\) T](<#Read>)
+- [func Reduce\[S, T any\]\(s \[\]S, initial T, f func\(T, S\) T\) T](<#Reduce>)
+- [func RemoveWith\[T \~\[\]S, S any\]\(s T, fn func\(a S\) bool\) T](<#RemoveWith>)
+- [func Repeat\[T \~\[\]S, S any\]\(b T, count int\) T](<#Repeat>)
+- [func Replace\[S \~\[\]E, E any\]\(s S, i, j int, v ...E\) S](<#Replace>)
+- [func Reverse\[S \~\[\]E, E any\]\(s S\)](<#Reverse>)
+- [func Sort\[S \~\[\]E, E constraints.Ordered\]\(x S\)](<#Sort>)
+- [func SortFunc\[S \~\[\]E, E any\]\(x S, cmp func\(a, b E\) int\)](<#SortFunc>)
+- [func SortStableFunc\[S \~\[\]E, E any\]\(x S, cmp func\(a, b E\) int\)](<#SortStableFunc>)
+- [func Split\[T \~\[\]S, S E\]\(s, sep T\) \[\]T](<#Split>)
+- [func Transform\[TS \~\[\]S, S any, T any\]\(s TS, f func\(S\) \(T, bool\)\) \[\]T](<#Transform>)
+- [func Unique\[T \~\[\]S, S E\]\(s T\) T](<#Unique>)
+- [type E](<#E>)
 
 
 ## Variables
+
+<a name="ErrWrongIndex"></a>
 
 ```go
 var (
@@ -1291,207 +1677,296 @@ var (
 )
 ```
 
-## func [Append](<https://github.com/goexts/generic/blob/main/slices/slice.go#L20>)
+<a name="Append"></a>
+## func [Append](<https://github.com/goexts/generic/blob/main/slices/slice.go#L18>)
 
 ```go
-func Append[T types.Slice[S], S any](arr T, v S) (T, int)
+func Append[T ~[]S, S any](arr T, v S) (T, int)
 ```
 
 Append appends the element v to the end of Array\[S\] s.
 
+<a name="BinarySearch"></a>
 ## func [BinarySearch](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L13>)
 
 ```go
 func BinarySearch[S ~[]E, E constraints.Ordered](x S, target E) (int, bool)
 ```
 
+
+
+<a name="BinarySearchFunc"></a>
 ## func [BinarySearchFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L17>)
 
 ```go
 func BinarySearchFunc[S ~[]E, E, T any](x S, target T, cmp func(E, T) int) (int, bool)
 ```
 
+
+
+<a name="Clip"></a>
 ## func [Clip](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L21>)
 
 ```go
 func Clip[S ~[]E, E any](s S) S
 ```
 
+
+
+<a name="Clone"></a>
 ## func [Clone](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L25>)
 
 ```go
 func Clone[S ~[]E, E any](s S) S
 ```
 
+
+
+<a name="Compact"></a>
 ## func [Compact](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L29>)
 
 ```go
 func Compact[S ~[]E, E comparable](s S) S
 ```
 
+
+
+<a name="CompactFunc"></a>
 ## func [CompactFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L33>)
 
 ```go
 func CompactFunc[S ~[]E, E any](s S, eq func(E, E) bool) S
 ```
 
+
+
+<a name="Compare"></a>
 ## func [Compare](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L37>)
 
 ```go
 func Compare[S ~[]E, E constraints.Ordered](s1, s2 S) int
 ```
 
+
+
+<a name="CompareFunc"></a>
 ## func [CompareFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L41>)
 
 ```go
 func CompareFunc[S1 ~[]E1, S2 ~[]E2, E1, E2 any](s1 S1, s2 S2, cmp func(E1, E2) int) int
 ```
 
+
+
+<a name="Contains"></a>
 ## func [Contains](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L45>)
 
 ```go
 func Contains[S ~[]E, E comparable](s S, v E) bool
 ```
 
+
+
+<a name="ContainsFunc"></a>
 ## func [ContainsFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L49>)
 
 ```go
 func ContainsFunc[S ~[]E, E any](s S, f func(E) bool) bool
 ```
 
-## func [CopyAt](<https://github.com/goexts/generic/blob/main/slices/slice.go#L28>)
+
+
+<a name="CopyAt"></a>
+## func [CopyAt](<https://github.com/goexts/generic/blob/main/slices/slice.go#L26>)
 
 ```go
-func CopyAt[T types.Slice[S], S any](s, t T, i int) T
+func CopyAt[T ~[]S, S any](s, t T, i int) T
 ```
 
 CopyAt copies the elements from t into s at the specified index. It panics if the index is negative. If the required length is greater than the length of s, s is grown to accommodate the new elements.
 
-## func [Count](<https://github.com/goexts/generic/blob/main/slices/slice.go#L46>)
+<a name="Count"></a>
+## func [Count](<https://github.com/goexts/generic/blob/main/slices/slice.go#L44>)
 
 ```go
-func Count[T types.Slice[S], S E](s, sub T) int
+func Count[T ~[]S, S E](s, sub T) int
 ```
 
 Count counts the number of non\-overlapping instances of substr in s. If substr is an empty Array, Count returns 1 \+ the number of Unicode code points in s.
 
-## func [CountArray](<https://github.com/goexts/generic/blob/main/slices/slice.go#L67>)
+<a name="CountArray"></a>
+## func [CountArray](<https://github.com/goexts/generic/blob/main/slices/slice.go#L65>)
 
 ```go
-func CountArray[T types.Slice[S], S E](ss T, s S) int
+func CountArray[T ~[]S, S E](ss T, s S) int
 ```
 
 CountArray counts the number of non\-overlapping instances of c in s.
 
-## func [Cut](<https://github.com/goexts/generic/blob/main/slices/slice.go#L81>)
+<a name="Cut"></a>
+## func [Cut](<https://github.com/goexts/generic/blob/main/slices/slice.go#L79>)
 
 ```go
-func Cut[T types.Slice[S], S E](s, sep T) (before, after T, found bool)
+func Cut[T ~[]S, S E](s, sep T) (before, after T, found bool)
 ```
 
-Cut slices s around the first instance of sep, returning the text before and after sep. The found result reports whether sep appears in s. If sep does not appear in s, cut returns s, "", false.
+Cut slices s around the first instance of sep, returning the text before and after sep. The found result reports whether sep appears in s. If sep does not appear in s, cut returns s, nil, false.
 
+<a name="Delete"></a>
 ## func [Delete](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L53>)
 
 ```go
 func Delete[S ~[]E, E any](s S, i, j int) S
 ```
 
+
+
+<a name="DeleteFunc"></a>
 ## func [DeleteFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L57>)
 
 ```go
 func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S
 ```
 
+
+
+<a name="Equal"></a>
 ## func [Equal](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L61>)
 
 ```go
 func Equal[S ~[]E, E comparable](s1, s2 S) bool
 ```
 
+
+
+<a name="EqualFunc"></a>
 ## func [EqualFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L65>)
 
 ```go
 func EqualFunc[S1 ~[]E1, S2 ~[]E2, E1, E2 any](s1 S1, s2 S2, eq func(E1, E2) bool) bool
 ```
 
-## func [Filter](<https://github.com/goexts/generic/blob/main/slices/slice.go#L89>)
+
+
+<a name="Filter"></a>
+## func [Filter](<https://github.com/goexts/generic/blob/main/slices/slice.go#L87>)
 
 ```go
-func Filter[T types.Slice[S], S any](s T, f func(S) bool) T
+func Filter[T ~[]S, S any](s T, f func(S) bool) T
 ```
 
 Filter returns a new slice containing all elements of s for which f\(s\) is true.
 
+<a name="FilterExcluded"></a>
+## func [FilterExcluded](<https://github.com/goexts/generic/blob/main/slices/slice.go#L139>)
+
+```go
+func FilterExcluded[S ~[]E, E comparable](s S, excludes S) S
+```
+
+FilterExcluded returns a new slice containing all elements of s that are not present in excludes. The order of elements in the result is the same as in the original slice. The function is optimized for small to medium\-sized exclude lists. For very large exclude lists, consider using a map for better performance.
+
+<a name="FilterIncluded"></a>
+## func [FilterIncluded](<https://github.com/goexts/generic/blob/main/slices/slice.go#L104>)
+
+```go
+func FilterIncluded[S ~[]E, E comparable](s S, includes S) S
+```
+
+FilterIncluded returns a new slice containing all elements of s that are present in includes. The order of elements in the result is the same as in the original slice. The function is optimized for small to medium\-sized include lists. For very large include lists, consider using a map for better performance.
+
+<a name="Grow"></a>
 ## func [Grow](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L69>)
 
 ```go
 func Grow[S ~[]E, E any](s S, n int) S
 ```
 
+
+
+<a name="Index"></a>
 ## func [Index](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L73>)
 
 ```go
 func Index[S ~[]E, E comparable](s S, v E) int
 ```
 
+
+
+<a name="IndexFunc"></a>
 ## func [IndexFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L77>)
 
 ```go
 func IndexFunc[S ~[]E, E any](s S, f func(E) bool) int
 ```
 
-## func [IndexSlice](<https://github.com/goexts/generic/blob/main/slices/slice.go#L103>)
+
+
+<a name="IndexSlice"></a>
+## func [IndexSlice](<https://github.com/goexts/generic/blob/main/slices/slice.go#L174>)
 
 ```go
-func IndexSlice[T types.Slice[S], S E](s, substr T) int
+func IndexSlice[T ~[]S, S E](s, substr T) int
 ```
 
-IndexSlice returns the index of the first instance of substr in s, or \-1 if substr is not present in s.
+IndexSlice returns the index of the first instance of substr in s, or \-1 if substr is not present in s. It works similarly to strings.Index but operates on slices of comparable elements. If substr is an empty slice, it returns 0. The time complexity is O\(n\*m\) where n is the length of s and m is the length of substr.
 
+<a name="Insert"></a>
 ## func [Insert](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L81>)
 
 ```go
 func Insert[S ~[]E, E any](s S, i int, v ...E) S
 ```
 
-## func [InsertWith](<https://github.com/goexts/generic/blob/main/slices/slice.go#L127>)
+
+
+<a name="InsertWith"></a>
+## func [InsertWith](<https://github.com/goexts/generic/blob/main/slices/slice.go#L198>)
 
 ```go
-func InsertWith[T types.Slice[S], S any](s T, v S, fn func(a, b S) bool) T
+func InsertWith[T ~[]S, S any](s T, v S, fn func(a, b S) bool) T
 ```
 
 InsertWith inserts v into s at the first index where fn\(a, b\) is true.
 
+<a name="IsSorted"></a>
 ## func [IsSorted](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L85>)
 
 ```go
 func IsSorted[S ~[]E, E constraints.Ordered](x S) bool
 ```
 
+
+
+<a name="IsSortedFunc"></a>
 ## func [IsSortedFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L89>)
 
 ```go
 func IsSortedFunc[S ~[]E, E any](x S, cmp func(a, b E) int) bool
 ```
 
-## func [Join](<https://github.com/goexts/generic/blob/main/slices/slice.go#L141>)
+
+
+<a name="Join"></a>
+## func [Join](<https://github.com/goexts/generic/blob/main/slices/slice.go#L212>)
 
 ```go
-func Join[T types.Slice[S], S any](s []T, sep T) T
+func Join[T ~[]S, S any](s []T, sep T) T
 ```
 
 Join concatenates the elements of its first argument to create a single Array\[S\]. The separator Array\[S\] sep is placed between elements in the resulting Array\[S\].
 
-## func [LastIndexSlice](<https://github.com/goexts/generic/blob/main/slices/slice.go#L164>)
+<a name="LastIndexSlice"></a>
+## func [LastIndexSlice](<https://github.com/goexts/generic/blob/main/slices/slice.go#L235>)
 
 ```go
-func LastIndexSlice[T types.Slice[S], S E](s, sep T) int
+func LastIndexSlice[T ~[]S, S E](s, sep T) int
 ```
 
 LastIndexSlice returns the index of the last instance of substr in s, or \-1 if substr is not present in s.
 
-## func [Map](<https://github.com/goexts/generic/blob/main/slices/slice.go#L188>)
+<a name="Map"></a>
+## func [Map](<https://github.com/goexts/generic/blob/main/slices/slice.go#L259>)
 
 ```go
 func Map[S, T any](s []S, f func(S) T) []T
@@ -1499,45 +1974,62 @@ func Map[S, T any](s []S, f func(S) T) []T
 
 Map transforms a slice of one type to a slice of another type by applying a function to each element.
 
+<a name="Max"></a>
 ## func [Max](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L93>)
 
 ```go
 func Max[S ~[]E, E constraints.Ordered](x S) E
 ```
 
+
+
+<a name="MaxFunc"></a>
 ## func [MaxFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L97>)
 
 ```go
 func MaxFunc[S ~[]E, E any](x S, cmp func(a, b E) int) E
 ```
 
+
+
+<a name="Min"></a>
 ## func [Min](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L101>)
 
 ```go
 func Min[S ~[]E, E constraints.Ordered](x S) E
 ```
 
+
+
+<a name="MinFunc"></a>
 ## func [MinFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L105>)
 
 ```go
 func MinFunc[S ~[]E, E any](x S, cmp func(a, b E) int) E
 ```
 
-## func [OverWithError](<https://github.com/goexts/generic/blob/main/slices/slice.go#L199>)
+
+
+<a name="OverWithError"></a>
+## func [OverWithError](<https://github.com/goexts/generic/blob/main/slices/slice.go#L273>)
 
 ```go
 func OverWithError[S any](s []S, err error) func(func(int, S) bool)
 ```
 
-## func [Read](<https://github.com/goexts/generic/blob/main/slices/slice.go#L214>)
+OverWithError returns an iterator function for a slice that may have an associated error. The returned iterator will only yield values if the provided error is nil and the slice is not empty. This is useful for chaining operations that can fail.
+
+<a name="Read"></a>
+## func [Read](<https://github.com/goexts/generic/blob/main/slices/slice.go#L288>)
 
 ```go
-func Read[T types.Slice[S], S any](arr T, offset int, limit int) T
+func Read[T ~[]S, S any](arr T, offset int, limit int) T
 ```
 
 Read returns a slice of the Array\[S\] s beginning at offset and length limit. If offset or limit is negative, it is treated as if it were zero.
 
-## func [Reduce](<https://github.com/goexts/generic/blob/main/slices/slice.go#L226>)
+<a name="Reduce"></a>
+## func [Reduce](<https://github.com/goexts/generic/blob/main/slices/slice.go#L300>)
 
 ```go
 func Reduce[S, T any](s []S, initial T, f func(T, S) T) T
@@ -1545,77 +2037,100 @@ func Reduce[S, T any](s []S, initial T, f func(T, S) T) T
 
 Reduce aggregates all elements of a slice into a single value by applying a function. It iterates through the slice, applying the function 'f' to an accumulator and the current element.
 
-## func [RemoveWith](<https://github.com/goexts/generic/blob/main/slices/slice.go#L235>)
+<a name="RemoveWith"></a>
+## func [RemoveWith](<https://github.com/goexts/generic/blob/main/slices/slice.go#L309>)
 
 ```go
-func RemoveWith[T types.Slice[S], S any](s T, fn func(a S) bool) T
+func RemoveWith[T ~[]S, S any](s T, fn func(a S) bool) T
 ```
 
 RemoveWith removes the first index where fn\(a, b\) is true.
 
-## func [Repeat](<https://github.com/goexts/generic/blob/main/slices/slice.go#L249>)
+<a name="Repeat"></a>
+## func [Repeat](<https://github.com/goexts/generic/blob/main/slices/slice.go#L323>)
 
 ```go
-func Repeat[T types.Slice[S], S any](b T, count int) T
+func Repeat[T ~[]S, S any](b T, count int) T
 ```
 
 Repeat returns a new Array\[S\] consisting of count copies of the Array\[S\] s.
 
 It panics if count is negative or if the result of \(len\(s\) \* count\) overflows.
 
+<a name="Replace"></a>
 ## func [Replace](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L109>)
 
 ```go
 func Replace[S ~[]E, E any](s S, i, j int, v ...E) S
 ```
 
+
+
+<a name="Reverse"></a>
 ## func [Reverse](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L113>)
 
 ```go
 func Reverse[S ~[]E, E any](s S)
 ```
 
+
+
+<a name="Sort"></a>
 ## func [Sort](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L117>)
 
 ```go
 func Sort[S ~[]E, E constraints.Ordered](x S)
 ```
 
+
+
+<a name="SortFunc"></a>
 ## func [SortFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L121>)
 
 ```go
 func SortFunc[S ~[]E, E any](x S, cmp func(a, b E) int)
 ```
 
+
+
+<a name="SortStableFunc"></a>
 ## func [SortStableFunc](<https://github.com/goexts/generic/blob/main/slices/slices.adapter.go#L125>)
 
 ```go
 func SortStableFunc[S ~[]E, E any](x S, cmp func(a, b E) int)
 ```
 
-## func [Split](<https://github.com/goexts/generic/blob/main/slices/slice.go#L274>)
+
+
+<a name="Split"></a>
+## func [Split](<https://github.com/goexts/generic/blob/main/slices/slice.go#L348>)
 
 ```go
-func Split[T types.Slice[S], S E](s, sep T) []T
+func Split[T ~[]S, S E](s, sep T) []T
 ```
 
 Split slices s into all subslices separated by sep and returns a slice of the subslices between those separators.
 
-## func [Transform](<https://github.com/goexts/generic/blob/main/slices/slice.go#L281>)
+<a name="Transform"></a>
+## func [Transform](<https://github.com/goexts/generic/blob/main/slices/slice.go#L358>)
 
 ```go
-func Transform[TS types.Slice[S], S any, T any](s TS, f func(S) (T, bool)) []T
+func Transform[TS ~[]S, S any, T any](s TS, f func(S) (T, bool)) []T
 ```
 
-## func [Unique](<https://github.com/goexts/generic/blob/main/slices/slice.go#L296>)
+Transform combines the behavior of mapping and filtering a slice. It iterates over each element of the input slice \`s\`, applies the function \`f\`, and if the function returns \`true\`, the transformed element is included in the result.
+
+<a name="Unique"></a>
+## func [Unique](<https://github.com/goexts/generic/blob/main/slices/slice.go#L373>)
 
 ```go
-func Unique[T types.Slice[S], S E](s T) T
+func Unique[T ~[]S, S E](s T) T
 ```
 
 Unique returns a new slice with duplicate elements removed. The order of the first occurrence of each element is preserved.
 
-## type [E](<https://github.com/goexts/generic/blob/main/slices/slice.go#L12>)
+<a name="E"></a>
+## type [E](<https://github.com/goexts/generic/blob/main/slices/slice.go#L10>)
 
 E is comparable type of slice element
 
@@ -1629,6 +2144,25 @@ type E = comparable
 import "github.com/goexts/generic/strings"
 ```
 
+Package strings provides a collection of functions for string manipulation.
+
+This package is a generated adapter and mirrors the public API of the standard Go library's \`strings\` package. It offers a convenient way to access the rich set of standard string utilities.
+
+For detailed information on the behavior of specific functions, please refer to the official Go documentation for the \`strings\` package.
+
+Example:
+
+```
+addr := "[INFO] This is a log message."
+
+// Check for a prefix
+_ = strings.HasPrefix(addr, "[INFO]") // true
+
+// Trim the prefix
+msg := strings.TrimPrefix(addr, "[INFO] ")
+// msg is "This is a log message."
+```
+
 Package strings implements the functions, types, and interfaces for the module.
 
 Package strings contains generated code by adptool.
@@ -1637,401 +2171,627 @@ Package strings implements the functions, types, and interfaces for the module.
 
 ## Index
 
-- [func Clone(s string) string](<#func-clone>)
-- [func Compare(a, b string) int](<#func-compare>)
-- [func Contains(s, substr string) bool](<#func-contains>)
-- [func ContainsAny(s, chars string) bool](<#func-containsany>)
-- [func ContainsFunc(s string, f func(rune) bool) bool](<#func-containsfunc>)
-- [func ContainsRune(s string, r rune) bool](<#func-containsrune>)
-- [func Count(s, substr string) int](<#func-count>)
-- [func Cut(s, sep string) (before, after string, found bool)](<#func-cut>)
-- [func CutPrefix(s, prefix string) (after string, found bool)](<#func-cutprefix>)
-- [func CutSuffix(s, suffix string) (before string, found bool)](<#func-cutsuffix>)
-- [func EqualFold(s, t string) bool](<#func-equalfold>)
-- [func Fields(s string) []string](<#func-fields>)
-- [func FieldsFunc(s string, f func(rune) bool) []string](<#func-fieldsfunc>)
-- [func HasPrefix(s, prefix string) bool](<#func-hasprefix>)
-- [func HasSuffix(s, suffix string) bool](<#func-hassuffix>)
-- [func Index(s, substr string) int](<#func-index>)
-- [func IndexAny(s, chars string) int](<#func-indexany>)
-- [func IndexByte(s string, c byte) int](<#func-indexbyte>)
-- [func IndexFunc(s string, f func(rune) bool) int](<#func-indexfunc>)
-- [func IndexRune(s string, r rune) int](<#func-indexrune>)
-- [func Join(elems []string, sep string) string](<#func-join>)
-- [func LastIndex(s, substr string) int](<#func-lastindex>)
-- [func LastIndexAny(s, chars string) int](<#func-lastindexany>)
-- [func LastIndexByte(s string, c byte) int](<#func-lastindexbyte>)
-- [func LastIndexFunc(s string, f func(rune) bool) int](<#func-lastindexfunc>)
-- [func Map(mapping func(rune) rune, s string) string](<#func-map>)
-- [func NewReader(s string) *strings.Reader](<#func-newreader>)
-- [func NewReplacer(oldnew ...string) *strings.Replacer](<#func-newreplacer>)
-- [func ParseOr[T any](s string, def ...T) T](<#func-parseor>)
-- [func Repeat(s string, count int) string](<#func-repeat>)
-- [func Replace(s, old, new string, n int) string](<#func-replace>)
-- [func ReplaceAll(s, old, new string) string](<#func-replaceall>)
-- [func Split(s, sep string) []string](<#func-split>)
-- [func SplitAfter(s, sep string) []string](<#func-splitafter>)
-- [func SplitAfterN(s, sep string, n int) []string](<#func-splitaftern>)
-- [func SplitN(s, sep string, n int) []string](<#func-splitn>)
-- [func Title(s string) string](<#func-title>)
-- [func ToLower(s string) string](<#func-tolower>)
-- [func ToLowerSpecial(c unicode.SpecialCase, s string) string](<#func-tolowerspecial>)
-- [func ToTitle(s string) string](<#func-totitle>)
-- [func ToTitleSpecial(c unicode.SpecialCase, s string) string](<#func-totitlespecial>)
-- [func ToUpper(s string) string](<#func-toupper>)
-- [func ToUpperSpecial(c unicode.SpecialCase, s string) string](<#func-toupperspecial>)
-- [func ToValidUTF8(s, replacement string) string](<#func-tovalidutf8>)
-- [func Trim(s, cutset string) string](<#func-trim>)
-- [func TrimFunc(s string, f func(rune) bool) string](<#func-trimfunc>)
-- [func TrimLeft(s, cutset string) string](<#func-trimleft>)
-- [func TrimLeftFunc(s string, f func(rune) bool) string](<#func-trimleftfunc>)
-- [func TrimPrefix(s, prefix string) string](<#func-trimprefix>)
-- [func TrimRight(s, cutset string) string](<#func-trimright>)
-- [func TrimRightFunc(s string, f func(rune) bool) string](<#func-trimrightfunc>)
-- [func TrimSpace(s string) string](<#func-trimspace>)
-- [func TrimSuffix(s, suffix string) string](<#func-trimsuffix>)
-- [type Builder](<#type-builder>)
-- [type Reader](<#type-reader>)
-- [type Replacer](<#type-replacer>)
+- [func Clone\(s string\) string](<#Clone>)
+- [func Compare\(a, b string\) int](<#Compare>)
+- [func Contains\(s, substr string\) bool](<#Contains>)
+- [func ContainsAny\(s, chars string\) bool](<#ContainsAny>)
+- [func ContainsFunc\(s string, f func\(rune\) bool\) bool](<#ContainsFunc>)
+- [func ContainsRune\(s string, r rune\) bool](<#ContainsRune>)
+- [func Count\(s, substr string\) int](<#Count>)
+- [func Cut\(s, sep string\) \(before, after string, found bool\)](<#Cut>)
+- [func CutPrefix\(s, prefix string\) \(after string, found bool\)](<#CutPrefix>)
+- [func CutSuffix\(s, suffix string\) \(before string, found bool\)](<#CutSuffix>)
+- [func EqualFold\(s, t string\) bool](<#EqualFold>)
+- [func Fields\(s string\) \[\]string](<#Fields>)
+- [func FieldsFunc\(s string, f func\(rune\) bool\) \[\]string](<#FieldsFunc>)
+- [func FieldsFuncSeq\(s string, f func\(rune\) bool\) iter.Seq\[string\]](<#FieldsFuncSeq>)
+- [func FieldsSeq\(s string\) iter.Seq\[string\]](<#FieldsSeq>)
+- [func HasPrefix\(s, prefix string\) bool](<#HasPrefix>)
+- [func HasSuffix\(s, suffix string\) bool](<#HasSuffix>)
+- [func Index\(s, substr string\) int](<#Index>)
+- [func IndexAny\(s, chars string\) int](<#IndexAny>)
+- [func IndexByte\(s string, c byte\) int](<#IndexByte>)
+- [func IndexFunc\(s string, f func\(rune\) bool\) int](<#IndexFunc>)
+- [func IndexRune\(s string, r rune\) int](<#IndexRune>)
+- [func Join\(elems \[\]string, sep string\) string](<#Join>)
+- [func LastIndex\(s, substr string\) int](<#LastIndex>)
+- [func LastIndexAny\(s, chars string\) int](<#LastIndexAny>)
+- [func LastIndexByte\(s string, c byte\) int](<#LastIndexByte>)
+- [func LastIndexFunc\(s string, f func\(rune\) bool\) int](<#LastIndexFunc>)
+- [func Lines\(s string\) iter.Seq\[string\]](<#Lines>)
+- [func Map\(mapping func\(rune\) rune, s string\) string](<#Map>)
+- [func NewReader\(s string\) \*strings.Reader](<#NewReader>)
+- [func NewReplacer\(oldnew ...string\) \*strings.Replacer](<#NewReplacer>)
+- [func ParseOr\[T any\]\(s string, def ...T\) T](<#ParseOr>)
+- [func Repeat\(s string, count int\) string](<#Repeat>)
+- [func Replace\(s, old, new string, n int\) string](<#Replace>)
+- [func ReplaceAll\(s, old, new string\) string](<#ReplaceAll>)
+- [func Split\(s, sep string\) \[\]string](<#Split>)
+- [func SplitAfter\(s, sep string\) \[\]string](<#SplitAfter>)
+- [func SplitAfterN\(s, sep string, n int\) \[\]string](<#SplitAfterN>)
+- [func SplitAfterSeq\(s, sep string\) iter.Seq\[string\]](<#SplitAfterSeq>)
+- [func SplitN\(s, sep string, n int\) \[\]string](<#SplitN>)
+- [func SplitSeq\(s, sep string\) iter.Seq\[string\]](<#SplitSeq>)
+- [func Title\(s string\) string](<#Title>)
+- [func ToLower\(s string\) string](<#ToLower>)
+- [func ToLowerSpecial\(c unicode.SpecialCase, s string\) string](<#ToLowerSpecial>)
+- [func ToTitle\(s string\) string](<#ToTitle>)
+- [func ToTitleSpecial\(c unicode.SpecialCase, s string\) string](<#ToTitleSpecial>)
+- [func ToUpper\(s string\) string](<#ToUpper>)
+- [func ToUpperSpecial\(c unicode.SpecialCase, s string\) string](<#ToUpperSpecial>)
+- [func ToValidUTF8\(s, replacement string\) string](<#ToValidUTF8>)
+- [func Trim\(s, cutset string\) string](<#Trim>)
+- [func TrimFunc\(s string, f func\(rune\) bool\) string](<#TrimFunc>)
+- [func TrimLeft\(s, cutset string\) string](<#TrimLeft>)
+- [func TrimLeftFunc\(s string, f func\(rune\) bool\) string](<#TrimLeftFunc>)
+- [func TrimPrefix\(s, prefix string\) string](<#TrimPrefix>)
+- [func TrimRight\(s, cutset string\) string](<#TrimRight>)
+- [func TrimRightFunc\(s string, f func\(rune\) bool\) string](<#TrimRightFunc>)
+- [func TrimSpace\(s string\) string](<#TrimSpace>)
+- [func TrimSuffix\(s, suffix string\) string](<#TrimSuffix>)
+- [type Builder](<#Builder>)
+- [type Reader](<#Reader>)
+- [type Replacer](<#Replacer>)
 
 
-## func [Clone](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L19>)
+<a name="Clone"></a>
+## func [Clone](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L20>)
 
 ```go
 func Clone(s string) string
 ```
 
-## func [Compare](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L23>)
+
+
+<a name="Compare"></a>
+## func [Compare](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L24>)
 
 ```go
 func Compare(a, b string) int
 ```
 
-## func [Contains](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L27>)
+
+
+<a name="Contains"></a>
+## func [Contains](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L28>)
 
 ```go
 func Contains(s, substr string) bool
 ```
 
-## func [ContainsAny](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L31>)
+
+
+<a name="ContainsAny"></a>
+## func [ContainsAny](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L32>)
 
 ```go
 func ContainsAny(s, chars string) bool
 ```
 
-## func [ContainsFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L35>)
+
+
+<a name="ContainsFunc"></a>
+## func [ContainsFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L36>)
 
 ```go
 func ContainsFunc(s string, f func(rune) bool) bool
 ```
 
-## func [ContainsRune](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L39>)
+
+
+<a name="ContainsRune"></a>
+## func [ContainsRune](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L40>)
 
 ```go
 func ContainsRune(s string, r rune) bool
 ```
 
-## func [Count](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L43>)
+
+
+<a name="Count"></a>
+## func [Count](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L44>)
 
 ```go
 func Count(s, substr string) int
 ```
 
-## func [Cut](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L47>)
+
+
+<a name="Cut"></a>
+## func [Cut](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L48>)
 
 ```go
 func Cut(s, sep string) (before, after string, found bool)
 ```
 
-## func [CutPrefix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L51>)
+
+
+<a name="CutPrefix"></a>
+## func [CutPrefix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L52>)
 
 ```go
 func CutPrefix(s, prefix string) (after string, found bool)
 ```
 
-## func [CutSuffix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L55>)
+
+
+<a name="CutSuffix"></a>
+## func [CutSuffix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L56>)
 
 ```go
 func CutSuffix(s, suffix string) (before string, found bool)
 ```
 
-## func [EqualFold](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L59>)
+
+
+<a name="EqualFold"></a>
+## func [EqualFold](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L60>)
 
 ```go
 func EqualFold(s, t string) bool
 ```
 
-## func [Fields](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L63>)
+
+
+<a name="Fields"></a>
+## func [Fields](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L64>)
 
 ```go
 func Fields(s string) []string
 ```
 
-## func [FieldsFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L67>)
+
+
+<a name="FieldsFunc"></a>
+## func [FieldsFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L68>)
 
 ```go
 func FieldsFunc(s string, f func(rune) bool) []string
 ```
 
-## func [HasPrefix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L71>)
+
+
+<a name="FieldsFuncSeq"></a>
+## func [FieldsFuncSeq](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L72>)
+
+```go
+func FieldsFuncSeq(s string, f func(rune) bool) iter.Seq[string]
+```
+
+
+
+<a name="FieldsSeq"></a>
+## func [FieldsSeq](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L76>)
+
+```go
+func FieldsSeq(s string) iter.Seq[string]
+```
+
+
+
+<a name="HasPrefix"></a>
+## func [HasPrefix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L80>)
 
 ```go
 func HasPrefix(s, prefix string) bool
 ```
 
-## func [HasSuffix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L75>)
+
+
+<a name="HasSuffix"></a>
+## func [HasSuffix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L84>)
 
 ```go
 func HasSuffix(s, suffix string) bool
 ```
 
-## func [Index](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L79>)
+
+
+<a name="Index"></a>
+## func [Index](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L88>)
 
 ```go
 func Index(s, substr string) int
 ```
 
-## func [IndexAny](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L83>)
+
+
+<a name="IndexAny"></a>
+## func [IndexAny](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L92>)
 
 ```go
 func IndexAny(s, chars string) int
 ```
 
-## func [IndexByte](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L87>)
+
+
+<a name="IndexByte"></a>
+## func [IndexByte](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L96>)
 
 ```go
 func IndexByte(s string, c byte) int
 ```
 
-## func [IndexFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L91>)
+
+
+<a name="IndexFunc"></a>
+## func [IndexFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L100>)
 
 ```go
 func IndexFunc(s string, f func(rune) bool) int
 ```
 
-## func [IndexRune](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L95>)
+
+
+<a name="IndexRune"></a>
+## func [IndexRune](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L104>)
 
 ```go
 func IndexRune(s string, r rune) int
 ```
 
-## func [Join](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L99>)
+
+
+<a name="Join"></a>
+## func [Join](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L108>)
 
 ```go
 func Join(elems []string, sep string) string
 ```
 
-## func [LastIndex](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L103>)
+
+
+<a name="LastIndex"></a>
+## func [LastIndex](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L112>)
 
 ```go
 func LastIndex(s, substr string) int
 ```
 
-## func [LastIndexAny](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L107>)
+
+
+<a name="LastIndexAny"></a>
+## func [LastIndexAny](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L116>)
 
 ```go
 func LastIndexAny(s, chars string) int
 ```
 
-## func [LastIndexByte](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L111>)
+
+
+<a name="LastIndexByte"></a>
+## func [LastIndexByte](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L120>)
 
 ```go
 func LastIndexByte(s string, c byte) int
 ```
 
-## func [LastIndexFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L115>)
+
+
+<a name="LastIndexFunc"></a>
+## func [LastIndexFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L124>)
 
 ```go
 func LastIndexFunc(s string, f func(rune) bool) int
 ```
 
-## func [Map](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L119>)
+
+
+<a name="Lines"></a>
+## func [Lines](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L128>)
+
+```go
+func Lines(s string) iter.Seq[string]
+```
+
+
+
+<a name="Map"></a>
+## func [Map](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L132>)
 
 ```go
 func Map(mapping func(rune) rune, s string) string
 ```
 
-## func [NewReader](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L123>)
+
+
+<a name="NewReader"></a>
+## func [NewReader](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L136>)
 
 ```go
 func NewReader(s string) *strings.Reader
 ```
 
-## func [NewReplacer](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L127>)
+
+
+<a name="NewReplacer"></a>
+## func [NewReplacer](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L140>)
 
 ```go
 func NewReplacer(oldnew ...string) *strings.Replacer
 ```
 
-## func [ParseOr](<https://github.com/goexts/generic/blob/main/strings/parse.go#L16>)
+
+
+<a name="ParseOr"></a>
+## func [ParseOr](<https://github.com/goexts/generic/blob/main/strings/parse.go#L15>)
 
 ```go
 func ParseOr[T any](s string, def ...T) T
 ```
 
-ParseOr converts string to specified type with default value support. Supported types: all basic types \(int/uint variants, float, bool, string\) Parameters: \- s: input string \- def: optional default value \(returns first default value if conversion fails\)
+ParseOr converts a string to a specified type, with support for a default value. It supports all basic types \(int/uint variants, float, bool, string\) and JSON\-deserializable types. If parsing fails and a default value is provided, it returns the default value. If parsing fails and no default is provided, it panics.
 
-## func [Repeat](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L131>)
+<a name="Repeat"></a>
+## func [Repeat](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L144>)
 
 ```go
 func Repeat(s string, count int) string
 ```
 
-## func [Replace](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L135>)
+
+
+<a name="Replace"></a>
+## func [Replace](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L148>)
 
 ```go
 func Replace(s, old, new string, n int) string
 ```
 
-## func [ReplaceAll](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L139>)
+
+
+<a name="ReplaceAll"></a>
+## func [ReplaceAll](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L152>)
 
 ```go
 func ReplaceAll(s, old, new string) string
 ```
 
-## func [Split](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L143>)
+
+
+<a name="Split"></a>
+## func [Split](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L156>)
 
 ```go
 func Split(s, sep string) []string
 ```
 
-## func [SplitAfter](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L147>)
+
+
+<a name="SplitAfter"></a>
+## func [SplitAfter](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L160>)
 
 ```go
 func SplitAfter(s, sep string) []string
 ```
 
-## func [SplitAfterN](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L151>)
+
+
+<a name="SplitAfterN"></a>
+## func [SplitAfterN](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L164>)
 
 ```go
 func SplitAfterN(s, sep string, n int) []string
 ```
 
-## func [SplitN](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L155>)
+
+
+<a name="SplitAfterSeq"></a>
+## func [SplitAfterSeq](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L168>)
+
+```go
+func SplitAfterSeq(s, sep string) iter.Seq[string]
+```
+
+
+
+<a name="SplitN"></a>
+## func [SplitN](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L172>)
 
 ```go
 func SplitN(s, sep string, n int) []string
 ```
 
-## func [Title](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L159>)
+
+
+<a name="SplitSeq"></a>
+## func [SplitSeq](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L176>)
+
+```go
+func SplitSeq(s, sep string) iter.Seq[string]
+```
+
+
+
+<a name="Title"></a>
+## func [Title](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L180>)
 
 ```go
 func Title(s string) string
 ```
 
-## func [ToLower](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L163>)
+
+
+<a name="ToLower"></a>
+## func [ToLower](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L184>)
 
 ```go
 func ToLower(s string) string
 ```
 
-## func [ToLowerSpecial](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L167>)
+
+
+<a name="ToLowerSpecial"></a>
+## func [ToLowerSpecial](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L188>)
 
 ```go
 func ToLowerSpecial(c unicode.SpecialCase, s string) string
 ```
 
-## func [ToTitle](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L171>)
+
+
+<a name="ToTitle"></a>
+## func [ToTitle](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L192>)
 
 ```go
 func ToTitle(s string) string
 ```
 
-## func [ToTitleSpecial](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L175>)
+
+
+<a name="ToTitleSpecial"></a>
+## func [ToTitleSpecial](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L196>)
 
 ```go
 func ToTitleSpecial(c unicode.SpecialCase, s string) string
 ```
 
-## func [ToUpper](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L179>)
+
+
+<a name="ToUpper"></a>
+## func [ToUpper](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L200>)
 
 ```go
 func ToUpper(s string) string
 ```
 
-## func [ToUpperSpecial](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L183>)
+
+
+<a name="ToUpperSpecial"></a>
+## func [ToUpperSpecial](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L204>)
 
 ```go
 func ToUpperSpecial(c unicode.SpecialCase, s string) string
 ```
 
-## func [ToValidUTF8](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L187>)
+
+
+<a name="ToValidUTF8"></a>
+## func [ToValidUTF8](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L208>)
 
 ```go
 func ToValidUTF8(s, replacement string) string
 ```
 
-## func [Trim](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L191>)
+
+
+<a name="Trim"></a>
+## func [Trim](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L212>)
 
 ```go
 func Trim(s, cutset string) string
 ```
 
-## func [TrimFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L195>)
+
+
+<a name="TrimFunc"></a>
+## func [TrimFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L216>)
 
 ```go
 func TrimFunc(s string, f func(rune) bool) string
 ```
 
-## func [TrimLeft](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L199>)
+
+
+<a name="TrimLeft"></a>
+## func [TrimLeft](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L220>)
 
 ```go
 func TrimLeft(s, cutset string) string
 ```
 
-## func [TrimLeftFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L203>)
+
+
+<a name="TrimLeftFunc"></a>
+## func [TrimLeftFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L224>)
 
 ```go
 func TrimLeftFunc(s string, f func(rune) bool) string
 ```
 
-## func [TrimPrefix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L207>)
+
+
+<a name="TrimPrefix"></a>
+## func [TrimPrefix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L228>)
 
 ```go
 func TrimPrefix(s, prefix string) string
 ```
 
-## func [TrimRight](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L211>)
+
+
+<a name="TrimRight"></a>
+## func [TrimRight](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L232>)
 
 ```go
 func TrimRight(s, cutset string) string
 ```
 
-## func [TrimRightFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L215>)
+
+
+<a name="TrimRightFunc"></a>
+## func [TrimRightFunc](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L236>)
 
 ```go
 func TrimRightFunc(s string, f func(rune) bool) string
 ```
 
-## func [TrimSpace](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L219>)
+
+
+<a name="TrimSpace"></a>
+## func [TrimSpace](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L240>)
 
 ```go
 func TrimSpace(s string) string
 ```
 
-## func [TrimSuffix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L223>)
+
+
+<a name="TrimSuffix"></a>
+## func [TrimSuffix](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L244>)
 
 ```go
 func TrimSuffix(s, suffix string) string
 ```
 
-## type [Builder](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L14>)
+
+
+<a name="Builder"></a>
+## type [Builder](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L15>)
+
+
 
 ```go
 type Builder = strings.Builder
 ```
 
-## type [Reader](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L15>)
+<a name="Reader"></a>
+## type [Reader](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L16>)
+
+
 
 ```go
 type Reader = strings.Reader
 ```
 
-## type [Replacer](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L16>)
+<a name="Replacer"></a>
+## type [Replacer](<https://github.com/goexts/generic/blob/main/strings/strings.adapter.go#L17>)
+
+
 
 ```go
 type Replacer = strings.Replacer
 ```
+
+# examples
+
+```go
+import "github.com/goexts/generic/docs/examples"
+```
+
+## Index
+
+
 
 # bytes
 
@@ -2041,85 +2801,111 @@ import "github.com/goexts/generic/slices/bytes"
 
 Package bytes contains generated code by adptool.
 
+Package bytes provides a rich set of functions for the manipulation of byte slices.
+
+This package is a generated adapter and mirrors the public API of the standard Go library's \`bytes\` package. It offers a convenient way to access the rich set of standard byte slice utilities within the generic context of this library.
+
+For detailed information on the behavior of specific functions, please refer to the official Go documentation for the \`bytes\` package.
+
+Example:
+
+```
+data := []byte("  [INFO] message  ")
+
+// Trim whitespace
+trimmed := bytes.TrimSpace(data)
+// trimmed is "[INFO] message"
+
+// Check for a prefix
+_ = bytes.HasPrefix(trimmed, []byte("[INFO]")) // true
+```
+
 ## Index
 
 - [Constants](<#constants>)
 - [Variables](<#variables>)
-- [func Clone(b []byte) []byte](<#func-clone>)
-- [func Compare(a, b []byte) int](<#func-compare>)
-- [func Contains(b, subslice []byte) bool](<#func-contains>)
-- [func ContainsAny(b []byte, chars string) bool](<#func-containsany>)
-- [func ContainsFunc(b []byte, f func(rune) bool) bool](<#func-containsfunc>)
-- [func ContainsRune(b []byte, r rune) bool](<#func-containsrune>)
-- [func Count(s, sep []byte) int](<#func-count>)
-- [func Cut(s, sep []byte) (before, after []byte, found bool)](<#func-cut>)
-- [func CutPrefix(s, prefix []byte) (after []byte, found bool)](<#func-cutprefix>)
-- [func CutSuffix(s, suffix []byte) (before []byte, found bool)](<#func-cutsuffix>)
-- [func Equal(a, b []byte) bool](<#func-equal>)
-- [func EqualFold(s, t []byte) bool](<#func-equalfold>)
-- [func Fields(s []byte) [][]byte](<#func-fields>)
-- [func FieldsFunc(s []byte, f func(rune) bool) [][]byte](<#func-fieldsfunc>)
-- [func HasPrefix(s, prefix []byte) bool](<#func-hasprefix>)
-- [func HasSuffix(s, suffix []byte) bool](<#func-hassuffix>)
-- [func Index(s, sep []byte) int](<#func-index>)
-- [func IndexAny(s []byte, chars string) int](<#func-indexany>)
-- [func IndexByte(b []byte, c byte) int](<#func-indexbyte>)
-- [func IndexFunc(s []byte, f func(r rune) bool) int](<#func-indexfunc>)
-- [func IndexRune(s []byte, r rune) int](<#func-indexrune>)
-- [func Join(s [][]byte, sep []byte) []byte](<#func-join>)
-- [func LastIndex(s, sep []byte) int](<#func-lastindex>)
-- [func LastIndexAny(s []byte, chars string) int](<#func-lastindexany>)
-- [func LastIndexByte(s []byte, c byte) int](<#func-lastindexbyte>)
-- [func LastIndexFunc(s []byte, f func(r rune) bool) int](<#func-lastindexfunc>)
-- [func Map(mapping func(r rune) rune, s []byte) []byte](<#func-map>)
-- [func NewBuffer(buf []byte) *bytes.Buffer](<#func-newbuffer>)
-- [func NewBufferString(s string) *bytes.Buffer](<#func-newbufferstring>)
-- [func NewReader(b []byte) *bytes.Reader](<#func-newreader>)
-- [func Repeat(b []byte, count int) []byte](<#func-repeat>)
-- [func Replace(s, old, new []byte, n int) []byte](<#func-replace>)
-- [func ReplaceAll(s, old, new []byte) []byte](<#func-replaceall>)
-- [func Runes(s []byte) []rune](<#func-runes>)
-- [func Split(s, sep []byte) [][]byte](<#func-split>)
-- [func SplitAfter(s, sep []byte) [][]byte](<#func-splitafter>)
-- [func SplitAfterN(s, sep []byte, n int) [][]byte](<#func-splitaftern>)
-- [func SplitN(s, sep []byte, n int) [][]byte](<#func-splitn>)
-- [func Title(s []byte) []byte](<#func-title>)
-- [func ToLower(s []byte) []byte](<#func-tolower>)
-- [func ToLowerSpecial(c unicode.SpecialCase, s []byte) []byte](<#func-tolowerspecial>)
-- [func ToTitle(s []byte) []byte](<#func-totitle>)
-- [func ToTitleSpecial(c unicode.SpecialCase, s []byte) []byte](<#func-totitlespecial>)
-- [func ToUpper(s []byte) []byte](<#func-toupper>)
-- [func ToUpperSpecial(c unicode.SpecialCase, s []byte) []byte](<#func-toupperspecial>)
-- [func ToValidUTF8(s, replacement []byte) []byte](<#func-tovalidutf8>)
-- [func Trim(s []byte, cutset string) []byte](<#func-trim>)
-- [func TrimFunc(s []byte, f func(r rune) bool) []byte](<#func-trimfunc>)
-- [func TrimLeft(s []byte, cutset string) []byte](<#func-trimleft>)
-- [func TrimLeftFunc(s []byte, f func(r rune) bool) []byte](<#func-trimleftfunc>)
-- [func TrimPrefix(s, prefix []byte) []byte](<#func-trimprefix>)
-- [func TrimRight(s []byte, cutset string) []byte](<#func-trimright>)
-- [func TrimRightFunc(s []byte, f func(r rune) bool) []byte](<#func-trimrightfunc>)
-- [func TrimSpace(s []byte) []byte](<#func-trimspace>)
-- [func TrimSuffix(s, suffix []byte) []byte](<#func-trimsuffix>)
-- [type Buffer](<#type-buffer>)
-- [type Bytes](<#type-bytes>)
-  - [func FromString(s string) Bytes](<#func-fromstring>)
-  - [func (b Bytes) Contains(sub []byte) bool](<#func-bytes-contains>)
-  - [func (b Bytes) FindString(s string) int](<#func-bytes-findstring>)
-  - [func (b Bytes) HasPrefix(prefix []byte) bool](<#func-bytes-hasprefix>)
-  - [func (b Bytes) HasSuffix(suffix []byte) bool](<#func-bytes-hassuffix>)
-  - [func (b Bytes) Index(sub []byte) int](<#func-bytes-index>)
-  - [func (b Bytes) Read(offset int, limit int) []byte](<#func-bytes-read>)
-  - [func (b Bytes) ReadString(offset int, limit int) string](<#func-bytes-readstring>)
-  - [func (b Bytes) Replace(old, new []byte, n int) []byte](<#func-bytes-replace>)
-  - [func (b Bytes) String() string](<#func-bytes-string>)
-  - [func (b Bytes) Trim(cutset string) []byte](<#func-bytes-trim>)
-  - [func (b Bytes) TrimPrefix(prefix []byte) []byte](<#func-bytes-trimprefix>)
-  - [func (b Bytes) TrimSpace() []byte](<#func-bytes-trimspace>)
-  - [func (b Bytes) TrimSuffix(suffix []byte) []byte](<#func-bytes-trimsuffix>)
-- [type Reader](<#type-reader>)
+- [func Clone\(b \[\]byte\) \[\]byte](<#Clone>)
+- [func Compare\(a, b \[\]byte\) int](<#Compare>)
+- [func Contains\(b, subslice \[\]byte\) bool](<#Contains>)
+- [func ContainsAny\(b \[\]byte, chars string\) bool](<#ContainsAny>)
+- [func ContainsFunc\(b \[\]byte, f func\(rune\) bool\) bool](<#ContainsFunc>)
+- [func ContainsRune\(b \[\]byte, r rune\) bool](<#ContainsRune>)
+- [func Count\(s, sep \[\]byte\) int](<#Count>)
+- [func Cut\(s, sep \[\]byte\) \(before, after \[\]byte, found bool\)](<#Cut>)
+- [func CutPrefix\(s, prefix \[\]byte\) \(after \[\]byte, found bool\)](<#CutPrefix>)
+- [func CutSuffix\(s, suffix \[\]byte\) \(before \[\]byte, found bool\)](<#CutSuffix>)
+- [func Equal\(a, b \[\]byte\) bool](<#Equal>)
+- [func EqualFold\(s, t \[\]byte\) bool](<#EqualFold>)
+- [func Fields\(s \[\]byte\) \[\]\[\]byte](<#Fields>)
+- [func FieldsFunc\(s \[\]byte, f func\(rune\) bool\) \[\]\[\]byte](<#FieldsFunc>)
+- [func FieldsFuncSeq\(s \[\]byte, f func\(rune\) bool\) iter.Seq\[\[\]byte\]](<#FieldsFuncSeq>)
+- [func FieldsSeq\(s \[\]byte\) iter.Seq\[\[\]byte\]](<#FieldsSeq>)
+- [func HasPrefix\(s, prefix \[\]byte\) bool](<#HasPrefix>)
+- [func HasSuffix\(s, suffix \[\]byte\) bool](<#HasSuffix>)
+- [func Index\(s, sep \[\]byte\) int](<#Index>)
+- [func IndexAny\(s \[\]byte, chars string\) int](<#IndexAny>)
+- [func IndexByte\(b \[\]byte, c byte\) int](<#IndexByte>)
+- [func IndexFunc\(s \[\]byte, f func\(r rune\) bool\) int](<#IndexFunc>)
+- [func IndexRune\(s \[\]byte, r rune\) int](<#IndexRune>)
+- [func Join\(s \[\]\[\]byte, sep \[\]byte\) \[\]byte](<#Join>)
+- [func LastIndex\(s, sep \[\]byte\) int](<#LastIndex>)
+- [func LastIndexAny\(s \[\]byte, chars string\) int](<#LastIndexAny>)
+- [func LastIndexByte\(s \[\]byte, c byte\) int](<#LastIndexByte>)
+- [func LastIndexFunc\(s \[\]byte, f func\(r rune\) bool\) int](<#LastIndexFunc>)
+- [func Lines\(s \[\]byte\) iter.Seq\[\[\]byte\]](<#Lines>)
+- [func Map\(mapping func\(r rune\) rune, s \[\]byte\) \[\]byte](<#Map>)
+- [func NewBuffer\(buf \[\]byte\) \*bytes.Buffer](<#NewBuffer>)
+- [func NewBufferString\(s string\) \*bytes.Buffer](<#NewBufferString>)
+- [func NewReader\(b \[\]byte\) \*bytes.Reader](<#NewReader>)
+- [func Repeat\(b \[\]byte, count int\) \[\]byte](<#Repeat>)
+- [func Replace\(s, old, new \[\]byte, n int\) \[\]byte](<#Replace>)
+- [func ReplaceAll\(s, old, new \[\]byte\) \[\]byte](<#ReplaceAll>)
+- [func Runes\(s \[\]byte\) \[\]rune](<#Runes>)
+- [func Split\(s, sep \[\]byte\) \[\]\[\]byte](<#Split>)
+- [func SplitAfter\(s, sep \[\]byte\) \[\]\[\]byte](<#SplitAfter>)
+- [func SplitAfterN\(s, sep \[\]byte, n int\) \[\]\[\]byte](<#SplitAfterN>)
+- [func SplitAfterSeq\(s, sep \[\]byte\) iter.Seq\[\[\]byte\]](<#SplitAfterSeq>)
+- [func SplitN\(s, sep \[\]byte, n int\) \[\]\[\]byte](<#SplitN>)
+- [func SplitSeq\(s, sep \[\]byte\) iter.Seq\[\[\]byte\]](<#SplitSeq>)
+- [func Title\(s \[\]byte\) \[\]byte](<#Title>)
+- [func ToLower\(s \[\]byte\) \[\]byte](<#ToLower>)
+- [func ToLowerSpecial\(c unicode.SpecialCase, s \[\]byte\) \[\]byte](<#ToLowerSpecial>)
+- [func ToTitle\(s \[\]byte\) \[\]byte](<#ToTitle>)
+- [func ToTitleSpecial\(c unicode.SpecialCase, s \[\]byte\) \[\]byte](<#ToTitleSpecial>)
+- [func ToUpper\(s \[\]byte\) \[\]byte](<#ToUpper>)
+- [func ToUpperSpecial\(c unicode.SpecialCase, s \[\]byte\) \[\]byte](<#ToUpperSpecial>)
+- [func ToValidUTF8\(s, replacement \[\]byte\) \[\]byte](<#ToValidUTF8>)
+- [func Trim\(s \[\]byte, cutset string\) \[\]byte](<#Trim>)
+- [func TrimFunc\(s \[\]byte, f func\(r rune\) bool\) \[\]byte](<#TrimFunc>)
+- [func TrimLeft\(s \[\]byte, cutset string\) \[\]byte](<#TrimLeft>)
+- [func TrimLeftFunc\(s \[\]byte, f func\(r rune\) bool\) \[\]byte](<#TrimLeftFunc>)
+- [func TrimPrefix\(s, prefix \[\]byte\) \[\]byte](<#TrimPrefix>)
+- [func TrimRight\(s \[\]byte, cutset string\) \[\]byte](<#TrimRight>)
+- [func TrimRightFunc\(s \[\]byte, f func\(r rune\) bool\) \[\]byte](<#TrimRightFunc>)
+- [func TrimSpace\(s \[\]byte\) \[\]byte](<#TrimSpace>)
+- [func TrimSuffix\(s, suffix \[\]byte\) \[\]byte](<#TrimSuffix>)
+- [type Buffer](<#Buffer>)
+- [type Bytes](<#Bytes>)
+  - [func FromString\(s string\) Bytes](<#FromString>)
+  - [func \(b Bytes\) Contains\(sub \[\]byte\) bool](<#Bytes.Contains>)
+  - [func \(b Bytes\) FindString\(s string\) int](<#Bytes.FindString>)
+  - [func \(b Bytes\) HasPrefix\(prefix \[\]byte\) bool](<#Bytes.HasPrefix>)
+  - [func \(b Bytes\) HasSuffix\(suffix \[\]byte\) bool](<#Bytes.HasSuffix>)
+  - [func \(b Bytes\) Index\(sub \[\]byte\) int](<#Bytes.Index>)
+  - [func \(b Bytes\) Read\(offset int, limit int\) \[\]byte](<#Bytes.Read>)
+  - [func \(b Bytes\) ReadString\(offset int, limit int\) string](<#Bytes.ReadString>)
+  - [func \(b Bytes\) Replace\(old, replacement \[\]byte, n int\) \[\]byte](<#Bytes.Replace>)
+  - [func \(b Bytes\) String\(\) string](<#Bytes.String>)
+  - [func \(b Bytes\) Trim\(cutset string\) \[\]byte](<#Bytes.Trim>)
+  - [func \(b Bytes\) TrimPrefix\(prefix \[\]byte\) \[\]byte](<#Bytes.TrimPrefix>)
+  - [func \(b Bytes\) TrimSpace\(\) \[\]byte](<#Bytes.TrimSpace>)
+  - [func \(b Bytes\) TrimSuffix\(suffix \[\]byte\) \[\]byte](<#Bytes.TrimSuffix>)
+- [type Reader](<#Reader>)
 
 
 ## Constants
+
+<a name="MinRead"></a>
 
 ```go
 const MinRead = bytes.MinRead
@@ -2127,346 +2913,562 @@ const MinRead = bytes.MinRead
 
 ## Variables
 
+<a name="ErrTooLarge"></a>
+
 ```go
 var ErrTooLarge = bytes.ErrTooLarge
 ```
 
-## func [Clone](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L22>)
+<a name="Clone"></a>
+## func [Clone](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L23>)
 
 ```go
 func Clone(b []byte) []byte
 ```
 
-## func [Compare](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L26>)
+
+
+<a name="Compare"></a>
+## func [Compare](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L27>)
 
 ```go
 func Compare(a, b []byte) int
 ```
 
-## func [Contains](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L30>)
+
+
+<a name="Contains"></a>
+## func [Contains](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L31>)
 
 ```go
 func Contains(b, subslice []byte) bool
 ```
 
-## func [ContainsAny](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L34>)
+
+
+<a name="ContainsAny"></a>
+## func [ContainsAny](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L35>)
 
 ```go
 func ContainsAny(b []byte, chars string) bool
 ```
 
-## func [ContainsFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L38>)
+
+
+<a name="ContainsFunc"></a>
+## func [ContainsFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L39>)
 
 ```go
 func ContainsFunc(b []byte, f func(rune) bool) bool
 ```
 
-## func [ContainsRune](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L42>)
+
+
+<a name="ContainsRune"></a>
+## func [ContainsRune](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L43>)
 
 ```go
 func ContainsRune(b []byte, r rune) bool
 ```
 
-## func [Count](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L46>)
+
+
+<a name="Count"></a>
+## func [Count](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L47>)
 
 ```go
 func Count(s, sep []byte) int
 ```
 
-## func [Cut](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L50>)
+
+
+<a name="Cut"></a>
+## func [Cut](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L51>)
 
 ```go
 func Cut(s, sep []byte) (before, after []byte, found bool)
 ```
 
-## func [CutPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L54>)
+
+
+<a name="CutPrefix"></a>
+## func [CutPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L55>)
 
 ```go
 func CutPrefix(s, prefix []byte) (after []byte, found bool)
 ```
 
-## func [CutSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L58>)
+
+
+<a name="CutSuffix"></a>
+## func [CutSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L59>)
 
 ```go
 func CutSuffix(s, suffix []byte) (before []byte, found bool)
 ```
 
-## func [Equal](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L62>)
+
+
+<a name="Equal"></a>
+## func [Equal](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L63>)
 
 ```go
 func Equal(a, b []byte) bool
 ```
 
-## func [EqualFold](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L66>)
+
+
+<a name="EqualFold"></a>
+## func [EqualFold](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L67>)
 
 ```go
 func EqualFold(s, t []byte) bool
 ```
 
-## func [Fields](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L70>)
+
+
+<a name="Fields"></a>
+## func [Fields](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L71>)
 
 ```go
 func Fields(s []byte) [][]byte
 ```
 
-## func [FieldsFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L74>)
+
+
+<a name="FieldsFunc"></a>
+## func [FieldsFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L75>)
 
 ```go
 func FieldsFunc(s []byte, f func(rune) bool) [][]byte
 ```
 
-## func [HasPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L78>)
+
+
+<a name="FieldsFuncSeq"></a>
+## func [FieldsFuncSeq](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L79>)
+
+```go
+func FieldsFuncSeq(s []byte, f func(rune) bool) iter.Seq[[]byte]
+```
+
+
+
+<a name="FieldsSeq"></a>
+## func [FieldsSeq](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L83>)
+
+```go
+func FieldsSeq(s []byte) iter.Seq[[]byte]
+```
+
+
+
+<a name="HasPrefix"></a>
+## func [HasPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L87>)
 
 ```go
 func HasPrefix(s, prefix []byte) bool
 ```
 
-## func [HasSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L82>)
+
+
+<a name="HasSuffix"></a>
+## func [HasSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L91>)
 
 ```go
 func HasSuffix(s, suffix []byte) bool
 ```
 
-## func [Index](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L86>)
+
+
+<a name="Index"></a>
+## func [Index](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L95>)
 
 ```go
 func Index(s, sep []byte) int
 ```
 
-## func [IndexAny](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L90>)
+
+
+<a name="IndexAny"></a>
+## func [IndexAny](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L99>)
 
 ```go
 func IndexAny(s []byte, chars string) int
 ```
 
-## func [IndexByte](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L94>)
+
+
+<a name="IndexByte"></a>
+## func [IndexByte](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L103>)
 
 ```go
 func IndexByte(b []byte, c byte) int
 ```
 
-## func [IndexFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L98>)
+
+
+<a name="IndexFunc"></a>
+## func [IndexFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L107>)
 
 ```go
 func IndexFunc(s []byte, f func(r rune) bool) int
 ```
 
-## func [IndexRune](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L102>)
+
+
+<a name="IndexRune"></a>
+## func [IndexRune](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L111>)
 
 ```go
 func IndexRune(s []byte, r rune) int
 ```
 
-## func [Join](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L106>)
+
+
+<a name="Join"></a>
+## func [Join](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L115>)
 
 ```go
 func Join(s [][]byte, sep []byte) []byte
 ```
 
-## func [LastIndex](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L110>)
+
+
+<a name="LastIndex"></a>
+## func [LastIndex](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L119>)
 
 ```go
 func LastIndex(s, sep []byte) int
 ```
 
-## func [LastIndexAny](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L114>)
+
+
+<a name="LastIndexAny"></a>
+## func [LastIndexAny](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L123>)
 
 ```go
 func LastIndexAny(s []byte, chars string) int
 ```
 
-## func [LastIndexByte](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L118>)
+
+
+<a name="LastIndexByte"></a>
+## func [LastIndexByte](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L127>)
 
 ```go
 func LastIndexByte(s []byte, c byte) int
 ```
 
-## func [LastIndexFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L122>)
+
+
+<a name="LastIndexFunc"></a>
+## func [LastIndexFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L131>)
 
 ```go
 func LastIndexFunc(s []byte, f func(r rune) bool) int
 ```
 
-## func [Map](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L126>)
+
+
+<a name="Lines"></a>
+## func [Lines](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L135>)
+
+```go
+func Lines(s []byte) iter.Seq[[]byte]
+```
+
+
+
+<a name="Map"></a>
+## func [Map](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L139>)
 
 ```go
 func Map(mapping func(r rune) rune, s []byte) []byte
 ```
 
-## func [NewBuffer](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L130>)
+
+
+<a name="NewBuffer"></a>
+## func [NewBuffer](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L143>)
 
 ```go
 func NewBuffer(buf []byte) *bytes.Buffer
 ```
 
-## func [NewBufferString](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L134>)
+
+
+<a name="NewBufferString"></a>
+## func [NewBufferString](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L147>)
 
 ```go
 func NewBufferString(s string) *bytes.Buffer
 ```
 
-## func [NewReader](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L138>)
+
+
+<a name="NewReader"></a>
+## func [NewReader](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L151>)
 
 ```go
 func NewReader(b []byte) *bytes.Reader
 ```
 
-## func [Repeat](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L142>)
+
+
+<a name="Repeat"></a>
+## func [Repeat](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L155>)
 
 ```go
 func Repeat(b []byte, count int) []byte
 ```
 
-## func [Replace](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L146>)
+
+
+<a name="Replace"></a>
+## func [Replace](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L159>)
 
 ```go
 func Replace(s, old, new []byte, n int) []byte
 ```
 
-## func [ReplaceAll](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L150>)
+
+
+<a name="ReplaceAll"></a>
+## func [ReplaceAll](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L163>)
 
 ```go
 func ReplaceAll(s, old, new []byte) []byte
 ```
 
-## func [Runes](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L154>)
+
+
+<a name="Runes"></a>
+## func [Runes](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L167>)
 
 ```go
 func Runes(s []byte) []rune
 ```
 
-## func [Split](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L158>)
+
+
+<a name="Split"></a>
+## func [Split](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L171>)
 
 ```go
 func Split(s, sep []byte) [][]byte
 ```
 
-## func [SplitAfter](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L162>)
+
+
+<a name="SplitAfter"></a>
+## func [SplitAfter](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L175>)
 
 ```go
 func SplitAfter(s, sep []byte) [][]byte
 ```
 
-## func [SplitAfterN](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L166>)
+
+
+<a name="SplitAfterN"></a>
+## func [SplitAfterN](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L179>)
 
 ```go
 func SplitAfterN(s, sep []byte, n int) [][]byte
 ```
 
-## func [SplitN](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L170>)
+
+
+<a name="SplitAfterSeq"></a>
+## func [SplitAfterSeq](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L183>)
+
+```go
+func SplitAfterSeq(s, sep []byte) iter.Seq[[]byte]
+```
+
+
+
+<a name="SplitN"></a>
+## func [SplitN](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L187>)
 
 ```go
 func SplitN(s, sep []byte, n int) [][]byte
 ```
 
-## func [Title](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L174>)
+
+
+<a name="SplitSeq"></a>
+## func [SplitSeq](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L191>)
+
+```go
+func SplitSeq(s, sep []byte) iter.Seq[[]byte]
+```
+
+
+
+<a name="Title"></a>
+## func [Title](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L195>)
 
 ```go
 func Title(s []byte) []byte
 ```
 
-## func [ToLower](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L178>)
+
+
+<a name="ToLower"></a>
+## func [ToLower](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L199>)
 
 ```go
 func ToLower(s []byte) []byte
 ```
 
-## func [ToLowerSpecial](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L182>)
+
+
+<a name="ToLowerSpecial"></a>
+## func [ToLowerSpecial](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L203>)
 
 ```go
 func ToLowerSpecial(c unicode.SpecialCase, s []byte) []byte
 ```
 
-## func [ToTitle](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L186>)
+
+
+<a name="ToTitle"></a>
+## func [ToTitle](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L207>)
 
 ```go
 func ToTitle(s []byte) []byte
 ```
 
-## func [ToTitleSpecial](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L190>)
+
+
+<a name="ToTitleSpecial"></a>
+## func [ToTitleSpecial](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L211>)
 
 ```go
 func ToTitleSpecial(c unicode.SpecialCase, s []byte) []byte
 ```
 
-## func [ToUpper](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L194>)
+
+
+<a name="ToUpper"></a>
+## func [ToUpper](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L215>)
 
 ```go
 func ToUpper(s []byte) []byte
 ```
 
-## func [ToUpperSpecial](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L198>)
+
+
+<a name="ToUpperSpecial"></a>
+## func [ToUpperSpecial](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L219>)
 
 ```go
 func ToUpperSpecial(c unicode.SpecialCase, s []byte) []byte
 ```
 
-## func [ToValidUTF8](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L202>)
+
+
+<a name="ToValidUTF8"></a>
+## func [ToValidUTF8](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L223>)
 
 ```go
 func ToValidUTF8(s, replacement []byte) []byte
 ```
 
-## func [Trim](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L206>)
+
+
+<a name="Trim"></a>
+## func [Trim](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L227>)
 
 ```go
 func Trim(s []byte, cutset string) []byte
 ```
 
-## func [TrimFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L210>)
+
+
+<a name="TrimFunc"></a>
+## func [TrimFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L231>)
 
 ```go
 func TrimFunc(s []byte, f func(r rune) bool) []byte
 ```
 
-## func [TrimLeft](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L214>)
+
+
+<a name="TrimLeft"></a>
+## func [TrimLeft](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L235>)
 
 ```go
 func TrimLeft(s []byte, cutset string) []byte
 ```
 
-## func [TrimLeftFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L218>)
+
+
+<a name="TrimLeftFunc"></a>
+## func [TrimLeftFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L239>)
 
 ```go
 func TrimLeftFunc(s []byte, f func(r rune) bool) []byte
 ```
 
-## func [TrimPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L222>)
+
+
+<a name="TrimPrefix"></a>
+## func [TrimPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L243>)
 
 ```go
 func TrimPrefix(s, prefix []byte) []byte
 ```
 
-## func [TrimRight](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L226>)
+
+
+<a name="TrimRight"></a>
+## func [TrimRight](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L247>)
 
 ```go
 func TrimRight(s []byte, cutset string) []byte
 ```
 
-## func [TrimRightFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L230>)
+
+
+<a name="TrimRightFunc"></a>
+## func [TrimRightFunc](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L251>)
 
 ```go
 func TrimRightFunc(s []byte, f func(r rune) bool) []byte
 ```
 
-## func [TrimSpace](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L234>)
+
+
+<a name="TrimSpace"></a>
+## func [TrimSpace](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L255>)
 
 ```go
 func TrimSpace(s []byte) []byte
 ```
 
-## func [TrimSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L238>)
+
+
+<a name="TrimSuffix"></a>
+## func [TrimSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L259>)
 
 ```go
 func TrimSuffix(s, suffix []byte) []byte
 ```
 
-## type [Buffer](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L18>)
+
+
+<a name="Buffer"></a>
+## type [Buffer](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L19>)
+
+
 
 ```go
 type Buffer = bytes.Buffer
 ```
 
+<a name="Bytes"></a>
 ## type [Bytes](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L11>)
 
 Bytes is a type alias for \[\]byte to provide methods.
@@ -2475,6 +3477,7 @@ Bytes is a type alias for \[\]byte to provide methods.
 type Bytes []byte
 ```
 
+<a name="FromString"></a>
 ### func [FromString](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L85>)
 
 ```go
@@ -2483,6 +3486,7 @@ func FromString(s string) Bytes
 
 FromString converts a string to a Bytes slice.
 
+<a name="Bytes.Contains"></a>
 ### func \(Bytes\) [Contains](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L70>)
 
 ```go
@@ -2491,6 +3495,7 @@ func (b Bytes) Contains(sub []byte) bool
 
 Contains reports whether sub is within b.
 
+<a name="Bytes.FindString"></a>
 ### func \(Bytes\) [FindString](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L35>)
 
 ```go
@@ -2499,6 +3504,7 @@ func (b Bytes) FindString(s string) int
 
 FindString returns the index of the first instance of s in b, or \-1 if s is not present in b.
 
+<a name="Bytes.HasPrefix"></a>
 ### func \(Bytes\) [HasPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L75>)
 
 ```go
@@ -2507,6 +3513,7 @@ func (b Bytes) HasPrefix(prefix []byte) bool
 
 HasPrefix tests whether the byte slice b begins with prefix.
 
+<a name="Bytes.HasSuffix"></a>
 ### func \(Bytes\) [HasSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L80>)
 
 ```go
@@ -2515,6 +3522,7 @@ func (b Bytes) HasSuffix(suffix []byte) bool
 
 HasSuffix tests whether the byte slice b ends with suffix.
 
+<a name="Bytes.Index"></a>
 ### func \(Bytes\) [Index](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L30>)
 
 ```go
@@ -2523,6 +3531,7 @@ func (b Bytes) Index(sub []byte) int
 
 Index returns the index of the first instance of sub in b, or \-1 if sub is not present in b.
 
+<a name="Bytes.Read"></a>
 ### func \(Bytes\) [Read](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L14>)
 
 ```go
@@ -2531,6 +3540,7 @@ func (b Bytes) Read(offset int, limit int) []byte
 
 Read returns a slice of the Bytes s beginning at offset and length limit.
 
+<a name="Bytes.ReadString"></a>
 ### func \(Bytes\) [ReadString](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L25>)
 
 ```go
@@ -2539,14 +3549,16 @@ func (b Bytes) ReadString(offset int, limit int) string
 
 ReadString returns a string of the Bytes s beginning at offset and length limit.
 
+<a name="Bytes.Replace"></a>
 ### func \(Bytes\) [Replace](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L65>)
 
 ```go
-func (b Bytes) Replace(old, new []byte, n int) []byte
+func (b Bytes) Replace(old, replacement []byte, n int) []byte
 ```
 
-Replace returns a copy of the slice with the first n non\-overlapping instances of old replaced by new.
+Replace returns a copy of the slice with the first n non\-overlapping instances of old replaced by replacement.
 
+<a name="Bytes.String"></a>
 ### func \(Bytes\) [String](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L40>)
 
 ```go
@@ -2555,6 +3567,7 @@ func (b Bytes) String() string
 
 String converts the Bytes slice to a string.
 
+<a name="Bytes.Trim"></a>
 ### func \(Bytes\) [Trim](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L45>)
 
 ```go
@@ -2563,6 +3576,7 @@ func (b Bytes) Trim(cutset string) []byte
 
 Trim returns a slice of the bytes, with all leading and trailing bytes contained in cutset removed.
 
+<a name="Bytes.TrimPrefix"></a>
 ### func \(Bytes\) [TrimPrefix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L55>)
 
 ```go
@@ -2571,6 +3585,7 @@ func (b Bytes) TrimPrefix(prefix []byte) []byte
 
 TrimPrefix returns b without the provided leading prefix.
 
+<a name="Bytes.TrimSpace"></a>
 ### func \(Bytes\) [TrimSpace](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L50>)
 
 ```go
@@ -2579,6 +3594,7 @@ func (b Bytes) TrimSpace() []byte
 
 TrimSpace returns a slice of the bytes, with all leading and trailing white space removed.
 
+<a name="Bytes.TrimSuffix"></a>
 ### func \(Bytes\) [TrimSuffix](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L60>)
 
 ```go
@@ -2587,7 +3603,10 @@ func (b Bytes) TrimSuffix(suffix []byte) []byte
 
 TrimSuffix returns b without the provided trailing suffix.
 
-## type [Reader](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L19>)
+<a name="Reader"></a>
+## type [Reader](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.adapter.go#L20>)
+
+
 
 ```go
 type Reader = bytes.Reader
@@ -2599,80 +3618,120 @@ type Reader = bytes.Reader
 import "github.com/goexts/generic/slices/runes"
 ```
 
+Package runes provides a rich set of functions for the manipulation of rune slices \(\`\[\]rune\`\).
+
+This package is essential for correct, Unicode\-aware text processing at the code point level.
+
+This package is a generated adapter and mirrors the public API of the Go experimental package \`golang.org/x/text/runes\`. It offers a convenient way to access these specialized utilities within the generic context of this library.
+
+For detailed information on the behavior of specific functions and the underlying Unicode algorithms, please refer to the official documentation for the \`golang.org/x/text/runes\` package.
+
+Example:
+
+```
+text := []rune("  Hello, 世界!  ")
+
+// Trim whitespace using Unicode-aware functions
+trimmed := runes.TrimSpace(text)
+// trimmed is "Hello, 世界!"
+```
+
 Package runes contains generated code by adptool.
 
 ## Index
 
-- [func If(s runes.Set, tIn, tNotIn transform.Transformer) runes.Transformer](<#func-if>)
-- [func In(rt *unicode.RangeTable) runes.Set](<#func-in>)
-- [func Map(mapping func(rune) rune) runes.Transformer](<#func-map>)
-- [func NotIn(rt *unicode.RangeTable) runes.Set](<#func-notin>)
-- [func Predicate(f func(rune) bool) runes.Set](<#func-predicate>)
-- [func Remove(s runes.Set) runes.Transformer](<#func-remove>)
-- [func ReplaceIllFormed() runes.Transformer](<#func-replaceillformed>)
-- [type Runes](<#type-runes>)
-  - [func StringToRunes(s string) Runes](<#func-stringtorunes>)
-  - [func (r Runes) Contains(sub []rune) bool](<#func-runes-contains>)
-  - [func (r Runes) FindString(s string) int](<#func-runes-findstring>)
-  - [func (r Runes) HasPrefix(prefix []rune) bool](<#func-runes-hasprefix>)
-  - [func (r Runes) HasSuffix(suffix []rune) bool](<#func-runes-hassuffix>)
-  - [func (r Runes) Index(sub []rune) int](<#func-runes-index>)
-  - [func (r Runes) Read(offset int, limit int) []rune](<#func-runes-read>)
-  - [func (r Runes) ReadString(offset int, limit int) string](<#func-runes-readstring>)
-  - [func (r Runes) Replace(old, new []rune, n int) []rune](<#func-runes-replace>)
-  - [func (r Runes) String() string](<#func-runes-string>)
-  - [func (r Runes) StringArray() []string](<#func-runes-stringarray>)
-  - [func (r Runes) ToBytes() []byte](<#func-runes-tobytes>)
-  - [func (r Runes) Trim(cutset string) []rune](<#func-runes-trim>)
-  - [func (r Runes) TrimPrefix(prefix []rune) []rune](<#func-runes-trimprefix>)
-  - [func (r Runes) TrimSpace() []rune](<#func-runes-trimspace>)
-  - [func (r Runes) TrimSuffix(suffix []rune) []rune](<#func-runes-trimsuffix>)
-- [type Set](<#type-set>)
-- [type Transformer](<#type-transformer>)
+- [func If\(s runes.Set, tIn, tNotIn transform.Transformer\) runes.Transformer](<#If>)
+- [func In\(rt \*unicode.RangeTable\) runes.Set](<#In>)
+- [func Map\(mapping func\(rune\) rune\) runes.Transformer](<#Map>)
+- [func NotIn\(rt \*unicode.RangeTable\) runes.Set](<#NotIn>)
+- [func Predicate\(f func\(rune\) bool\) runes.Set](<#Predicate>)
+- [func Remove\(s runes.Set\) runes.Transformer](<#Remove>)
+- [func ReplaceIllFormed\(\) runes.Transformer](<#ReplaceIllFormed>)
+- [type Runes](<#Runes>)
+  - [func FromString\(s string\) Runes](<#FromString>)
+  - [func \(r Runes\) Contains\(sub \[\]rune\) bool](<#Runes.Contains>)
+  - [func \(r Runes\) FindString\(s string\) int](<#Runes.FindString>)
+  - [func \(r Runes\) HasPrefix\(prefix \[\]rune\) bool](<#Runes.HasPrefix>)
+  - [func \(r Runes\) HasSuffix\(suffix \[\]rune\) bool](<#Runes.HasSuffix>)
+  - [func \(r Runes\) Index\(sub \[\]rune\) int](<#Runes.Index>)
+  - [func \(r Runes\) Read\(offset int, limit int\) \[\]rune](<#Runes.Read>)
+  - [func \(r Runes\) ReadString\(offset int, limit int\) string](<#Runes.ReadString>)
+  - [func \(r Runes\) Replace\(old, replacement \[\]rune, n int\) \[\]rune](<#Runes.Replace>)
+  - [func \(r Runes\) String\(\) string](<#Runes.String>)
+  - [func \(r Runes\) StringArray\(\) \[\]string](<#Runes.StringArray>)
+  - [func \(r Runes\) ToBytes\(\) \[\]byte](<#Runes.ToBytes>)
+  - [func \(r Runes\) Trim\(cutset string\) \[\]rune](<#Runes.Trim>)
+  - [func \(r Runes\) TrimPrefix\(prefix \[\]rune\) \[\]rune](<#Runes.TrimPrefix>)
+  - [func \(r Runes\) TrimSpace\(\) \[\]rune](<#Runes.TrimSpace>)
+  - [func \(r Runes\) TrimSuffix\(suffix \[\]rune\) \[\]rune](<#Runes.TrimSuffix>)
+- [type Set](<#Set>)
+- [type Transformer](<#Transformer>)
 
 
+<a name="If"></a>
 ## func [If](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L20>)
 
 ```go
 func If(s runes.Set, tIn, tNotIn transform.Transformer) runes.Transformer
 ```
 
+
+
+<a name="In"></a>
 ## func [In](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L24>)
 
 ```go
 func In(rt *unicode.RangeTable) runes.Set
 ```
 
+
+
+<a name="Map"></a>
 ## func [Map](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L28>)
 
 ```go
 func Map(mapping func(rune) rune) runes.Transformer
 ```
 
+
+
+<a name="NotIn"></a>
 ## func [NotIn](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L32>)
 
 ```go
 func NotIn(rt *unicode.RangeTable) runes.Set
 ```
 
+
+
+<a name="Predicate"></a>
 ## func [Predicate](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L36>)
 
 ```go
 func Predicate(f func(rune) bool) runes.Set
 ```
 
+
+
+<a name="Remove"></a>
 ## func [Remove](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L40>)
 
 ```go
 func Remove(s runes.Set) runes.Transformer
 ```
 
+
+
+<a name="ReplaceIllFormed"></a>
 ## func [ReplaceIllFormed](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L44>)
 
 ```go
 func ReplaceIllFormed() runes.Transformer
 ```
 
+
+
+<a name="Runes"></a>
 ## type [Runes](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L13>)
 
 Runes is a type alias for \[\]rune to provide methods.
@@ -2681,15 +3740,17 @@ Runes is a type alias for \[\]rune to provide methods.
 type Runes []rune
 ```
 
-### func [StringToRunes](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L63>)
+<a name="FromString"></a>
+### func [FromString](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L164>)
 
 ```go
-func StringToRunes(s string) Runes
+func FromString(s string) Runes
 ```
 
-StringToRunes converts a string to a Runes slice.
+FromString converts a string to a rune slice \(\[\]rune\). This is a convenience function that is equivalent to \`\[\]rune\(s\)\`.
 
-### func \(Runes\) [Contains](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L153>)
+<a name="Runes.Contains"></a>
+### func \(Runes\) [Contains](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L148>)
 
 ```go
 func (r Runes) Contains(sub []rune) bool
@@ -2697,6 +3758,7 @@ func (r Runes) Contains(sub []rune) bool
 
 Contains reports whether sub is within r.
 
+<a name="Runes.FindString"></a>
 ### func \(Runes\) [FindString](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L39>)
 
 ```go
@@ -2705,7 +3767,8 @@ func (r Runes) FindString(s string) int
 
 FindString returns the index of the first instance of s in r, or \-1 if s is not present in r.
 
-### func \(Runes\) [HasPrefix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L158>)
+<a name="Runes.HasPrefix"></a>
+### func \(Runes\) [HasPrefix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L153>)
 
 ```go
 func (r Runes) HasPrefix(prefix []rune) bool
@@ -2713,7 +3776,8 @@ func (r Runes) HasPrefix(prefix []rune) bool
 
 HasPrefix tests whether the Runes slice s begins with prefix.
 
-### func \(Runes\) [HasSuffix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L163>)
+<a name="Runes.HasSuffix"></a>
+### func \(Runes\) [HasSuffix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L158>)
 
 ```go
 func (r Runes) HasSuffix(suffix []rune) bool
@@ -2721,6 +3785,7 @@ func (r Runes) HasSuffix(suffix []rune) bool
 
 HasSuffix tests whether the Runes slice s ends with suffix.
 
+<a name="Runes.Index"></a>
 ### func \(Runes\) [Index](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L34>)
 
 ```go
@@ -2729,6 +3794,7 @@ func (r Runes) Index(sub []rune) int
 
 Index returns the index of the first instance of sub in r, or \-1 if sub is not present in r.
 
+<a name="Runes.Read"></a>
 ### func \(Runes\) [Read](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L16>)
 
 ```go
@@ -2737,6 +3803,7 @@ func (r Runes) Read(offset int, limit int) []rune
 
 Read returns a slice of the Runes s beginning at offset and length limit.
 
+<a name="Runes.ReadString"></a>
 ### func \(Runes\) [ReadString](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L29>)
 
 ```go
@@ -2745,14 +3812,16 @@ func (r Runes) ReadString(offset int, limit int) string
 
 ReadString returns a string of the Runes s beginning at offset and length limit.
 
-### func \(Runes\) [Replace](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L119>)
+<a name="Runes.Replace"></a>
+### func \(Runes\) [Replace](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L114>)
 
 ```go
-func (r Runes) Replace(old, new []rune, n int) []rune
+func (r Runes) Replace(old, replacement []rune, n int) []rune
 ```
 
-Replace returns a copy of the slice with the first n non\-overlapping instances of old replaced by new.
+Replace returns a copy of the slice with the first n non\-overlapping instances of old replaced by replacement.
 
+<a name="Runes.String"></a>
 ### func \(Runes\) [String](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L53>)
 
 ```go
@@ -2761,6 +3830,7 @@ func (r Runes) String() string
 
 String converts the Runes slice to a string.
 
+<a name="Runes.StringArray"></a>
 ### func \(Runes\) [StringArray](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L44>)
 
 ```go
@@ -2769,6 +3839,7 @@ func (r Runes) StringArray() []string
 
 StringArray converts each rune to a string and returns a slice of strings.
 
+<a name="Runes.ToBytes"></a>
 ### func \(Runes\) [ToBytes](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L58>)
 
 ```go
@@ -2777,7 +3848,8 @@ func (r Runes) ToBytes() []byte
 
 ToBytes converts the rune slice back to a UTF\-8 encoded byte slice.
 
-### func \(Runes\) [Trim](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L68>)
+<a name="Runes.Trim"></a>
+### func \(Runes\) [Trim](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L63>)
 
 ```go
 func (r Runes) Trim(cutset string) []rune
@@ -2785,7 +3857,8 @@ func (r Runes) Trim(cutset string) []rune
 
 Trim returns a slice of the runes, with all leading and trailing runes contained in cutset removed.
 
-### func \(Runes\) [TrimPrefix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L103>)
+<a name="Runes.TrimPrefix"></a>
+### func \(Runes\) [TrimPrefix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L98>)
 
 ```go
 func (r Runes) TrimPrefix(prefix []rune) []rune
@@ -2793,7 +3866,8 @@ func (r Runes) TrimPrefix(prefix []rune) []rune
 
 TrimPrefix returns s without the provided leading prefix.
 
-### func \(Runes\) [TrimSpace](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L86>)
+<a name="Runes.TrimSpace"></a>
+### func \(Runes\) [TrimSpace](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L81>)
 
 ```go
 func (r Runes) TrimSpace() []rune
@@ -2801,7 +3875,8 @@ func (r Runes) TrimSpace() []rune
 
 TrimSpace returns a slice of the runes, with all leading and trailing white space removed.
 
-### func \(Runes\) [TrimSuffix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L111>)
+<a name="Runes.TrimSuffix"></a>
+### func \(Runes\) [TrimSuffix](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L106>)
 
 ```go
 func (r Runes) TrimSuffix(suffix []rune) []rune
@@ -2809,18 +3884,22 @@ func (r Runes) TrimSuffix(suffix []rune) []rune
 
 TrimSuffix returns s without the provided trailing suffix.
 
+<a name="Set"></a>
 ## type [Set](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L16>)
+
+
 
 ```go
 type Set = runes.Set
 ```
 
+<a name="Transformer"></a>
 ## type [Transformer](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L17>)
+
+
 
 ```go
 type Transformer = runes.Transformer
 ```
-
-
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)

@@ -158,7 +158,7 @@ Please read our [Contributing Guide](.github/CONTRIBUTING.md) and [Code of Condu
 ### Development Setup
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/generic.git`
+2. Clone the repository: `git clone https://github.com/goexts/generic.git`
 3. Run tests: `go test ./...`
 4. Make your changes and submit a pull request
 
