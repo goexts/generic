@@ -60,10 +60,10 @@ func Exclude[M ~map[K]V, K comparable, V any](m M, keys ...K) {
 	}
 }
 
-// Filter is like Exclude, but uses a function.
+// Filter keeps only the key-value pairs in the map for which the provided function returns true.
 func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
 	for k, v := range m {
-		if f(k, v) {
+		if !f(k, v) {
 			delete(m, k)
 		}
 	}
