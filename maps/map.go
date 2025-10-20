@@ -102,11 +102,32 @@ func ToSlice[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T {
 	return ts
 }
 
+// ToSliceWith converts a map to a slice of types, filtering out values that return false.
+func ToSliceWith[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) (T, bool)) []T {
+	ts := make([]T, 0, len(m))
+	for k, v := range m {
+		if t, ok := f(k, v); ok {
+			ts = append(ts, t)
+		}
+	}
+	return ts
+}
+
 // FromSlice converts a slice of types to a map.
 func FromSlice[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M {
 	m := make(M, len(ts))
 	for _, t := range ts {
 		k, v := f(t)
+		m[k] = v
+	}
+	return m
+}
+
+// FromSliceWithIndex converts a slice of types to a map, using the provided function to extract the key and value.
+func FromSliceWithIndex[T any, M ~map[K]V, K comparable, V any](ts []T, f func(int, T) (K, V)) M {
+	m := make(M, len(ts))
+	for i, t := range ts {
+		k, v := f(i, t)
 		m[k] = v
 	}
 	return m

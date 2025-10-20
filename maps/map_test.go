@@ -84,6 +84,53 @@ func TestFromKVs(t *testing.T) {
 	}
 }
 
+func TestToSliceWith(t *testing.T) {
+	tests := []struct {
+		name string
+		m    map[string]int
+		f    func(string, int) (string, bool)
+		want []string
+	}{
+		{
+			name: "empty map",
+			m:    map[string]int{},
+			f:    func(k string, v int) (string, bool) { return fmt.Sprintf("%s:%d", k, v), true },
+			want: []string{},
+		},
+		{
+			name: "filter out all elements",
+			m:    map[string]int{"a": 1, "b": 2, "c": 3},
+			f:    func(_ string, _ int) (string, bool) { return "", false },
+			want: []string{},
+		},
+		{
+			name: "filter some elements",
+			m:    map[string]int{"a": 1, "b": 2, "c": 3, "d": 4},
+			f: func(k string, v int) (string, bool) {
+				if v%2 == 0 {
+					return fmt.Sprintf("%s:%d", k, v), true
+				}
+				return "", false
+			},
+			want: []string{"b:2", "d:4"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ToSliceWith(tt.m, tt.f)
+			assert.ElementsMatch(t, tt.want, got)
+		})
+	}
+
+	// Test with nil function
+	t.Run("nil function", func(t *testing.T) {
+		assert.Panics(t, func() {
+			ToSliceWith[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
+		})
+	})
+}
+
 func TestToSlice(t *testing.T) {
 	tests := []struct {
 		name string
@@ -116,6 +163,58 @@ func TestToSlice(t *testing.T) {
 	t.Run("nil function", func(t *testing.T) {
 		assert.Panics(t, func() {
 			ToSlice[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
+		})
+	})
+}
+
+func TestFromSliceWithIndex(t *testing.T) {
+	tests := []struct {
+		name string
+		s    []string
+		f    func(int, string) (string, int)
+		want map[string]int
+	}{
+		{
+			name: "empty slice",
+			s:    []string{},
+			f: func(i int, s string) (string, int) {
+				return fmt.Sprintf("%s_%d", s, i), len(s)
+			},
+			want: map[string]int{},
+		},
+		{
+			name: "single element",
+			s:    []string{"a"},
+			f: func(i int, s string) (string, int) {
+				return fmt.Sprintf("%s_%d", s, i), len(s) * (i + 1)
+			},
+			want: map[string]int{"a_0": 1},
+		},
+		{
+			name: "multiple elements with index",
+			s:    []string{"a", "bb", "ccc"},
+			f: func(i int, s string) (string, int) {
+				return fmt.Sprintf("%s_%d", s, i), len(s) * (i + 1)
+			},
+			want: map[string]int{
+				"a_0":   1, // 1 * (0 + 1)
+				"bb_1":  4, // 2 * (1 + 1)
+				"ccc_2": 9, // 3 * (2 + 1)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FromSliceWithIndex[string, map[string]int, string, int](tt.s, tt.f)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+
+	// Test with nil function
+	t.Run("nil function", func(t *testing.T) {
+		assert.Panics(t, func() {
+			FromSliceWithIndex[any, map[string]int, string, int]([]any{"test"}, nil)
 		})
 	})
 }
