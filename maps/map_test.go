@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// sortKV is no longer used and has been removed
 func TestToKVs(t *testing.T) {
 	tests := []struct {
 		name string
