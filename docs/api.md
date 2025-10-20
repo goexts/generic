@@ -730,29 +730,25 @@ Package maps contains generated code by adptool.
 
 - [func Clear\[M \~map\[K\]V, K comparable, V any\]\(m M\)](<#Clear>)
 - [func Clone\[M \~map\[K\]V, K comparable, V any\]\(m M\) M](<#Clone>)
+- [func Concat\[M \~map\[K\]V, K comparable, V any\]\(m M, ms ...M\)](<#Concat>)
+- [func ConcatWith\[M \~map\[K\]V, K comparable, V any\]\(merge func\(K, V, V\) V, m M, ms ...M\)](<#ConcatWith>)
 - [func Copy\[M1 \~map\[K\]V, M2 \~map\[K\]V, K comparable, V any\]\(dst M1, src M2\)](<#Copy>)
 - [func DeleteFunc\[M \~map\[K\]V, K comparable, V any\]\(m M, del func\(K, V\) bool\)](<#DeleteFunc>)
 - [func Equal\[M1, M2 \~map\[K\]V, K, V comparable\]\(m1 M1, m2 M2\) bool](<#Equal>)
 - [func EqualFunc\[M1 \~map\[K\]V1, M2 \~map\[K\]V2, K comparable, V1, V2 any\]\(m1 M1, m2 M2, eq func\(V1, V2\) bool\) bool](<#EqualFunc>)
-- [func Filter\[M \~map\[K\]V, K comparable, V any\]\(m M, keys ...K\)](<#Filter>)
-- [func FilterFunc\[M \~map\[K\]V, K comparable, V any\]\(m M, f func\(K, V\) bool\)](<#FilterFunc>)
-- [func GetOr\[V any\]\(v V, ok bool, defaultValue V\) V](<#GetOr>)
-- [func GetOrNil\[V any\]\(v \*V, ok bool\) \*V](<#GetOrNil>)
-- [func GetOrZero\[V any\]\(v V, ok bool\) V](<#GetOrZero>)
-- [func KVsToMap\[KV KeyValue\[K, V\], K comparable, V any, M \~map\[K\]V\]\(kvs \[\]KeyValue\[K, V\]\) M](<#KVsToMap>)
+- [func Exclude\[M \~map\[K\]V, K comparable, V any\]\(m M, keys ...K\)](<#Exclude>)
+- [func Filter\[M \~map\[K\]V, K comparable, V any\]\(m M, f func\(K, V\) bool\)](<#Filter>)
+- [func FromKVs\[K comparable, V any, M \~map\[K\]V\]\(kvs \[\]KeyValue\[K, V\]\) M](<#FromKVs>)
+- [func FromSlice\[T any, M \~map\[K\]V, K comparable, V any\]\(ts \[\]T, f func\(T\) \(K, V\)\) M](<#FromSlice>)
 - [func Keys\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]K](<#Keys>)
-- [func MapToKVs\[M \~map\[K\]V, K comparable, V any, KV KeyValue\[K, V\]\]\(m M\) \[\]KV](<#MapToKVs>)
-- [func MapToStruct\[M \~map\[K\]V, K comparable, V any, S any\]\(m M, f func\(\*S, K, V\) \*S\) \*S](<#MapToStruct>)
-- [func MapToTypes\[M \~map\[K\]V, K comparable, V any, T any\]\(m M, f func\(K, V\) T\) \[\]T](<#MapToTypes>)
 - [func Merge\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, overlay bool\)](<#Merge>)
-- [func MergeFunc\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, cmp func\(key K, src V, val V\) V\)](<#MergeFunc>)
-- [func MergeMaps\[M \~map\[K\]V, K comparable, V any\]\(m M, ms ...M\)](<#MergeMaps>)
-- [func MergeMapsFunc\[M \~map\[K\]V, K comparable, V any\]\(merge func\(K, V, V\) V, m M, ms ...M\)](<#MergeMapsFunc>)
-- [func MustGet\[V any\]\(v V, ok bool\) V](<#MustGet>)
+- [func MergeWith\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, cmp func\(key K, src V, val V\) V\)](<#MergeWith>)
+- [func ToSlice\[M \~map\[K\]V, K comparable, V any, T any\]\(m M, f func\(K, V\) T\) \[\]T](<#ToSlice>)
+- [func ToStruct\[M \~map\[K\]V, K comparable, V any, S any\]\(m M, f func\(\*S, K, V\) \*S\) \*S](<#ToStruct>)
 - [func Transform\[M \~map\[K\]V, K comparable, V any, TK comparable, TV any\]\(m M, f func\(K, V\) \(TK, TV, bool\)\) map\[TK\]TV](<#Transform>)
-- [func TypesToMap\[T any, M \~map\[K\]V, K comparable, V any\]\(ts \[\]T, f func\(T\) \(K, V\)\) M](<#TypesToMap>)
 - [func Values\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]V](<#Values>)
 - [type KeyValue](<#KeyValue>)
+  - [func ToKVs\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]KeyValue\[K, V\]](<#ToKVs>)
 
 
 <a name="Clear"></a>
@@ -772,6 +768,24 @@ func Clone[M ~map[K]V, K comparable, V any](m M) M
 ```
 
 
+
+<a name="Concat"></a>
+## func [Concat](<https://github.com/goexts/generic/blob/main/maps/map.go#L32>)
+
+```go
+func Concat[M ~map[K]V, K comparable, V any](m M, ms ...M)
+```
+
+Concat merges multiple maps into a single map. If a key exists in multiple maps, the value from the last map will be used.
+
+<a name="ConcatWith"></a>
+## func [ConcatWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L45>)
+
+```go
+func ConcatWith[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)
+```
+
+ConcatWith merges multiple maps into a single map using a custom merge function. If a key exists in multiple maps, the merge function will be called to determine the final value.
 
 <a name="Copy"></a>
 ## func [Copy](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L20>)
@@ -809,59 +823,41 @@ func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M
 
 
 
+<a name="Exclude"></a>
+## func [Exclude](<https://github.com/goexts/generic/blob/main/maps/map.go#L57>)
+
+```go
+func Exclude[M ~map[K]V, K comparable, V any](m M, keys ...K)
+```
+
+Exclude removes all key/value pairs from m for which f returns false.
+
 <a name="Filter"></a>
-## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L57>)
+## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L64>)
 
 ```go
-func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K)
+func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
 ```
 
-Filter removes all key/value pairs from m for which f returns false.
+Filter keeps only the key\-value pairs in the map for which the provided function returns true.
 
-<a name="FilterFunc"></a>
-## func [FilterFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L64>)
+<a name="FromKVs"></a>
+## func [FromKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L88>)
 
 ```go
-func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
+func FromKVs[K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M
 ```
 
-FilterFunc is like Filter, but uses a function.
+FromKVs converts a slice of key\-value pairs to a map.
 
-<a name="GetOr"></a>
-## func [GetOr](<https://github.com/goexts/generic/blob/main/maps/map.go#L161>)
+<a name="FromSlice"></a>
+## func [FromSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L106>)
 
 ```go
-func GetOr[V any](v V, ok bool, defaultValue V) V
+func FromSlice[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M
 ```
 
-GetOr is a utility function that simplifies map lookups. It returns the value from a map lookup or a default value if the key is not found.
-
-<a name="GetOrNil"></a>
-## func [GetOrNil](<https://github.com/goexts/generic/blob/main/maps/map.go#L180>)
-
-```go
-func GetOrNil[V any](v *V, ok bool) *V
-```
-
-GetOrNil is a utility function that simplifies map lookups for pointer types. It returns the value from a map lookup or nil if the key is not found.
-
-<a name="GetOrZero"></a>
-## func [GetOrZero](<https://github.com/goexts/generic/blob/main/maps/map.go#L170>)
-
-```go
-func GetOrZero[V any](v V, ok bool) V
-```
-
-GetOrZero is a utility function that simplifies map lookups. It returns the value from a map lookup or the zero value of the type if the key is not found.
-
-<a name="KVsToMap"></a>
-## func [KVsToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L88>)
-
-```go
-func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M
-```
-
-KVsToMap converts a slice of key\-value pairs to a map.
+FromSlice converts a slice of types to a map.
 
 <a name="Keys"></a>
 ## func [Keys](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L36>)
@@ -872,33 +868,6 @@ func Keys[M ~map[K]V, K comparable, V any](m M) []K
 
 
 
-<a name="MapToKVs"></a>
-## func [MapToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L79>)
-
-```go
-func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV
-```
-
-MapToKVs converts a map to a slice of key\-value pairs.
-
-<a name="MapToStruct"></a>
-## func [MapToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L116>)
-
-```go
-func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
-```
-
-MapToStruct converts a map to a struct.
-
-<a name="MapToTypes"></a>
-## func [MapToTypes](<https://github.com/goexts/generic/blob/main/maps/map.go#L97>)
-
-```go
-func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
-```
-
-MapToTypes converts a map to a slice of types.
-
 <a name="Merge"></a>
 ## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L10>)
 
@@ -908,41 +877,32 @@ func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)
 
 Merge merges the values of src into dest. If overlay is true, existing values in dest will be overwritten.
 
-<a name="MergeFunc"></a>
-## func [MergeFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L20>)
+<a name="MergeWith"></a>
+## func [MergeWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L20>)
 
 ```go
-func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)
+func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)
 ```
 
-MergeFunc merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
+MergeWith merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
 
-<a name="MergeMaps"></a>
-## func [MergeMaps](<https://github.com/goexts/generic/blob/main/maps/map.go#L32>)
+<a name="ToSlice"></a>
+## func [ToSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L97>)
 
 ```go
-func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M)
+func ToSlice[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
 ```
 
-MergeMaps merges multiple maps into a single map. If a key exists in multiple maps, the value from the last map will be used.
+ToSlice converts a map to a slice of types.
 
-<a name="MergeMapsFunc"></a>
-## func [MergeMapsFunc](<https://github.com/goexts/generic/blob/main/maps/map.go#L45>)
+<a name="ToStruct"></a>
+## func [ToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L116>)
 
 ```go
-func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)
+func ToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
 ```
 
-MergeMapsFunc merges multiple maps into a single map using a custom merge function. If a key exists in multiple maps, the merge function will be called to determine the final value.
-
-<a name="MustGet"></a>
-## func [MustGet](<https://github.com/goexts/generic/blob/main/maps/map.go#L152>)
-
-```go
-func MustGet[V any](v V, ok bool) V
-```
-
-MustGet is a utility function that simplifies map lookups. It returns the value from a map lookup and panics if the key is not found.
+ToStruct converts a map to a struct.
 
 <a name="Transform"></a>
 ## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L128>)
@@ -952,15 +912,6 @@ func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f fu
 ```
 
 Transform remaps the keys and values of a map using a custom transformation function. The transformation function is called for each key\-value pair in the original map. If the transformation function returns false as its third return value, the key\-value pair is skipped. Otherwise, the transformed key\-value pair is added to the new map.
-
-<a name="TypesToMap"></a>
-## func [TypesToMap](<https://github.com/goexts/generic/blob/main/maps/map.go#L106>)
-
-```go
-func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M
-```
-
-TypesToMap converts a slice of types to a map.
 
 <a name="Values"></a>
 ## func [Values](<https://github.com/goexts/generic/blob/main/maps/maps.adapter.go#L40>)
@@ -982,6 +933,15 @@ type KeyValue[K comparable, V any] struct {
     Val V
 }
 ```
+
+<a name="ToKVs"></a>
+### func [ToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L79>)
+
+```go
+func ToKVs[M ~map[K]V, K comparable, V any](m M) []KeyValue[K, V]
+```
+
+ToKVs converts a map to a slice of key\-value pairs.
 
 # must
 
@@ -2788,6 +2748,8 @@ type Replacer = strings.Replacer
 ```go
 import "github.com/goexts/generic/docs/examples"
 ```
+
+Package main provides examples for using the slices package. These examples demonstrate common operations like mapping, filtering, and reducing slices.
 
 ## Index
 
