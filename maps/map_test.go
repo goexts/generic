@@ -9,35 +9,13 @@ package maps
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func sortKV[K comparable, V any](kvs []KeyValue[K, V]) []KeyValue[K, V] {
-	slices.SortFunc(kvs, func(a, b KeyValue[K, V]) int {
-		switch a := any(a.Key).(type) {
-		case int:
-			bKey := any(b.Key).(int)
-			if a > bKey {
-				return 1
-			} else if a < bKey {
-				return -1
-			}
-		case string:
-			bKey := any(b.Key).(string)
-			if a > bKey {
-				return 1
-			} else if a < bKey {
-				return -1
-			}
-		}
-		return 0
-	})
-	return kvs
-}
+// sortKV is no longer used and has been removed
 func TestToKVs(t *testing.T) {
 	tests := []struct {
 		name string
@@ -203,7 +181,7 @@ func TestMergeWith(t *testing.T) {
 	t.Run("merge with custom function", func(t *testing.T) {
 		dest := map[string]int{"a": 1, "b": 2}
 		src := map[string]int{"b": 3, "c": 4}
-		MergeWith(dest, src, func(key string, oldV, newV int) int {
+		MergeWith(dest, src, func(_ string, oldV, newV int) int {
 			return oldV + newV
 		})
 		assert.Equal(t, map[string]int{"a": 1, "b": 5, "c": 4}, dest)
@@ -225,7 +203,7 @@ func TestConcatWith(t *testing.T) {
 		dest := map[string]int{"a": 1}
 		m1 := map[string]int{"a": 2, "b": 3}
 		m2 := map[string]int{"b": 4, "c": 5}
-		ConcatWith(func(k string, v1, v2 int) int {
+		ConcatWith(func(_ string, v1, v2 int) int {
 			return v1 + v2
 		}, dest, m1, m2)
 		assert.Equal(t, map[string]int{"a": 3, "b": 7, "c": 5}, dest)
@@ -243,7 +221,7 @@ func TestExclude(t *testing.T) {
 func TestFilter(t *testing.T) {
 	t.Run("filter even values", func(t *testing.T) {
 		m := map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}
-		Filter(m, func(k string, v int) bool {
+		Filter(m, func(_ string, v int) bool {
 			return v%2 == 0
 		})
 		assert.Equal(t, map[string]int{"b": 2, "d": 4}, m)
