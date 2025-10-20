@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0](https://github.com/goexts/generic/compare/v0.6.0...v0.7.0) (2025-10-20)
+
+
+### Features
+
+* **maps:** improve Filter function logic and refactor tests for better clarity and coverage ([7066ec0](https://github.com/goexts/generic/commit/7066ec0da392263500ee8335134fe10de8ba2d8e))
+* **maps:** remove outdated comment in TestToKVs test function ([65958d6](https://github.com/goexts/generic/commit/65958d66be69f938a8d42777b4f09e5800a27d90))
+* **maps:** remove unused sortKV function and clean up test function parameters ([8063b28](https://github.com/goexts/generic/commit/8063b2894f1214d200319bc16e34b9888bb1da57))
+* **maps:** rename and restructure map utility functions (Filter-&gt;Exclude, KVsToMap-&gt;FromKVs, etc.) and add Concat/ConcatWith functions ([c6f3fd6](https://github.com/goexts/generic/commit/c6f3fd6229c3b1cd53fbd59d7073c49ccaeaf50a))
+* **maps:** rename functions to more concise names (MergeFunc-&gt;MergeWith, MergeMaps-&gt;Concat, etc.) and update tests ([7f7c859](https://github.com/goexts/generic/commit/7f7c8596d042031e1f78ae1892bd6db09ad03da4))
+
 ## [0.6.0](https://github.com/goexts/generic/compare/v0.5.0...v0.6.0) (2025-10-11)
 
 
