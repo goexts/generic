@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/goexts/generic/compare/v0.7.0...v0.8.0) (2025-10-20)
+
+
+### Features
+
+* **maps:** add ToSliceWith and FromSliceWithIndex functions with tests for filtered map conversions ([d958f6f](https://github.com/goexts/generic/commit/d958f6f68a4ea9380389c0836485643b0a1271c6))
+
 ## [0.7.0](https://github.com/goexts/generic/compare/v0.6.0...v0.7.0) (2025-10-20)
 
 
