@@ -15,21 +15,21 @@ func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool) {
 	}
 }
 
-// MergeFunc merges the values of src into dest using the provided merge function.
+// MergeWith merges the values of src into dest using the provided merge function.
 // If a key exists in both maps, the merge function will be called to determine the final value.
-func MergeFunc[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V) {
+func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V) {
 	for k, v := range src {
-		if existing, ok := dest[k]; !ok {
-			dest[k] = v
-		} else {
+		if existing, ok := dest[k]; ok {
 			dest[k] = cmp(k, existing, v)
+		} else {
+			dest[k] = v
 		}
 	}
 }
 
-// MergeMaps merges multiple maps into a single map.
+// Concat merges multiple maps into a single map.
 // If a key exists in multiple maps, the value from the last map will be used.
-func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M) {
+func Concat[M ~map[K]V, K comparable, V any](m M, ms ...M) {
 	if len(ms) == 0 {
 		return
 	}
@@ -40,28 +40,28 @@ func MergeMaps[M ~map[K]V, K comparable, V any](m M, ms ...M) {
 	}
 }
 
-// MergeMapsFunc merges multiple maps into a single map using a custom merge function.
+// ConcatWith merges multiple maps into a single map using a custom merge function.
 // If a key exists in multiple maps, the merge function will be called to determine the final value.
-func MergeMapsFunc[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M) {
+func ConcatWith[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M) {
 	if len(ms) == 0 {
 		return
 	}
 
 	// Merge subsequent maps into the result map
 	for _, mm := range ms {
-		MergeFunc(m, mm, merge)
+		MergeWith(m, mm, merge)
 	}
 }
 
-// Filter removes all key/value pairs from m for which f returns false.
-func Filter[M ~map[K]V, K comparable, V any](m M, keys ...K) {
+// Exclude removes all key/value pairs from m for which f returns false.
+func Exclude[M ~map[K]V, K comparable, V any](m M, keys ...K) {
 	for i := range keys {
 		delete(m, keys[i])
 	}
 }
 
-// FilterFunc is like Filter, but uses a function.
-func FilterFunc[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
+// Filter is like Exclude, but uses a function.
+func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool) {
 	for k, v := range m {
 		if f(k, v) {
 			delete(m, k)
@@ -75,17 +75,17 @@ type KeyValue[K comparable, V any] struct {
 	Val V
 }
 
-// MapToKVs converts a map to a slice of key-value pairs.
-func MapToKVs[M ~map[K]V, K comparable, V any, KV KeyValue[K, V]](m M) []KV {
-	kvs := make([]KV, 0, len(m))
+// ToKVs converts a map to a slice of key-value pairs.
+func ToKVs[M ~map[K]V, K comparable, V any](m M) []KeyValue[K, V] {
+	kvs := make([]KeyValue[K, V], 0, len(m))
 	for k, v := range m {
-		kvs = append(kvs, KV{Key: k, Val: v})
+		kvs = append(kvs, KeyValue[K, V]{Key: k, Val: v})
 	}
 	return kvs
 }
 
-// KVsToMap converts a slice of key-value pairs to a map.
-func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M {
+// FromKVs converts a slice of key-value pairs to a map.
+func FromKVs[K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M {
 	m := make(M, len(kvs))
 	for _, kv := range kvs {
 		m[kv.Key] = kv.Val
@@ -93,8 +93,8 @@ func KVsToMap[KV KeyValue[K, V], K comparable, V any, M ~map[K]V](kvs []KeyValue
 	return m
 }
 
-// MapToTypes converts a map to a slice of types.
-func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T {
+// ToSlice converts a map to a slice of types.
+func ToSlice[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T {
 	ts := make([]T, 0, len(m))
 	for k, v := range m {
 		ts = append(ts, f(k, v))
@@ -102,8 +102,8 @@ func MapToTypes[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
 	return ts
 }
 
-// TypesToMap converts a slice of types to a map.
-func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M {
+// FromSlice converts a slice of types to a map.
+func FromSlice[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M {
 	m := make(M, len(ts))
 	for _, t := range ts {
 		k, v := f(t)
@@ -112,8 +112,8 @@ func TypesToMap[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)
 	return m
 }
 
-// MapToStruct converts a map to a struct.
-func MapToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S {
+// ToStruct converts a map to a struct.
+func ToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S {
 	s := new(S)
 	for k, v := range m {
 		s = f(s, k, v)
@@ -145,41 +145,4 @@ func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f fu
 
 	// Return the new map with the transformed key-value pairs.
 	return n
-}
-
-// MustGet is a utility function that simplifies map lookups.
-// It returns the value from a map lookup and panics if the key is not found.
-func MustGet[V any](v V, ok bool) V {
-	if !ok {
-		panic("key not found")
-	}
-	return v
-}
-
-// GetOr is a utility function that simplifies map lookups.
-// It returns the value from a map lookup or a default value if the key is not found.
-func GetOr[V any](v V, ok bool, defaultValue V) V {
-	if !ok {
-		return defaultValue
-	}
-	return v
-}
-
-// GetOrZero is a utility function that simplifies map lookups.
-// It returns the value from a map lookup or the zero value of the type if the key is not found.
-func GetOrZero[V any](v V, ok bool) V {
-	if !ok {
-		var zero V
-		return zero
-	}
-	return v
-}
-
-// GetOrNil is a utility function that simplifies map lookups for pointer types.
-// It returns the value from a map lookup or nil if the key is not found.
-func GetOrNil[V any](v *V, ok bool) *V {
-	if !ok {
-		return nil
-	}
-	return v
 }

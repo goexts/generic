@@ -63,7 +63,7 @@ func TestMapToKVs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := MapToKVs(tt.args.m)
+			got := ToKVs(tt.args.m)
 			assert.EqualValues(t, sortKV(tt.want), sortKV(got))
 		})
 	}
@@ -76,7 +76,7 @@ func TestMergeMapsWithUniqueKeys(t *testing.T) {
 	result := map[string]int{"gold": 100, "gems": 50}
 	map2 := map[string]int{"coins": 75, "pearls": 25}
 
-	MergeMaps(result, map2)
+	Concat(result, map2)
 
 	assert.Equal(t, 4, len(result))
 	assert.Equal(t, 100, result["gold"])
@@ -92,7 +92,7 @@ func TestMergeMapsWithOverlappingKeys(t *testing.T) {
 	result := map[string]int{"chest": 100, "map": 1}
 	map2 := map[string]int{"chest": 200, "compass": 1}
 
-	MergeMaps(result, map2)
+	Concat(result, map2)
 
 	assert.Equal(t, 3, len(result))
 	assert.Equal(t, 200, result["chest"])
@@ -109,7 +109,7 @@ func TestMergeMapsSequence(t *testing.T) {
 	map3 := map[string]int{"c": 3}
 	map4 := map[string]int{"d": 4}
 
-	MergeMaps(result, map2, map3, map4)
+	Concat(result, map2, map3, map4)
 
 	assert.Equal(t, 4, len(result))
 	assert.Equal(t, 1, result["a"])
@@ -123,7 +123,7 @@ func TestMergeMapsEmptyVariadic(t *testing.T) {
 	// Blimey! The map chest be empty!
 
 	base := map[string]int{"x": 1}
-	MergeMaps(base)
+	Concat(base)
 
 	assert.NotNil(t, base)
 }
@@ -138,7 +138,7 @@ func TestMergeMapsWithNilMap(t *testing.T) {
 	var nilMap map[string]int
 	validMap := map[string]int{"valid": 1}
 
-	MergeMaps(nilMap, validMap)
+	Concat(nilMap, validMap)
 
 	assert.Fail(t, "panic expected")
 }
@@ -153,7 +153,7 @@ func TestMergeMapsZeroCapacity(t *testing.T) {
 	result["key"] = 1
 	map2["another"] = 2
 
-	MergeMaps(result, map2)
+	Concat(result, map2)
 
 	assert.Equal(t, 2, len(result))
 	assert.Equal(t, 1, result["key"])
@@ -167,7 +167,7 @@ func TestMergeMapsWithNilValues(t *testing.T) {
 	result := map[string]*string{"key1": nil}
 	map2 := map[string]*string{"key2": nil}
 
-	MergeMaps(result, map2)
+	Concat(result, map2)
 
 	assert.Equal(t, 2, len(result))
 	assert.Nil(t, result["key1"])
@@ -180,7 +180,7 @@ func TestMapToTypesEmptyMap(t *testing.T) {
 
 	emptyMap := make(map[string]int)
 
-	result := MapToTypes(emptyMap, func(k string, v int) string {
+	result := ToSlice(emptyMap, func(k string, v int) string {
 		return fmt.Sprintf("%s:%d", k, v)
 	})
 
@@ -193,7 +193,7 @@ func TestMapToTypesSinglePair(t *testing.T) {
 
 	m := map[string]int{"key": 42}
 
-	result := MapToTypes(m, func(k string, v int) string {
+	result := ToSlice(m, func(k string, v int) string {
 		return fmt.Sprintf("%s:%d", k, v)
 	})
 
@@ -210,7 +210,7 @@ func TestMapToTypesMultiplePairs(t *testing.T) {
 		"third":  3,
 	}
 
-	result := MapToTypes(m, func(k string, v int) string {
+	result := ToSlice(m, func(k string, v int) string {
 		return fmt.Sprintf("%s:%d", k, v)
 	})
 
@@ -226,7 +226,7 @@ func TestMapToTypesNilMap(t *testing.T) {
 
 	var nilMap map[string]int
 
-	result := MapToTypes(nilMap, func(k string, v int) string {
+	result := ToSlice(nilMap, func(k string, v int) string {
 		return fmt.Sprintf("%s:%d", k, v)
 	})
 
@@ -239,7 +239,7 @@ func TestMapToTypesNilFunction(t *testing.T) {
 	m := map[string]int{"key": 42}
 
 	assert.Panics(t, func() {
-		MapToTypes[map[string]int, string, int, string](m, nil)
+		ToSlice[map[string]int, string, int, string](m, nil)
 	})
 }
 
@@ -250,7 +250,7 @@ func TestMapToTypesZeroCapMap(t *testing.T) {
 	m := make(map[string]int)
 	m["key"] = 42
 
-	result := MapToTypes(m, func(k string, v int) string {
+	result := ToSlice(m, func(k string, v int) string {
 		return fmt.Sprintf("%s:%d", k, v)
 	})
 
@@ -266,7 +266,7 @@ func TestMapToTypesInterfaceValues(t *testing.T) {
 		"bool": true,
 	}
 
-	result := MapToTypes(m, func(_ string, v interface{}) string {
+	result := ToSlice(m, func(_ string, v interface{}) string {
 		return fmt.Sprintf("%v", v)
 	})
 
@@ -291,7 +291,7 @@ func TestMapToTypesStruct(t *testing.T) {
 		"bool": true,
 	}
 
-	result := MapToTypes(m, func(_ string, v interface{}) string {
+	result := ToSlice(m, func(_ string, v interface{}) string {
 		return fmt.Sprintf("%v", v)
 	})
 
