@@ -110,17 +110,16 @@ func NewClient(opts ...Option) *http.Client {
 
 func main() {
 	// Create a client with default settings (no options).
-	defaultClient := NewClient(nil)
+	defaultClient := NewClient()
 	fmt.Printf("Default client timeout: %s\n", defaultClient.Timeout)
 
 	// Create a client with a custom timeout, overriding the default.
-	// Pass options as a slice.
-	customClient := NewClient([]Option{WithTimeout(30 * time.Second)})
+	// Pass options as variadic arguments.
+	customClient := NewClient(WithTimeout(30 * time.Second))
 	fmt.Printf("Custom client timeout: %s\n", customClient.Timeout)
 
-	// If you have individual options, you can collect them into a slice:
-	// myOptions := []Option{WithTimeout(20 * time.Second), WithTransport(&http.Transport{})}
-	// anotherClient := NewClient(myOptions)
+	// If you have individual options, you can pass them directly:
+	// anotherClient := NewClient(WithTimeout(20 * time.Second), WithTransport(&http.Transport{}))
 }
 ```
 
