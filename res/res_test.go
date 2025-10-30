@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goexts/generic/res"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goexts/generic/res"
 )
 
 func TestResult(t *testing.T) {

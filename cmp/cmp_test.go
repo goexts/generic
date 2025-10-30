@@ -3,8 +3,9 @@ package cmp_test
 import (
 	"testing"
 
-	"github.com/goexts/generic/cmp"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goexts/generic/cmp"
 )
 
 func TestCompare(t *testing.T) {

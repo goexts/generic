@@ -4,8 +4,8 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package maps implements the functions, types, and interfaces for the module.
-package maps
+// Package maps_test implements the functions, types, and interfaces for the module.
+package maps_test
 
 import (
 	"fmt"
@@ -13,28 +13,30 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goexts/generic/maps"
 )
 
 func TestToKVs(t *testing.T) {
 	tests := []struct {
 		name string
 		m    map[int]string
-		want []KeyValue[int, string]
+		want []maps.KeyValue[int, string]
 	}{
 		{
 			name: "empty map",
 			m:    map[int]string{},
-			want: []KeyValue[int, string]{},
+			want: []maps.KeyValue[int, string]{},
 		},
 		{
 			name: "single element",
 			m:    map[int]string{1: "a"},
-			want: []KeyValue[int, string]{{Key: 1, Val: "a"}},
+			want: []maps.KeyValue[int, string]{{Key: 1, Val: "a"}},
 		},
 		{
 			name: "multiple elements",
 			m:    map[int]string{1: "a", 2: "b", 3: "c"},
-			want: []KeyValue[int, string]{
+			want: []maps.KeyValue[int, string]{
 				{Key: 1, Val: "a"},
 				{Key: 2, Val: "b"},
 				{Key: 3, Val: "c"},
@@ -44,7 +46,7 @@ func TestToKVs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ToKVs(tt.m)
+			got := maps.ToKVs(tt.m)
 			assert.ElementsMatch(t, tt.want, got)
 		})
 	}
@@ -53,22 +55,22 @@ func TestToKVs(t *testing.T) {
 func TestFromKVs(t *testing.T) {
 	tests := []struct {
 		name string
-		kvs  []KeyValue[string, int]
+		kvs  []maps.KeyValue[string, int]
 		want map[string]int
 	}{
 		{
 			name: "empty slice",
-			kvs:  []KeyValue[string, int]{},
+			kvs:  []maps.KeyValue[string, int]{},
 			want: map[string]int{},
 		},
 		{
 			name: "single element",
-			kvs:  []KeyValue[string, int]{{Key: "a", Val: 1}},
+			kvs:  []maps.KeyValue[string, int]{{Key: "a", Val: 1}},
 			want: map[string]int{"a": 1},
 		},
 		{
 			name: "multiple elements",
-			kvs: []KeyValue[string, int]{
+			kvs: []maps.KeyValue[string, int]{
 				{Key: "a", Val: 1},
 				{Key: "b", Val: 2},
 			},
@@ -78,7 +80,7 @@ func TestFromKVs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FromKVs[string, int, map[string]int](tt.kvs)
+			got := maps.FromKVs[string, int, map[string]int](tt.kvs)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -118,7 +120,7 @@ func TestToSliceWith(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ToSliceWith(tt.m, tt.f)
+			got := maps.ToSliceWith(tt.m, tt.f)
 			assert.ElementsMatch(t, tt.want, got)
 		})
 	}
@@ -126,7 +128,7 @@ func TestToSliceWith(t *testing.T) {
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
 		assert.Panics(t, func() {
-			ToSliceWith[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
+			maps.ToSliceWith[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
 		})
 	})
 }
@@ -154,7 +156,7 @@ func TestToSlice(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ToSlice(tt.m, tt.f)
+			got := maps.ToSlice(tt.m, tt.f)
 			assert.ElementsMatch(t, tt.want, got)
 		})
 	}
@@ -162,7 +164,7 @@ func TestToSlice(t *testing.T) {
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
 		assert.Panics(t, func() {
-			ToSlice[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
+			maps.ToSlice[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
 		})
 	})
 }
@@ -206,7 +208,7 @@ func TestFromSliceWithIndex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FromSliceWithIndex[string, map[string]int, string, int](tt.s, tt.f)
+			got := maps.FromSliceWithIndex[string, map[string]int, string, int](tt.s, tt.f)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -214,7 +216,7 @@ func TestFromSliceWithIndex(t *testing.T) {
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
 		assert.Panics(t, func() {
-			FromSliceWithIndex[any, map[string]int, string, int]([]any{"test"}, nil)
+			maps.FromSliceWithIndex[any, map[string]int, string, int]([]any{"test"}, nil)
 		})
 	})
 }
@@ -246,7 +248,7 @@ func TestFromSlice(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FromSlice[string, map[string]int, string, int](tt.s, tt.f)
+			got := maps.FromSlice[string, map[string]int, string, int](tt.s, tt.f)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -254,7 +256,7 @@ func TestFromSlice(t *testing.T) {
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
 		assert.Panics(t, func() {
-			FromSlice[string, map[string]int, string, int]([]string{"a"}, nil)
+			maps.FromSlice[string, map[string]int, string, int]([]string{"a"}, nil)
 		})
 	})
 }
@@ -263,14 +265,14 @@ func TestMerge(t *testing.T) {
 	t.Run("merge with overlay true", func(t *testing.T) {
 		dest := map[string]int{"a": 1, "b": 2}
 		src := map[string]int{"b": 3, "c": 4}
-		Merge(dest, src, true)
+		maps.Merge(dest, src, true)
 		assert.Equal(t, map[string]int{"a": 1, "b": 3, "c": 4}, dest)
 	})
 
 	t.Run("merge with overlay false", func(t *testing.T) {
 		dest := map[string]int{"a": 1, "b": 2}
 		src := map[string]int{"b": 3, "c": 4}
-		Merge(dest, src, false)
+		maps.Merge(dest, src, false)
 		assert.Equal(t, map[string]int{"a": 1, "b": 2, "c": 4}, dest)
 	})
 }
@@ -279,7 +281,7 @@ func TestMergeWith(t *testing.T) {
 	t.Run("merge with custom function", func(t *testing.T) {
 		dest := map[string]int{"a": 1, "b": 2}
 		src := map[string]int{"b": 3, "c": 4}
-		MergeWith(dest, src, func(_ string, oldV, newV int) int {
+		maps.MergeWith(dest, src, func(_ string, oldV, newV int) int {
 			return oldV + newV
 		})
 		assert.Equal(t, map[string]int{"a": 1, "b": 5, "c": 4}, dest)
@@ -291,7 +293,7 @@ func TestConcat(t *testing.T) {
 		dest := map[string]int{"a": 1}
 		m1 := map[string]int{"b": 2}
 		m2 := map[string]int{"c": 3}
-		Concat(dest, m1, m2)
+		maps.Concat(dest, m1, m2)
 		assert.Equal(t, map[string]int{"a": 1, "b": 2, "c": 3}, dest)
 	})
 }
@@ -301,7 +303,7 @@ func TestConcatWith(t *testing.T) {
 		dest := map[string]int{"a": 1}
 		m1 := map[string]int{"a": 2, "b": 3}
 		m2 := map[string]int{"b": 4, "c": 5}
-		ConcatWith(func(_ string, v1, v2 int) int {
+		maps.ConcatWith(func(_ string, v1, v2 int) int {
 			return v1 + v2
 		}, dest, m1, m2)
 		assert.Equal(t, map[string]int{"a": 3, "b": 7, "c": 5}, dest)
@@ -311,7 +313,7 @@ func TestConcatWith(t *testing.T) {
 func TestExclude(t *testing.T) {
 	t.Run("exclude keys", func(t *testing.T) {
 		m := map[string]int{"a": 1, "b": 2, "c": 3}
-		Exclude(m, "a", "c")
+		maps.Exclude(m, "a", "c")
 		assert.Equal(t, map[string]int{"b": 2}, m)
 	})
 }
@@ -319,7 +321,7 @@ func TestExclude(t *testing.T) {
 func TestFilter(t *testing.T) {
 	t.Run("filter even values", func(t *testing.T) {
 		m := map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}
-		Filter(m, func(_ string, v int) bool {
+		maps.Filter(m, func(_ string, v int) bool {
 			return v%2 == 0
 		})
 		assert.Equal(t, map[string]int{"b": 2, "d": 4}, m)
@@ -379,7 +381,7 @@ func TestToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ToStruct(tt.m, tt.f)
+			got := maps.ToStruct(tt.m, tt.f)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -388,7 +390,7 @@ func TestToStruct(t *testing.T) {
 func TestTransform(t *testing.T) {
 	t.Run("transform keys and values", func(t *testing.T) {
 		m := map[string]int{"a": 1, "b": 2}
-		result := Transform(m, func(k string, v int) (string, int, bool) {
+		result := maps.Transform(m, func(k string, v int) (string, int, bool) {
 			return strings.ToUpper(k), v * 2, true
 		})
 		assert.Equal(t, map[string]int{"A": 2, "B": 4}, result)
@@ -396,7 +398,7 @@ func TestTransform(t *testing.T) {
 
 	t.Run("skip some items", func(t *testing.T) {
 		m := map[string]int{"a": 1, "b": 2, "c": 3}
-		result := Transform(m, func(k string, v int) (string, int, bool) {
+		result := maps.Transform(m, func(k string, v int) (string, int, bool) {
 			if v%2 == 0 {
 				return "", 0, false
 			}

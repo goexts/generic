@@ -206,7 +206,7 @@ func TestFilter(t *testing.T) {
 		{"filter none", []int{1, 3, 5}, func(i int) bool { return i%2 == 0 }, []int{}},
 		{"filter all", []int{2, 4, 6}, func(i int) bool { return i%2 == 0 }, []int{2, 4, 6}},
 		{"empty slice", []int{}, func(_ int) bool { return true }, []int{}},
-		{"nil slice", nil, func(_ int) bool { return true }, []int{}},
+		{"nil slice", nil, func(_ int) bool { return true }, nil},
 	}
 
 	for _, tc := range testCases {
@@ -425,7 +425,7 @@ func TestMap(t *testing.T) {
 		var s []int
 		f := func(i int) int { return i }
 		result := slices.Map(s, f)
-		assert.Equal(t, []int{}, result)
+		assert.Equal(t, []int(nil), result)
 	})
 
 	t.Run("empty slice", func(t *testing.T) {
@@ -690,7 +690,7 @@ func TestTransform(t *testing.T) {
 		out := slices.Transform(in, func(f float64) (int, bool) {
 			return int(f), true
 		})
-		assert.Equal(t, []int{}, out)
+		assert.Equal(t, []int(nil), out)
 	})
 }
 

@@ -4,8 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/goexts/generic/must"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goexts/generic/must"
 )
 
 func TestDo(t *testing.T) {

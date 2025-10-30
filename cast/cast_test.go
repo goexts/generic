@@ -3,8 +3,9 @@ package cast_test
 import (
 	"testing"
 
-	"github.com/goexts/generic/cast"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goexts/generic/cast"
 )
 
 func TestTry(t *testing.T) {

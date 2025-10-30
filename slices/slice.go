@@ -6,16 +6,16 @@ import (
 	"sort"
 )
 
-// E is comparable type of slice element
+// E is a shorthand for the comparable constraint.
 type E = comparable
 
 var (
-	// ErrWrongIndex is an error when index is out of range
-	ErrWrongIndex = errors.New("slices.Array: wrong index")
+	// ErrWrongIndex is an error returned when an index is out of range.
+	ErrWrongIndex = errors.New("slices: index out of range")
 )
 
-// Append appends the element v to the end of Array[S] s.
-func Append[T ~[]S, S any](arr T, v S) (T, int) {
+// Append appends the element v to the end of the slice s.
+func Append[S any](arr []S, v S) ([]S, int) {
 	sz := len(arr)
 	return append(arr, v), sz
 }
@@ -23,30 +23,25 @@ func Append[T ~[]S, S any](arr T, v S) (T, int) {
 // CopyAt copies the elements from t into s at the specified index.
 // It panics if the index is negative. If the required length is greater
 // than the length of s, s is grown to accommodate the new elements.
-func CopyAt[T ~[]S, S any](s, t T, i int) T {
+func CopyAt[S any](s, t []S, i int) []S {
 	if i < 0 {
-		panic(ErrWrongIndex) // Or return an error, panic is consistent with stdlib
+		panic(ErrWrongIndex)
 	}
 
 	requiredLen := i + len(t)
 	if len(s) < requiredLen {
-		// Grow the slice to the required length, filling with zero values.
-		s = append(s, make(T, requiredLen-len(s))...)
+		s = append(s, make([]S, requiredLen-len(s))...)
 	}
 
-	// Copy the elements from t into s at the specified index.
 	copy(s[i:], t)
 	return s
 }
 
 // Count counts the number of non-overlapping instances of substr in s.
-// If substr is an empty Array, Count returns 1 + the number of Unicode code points in s.
-func Count[T ~[]S, S E](s, sub T) int {
-	// special case
+func Count[S E](s, sub []S) int {
 	if len(sub) == 0 {
 		return len(s) + 1
 	}
-
 	if len(sub) == 1 {
 		return CountArray(s, sub[0])
 	}
@@ -61,8 +56,8 @@ func Count[T ~[]S, S E](s, sub T) int {
 	}
 }
 
-// CountArray counts the number of non-overlapping instances of c in s.
-func CountArray[T ~[]S, S E](ss T, s S) int {
+// CountArray counts the number of occurrences of c in s.
+func CountArray[S E](ss []S, s S) int {
 	n := 0
 	for _, x := range ss {
 		if x == s {
@@ -76,7 +71,7 @@ func CountArray[T ~[]S, S E](ss T, s S) int {
 // returning the text before and after sep.
 // The found result reports whether sep appears in s.
 // If sep does not appear in s, cut returns s, nil, false.
-func Cut[T ~[]S, S E](s, sep T) (before, after T, found bool) {
+func Cut[S E](s, sep []S) (before, after []S, found bool) {
 	if i := IndexSlice(s, sep); i >= 0 {
 		return s[:i], s[i+len(sep):], true
 	}
@@ -84,11 +79,11 @@ func Cut[T ~[]S, S E](s, sep T) (before, after T, found bool) {
 }
 
 // Filter returns a new slice containing all elements of s for which f(s) is true.
-func Filter[T ~[]S, S any](s T, f func(S) bool) T {
+func Filter[S any](s []S, f func(S) bool) []S {
 	if s == nil {
-		return make(T, 0)
+		return nil
 	}
-	result := make(T, 0, len(s))
+	result := make([]S, 0, len(s))
 	for _, v := range s {
 		if f(v) {
 			result = append(result, v)
@@ -98,18 +93,12 @@ func Filter[T ~[]S, S any](s T, f func(S) bool) T {
 }
 
 // FilterIncluded returns a new slice containing all elements of s that are present in includes.
-// The order of elements in the result is the same as in the original slice.
-// The function is optimized for small to medium-sized include lists.
-// For very large include lists, consider using a map for better performance.
-func FilterIncluded[S ~[]E, E comparable](s S, includes S) S {
+func FilterIncluded[S comparable](s []S, includes []S) []S {
 	if len(includes) == 0 {
-		return make(S, 0)
+		return make([]S, 0)
 	}
-
-	// For small include lists (≤20 elements), use linear search
-	// Benchmark shows better performance for small lists due to lower overhead
 	if len(includes) <= 20 {
-		return Filter(s, func(e E) bool {
+		return Filter(s, func(e S) bool {
 			for _, v := range includes {
 				if v == e {
 					return true
@@ -118,33 +107,23 @@ func FilterIncluded[S ~[]E, E comparable](s S, includes S) S {
 			return false
 		})
 	}
-
-	// For larger include lists, use map for O(1) lookups
-	// The memory overhead is justified by the O(1) lookup time
-	includeSet := make(map[E]struct{}, len(includes))
+	includeSet := make(map[S]struct{}, len(includes))
 	for _, v := range includes {
 		includeSet[v] = struct{}{}
 	}
-
-	return Filter(s, func(e E) bool {
+	return Filter(s, func(e S) bool {
 		_, exists := includeSet[e]
 		return exists
 	})
 }
 
 // FilterExcluded returns a new slice containing all elements of s that are not present in excludes.
-// The order of elements in the result is the same as in the original slice.
-// The function is optimized for small to medium-sized exclude lists.
-// For very large exclude lists, consider using a map for better performance.
-func FilterExcluded[S ~[]E, E comparable](s S, excludes S) S {
+func FilterExcluded[S comparable](s []S, excludes []S) []S {
 	if len(excludes) == 0 {
 		return s
 	}
-
-	// For small exclude lists (≤20 elements), use linear search
-	// This avoids map allocation overhead for small lists
 	if len(excludes) <= 20 {
-		return Filter(s, func(e E) bool {
+		return Filter(s, func(e S) bool {
 			for _, v := range excludes {
 				if v == e {
 					return false
@@ -153,25 +132,18 @@ func FilterExcluded[S ~[]E, E comparable](s S, excludes S) S {
 			return true
 		})
 	}
-
-	// For larger exclude lists, use map for O(1) lookups
-	// The memory overhead is justified by the O(1) lookup time
-	excludeSet := make(map[E]struct{}, len(excludes))
+	excludeSet := make(map[S]struct{}, len(excludes))
 	for _, v := range excludes {
 		excludeSet[v] = struct{}{}
 	}
-
-	return Filter(s, func(e E) bool {
+	return Filter(s, func(e S) bool {
 		_, exists := excludeSet[e]
 		return !exists
 	})
 }
 
-// IndexSlice returns the index of the first instance of substr in s, or -1 if substr is not present in s.
-// It works similarly to strings.Index but operates on slices of comparable elements.
-// If substr is an empty slice, it returns 0.
-// The time complexity is O(n*m) where n is the length of s and m is the length of substr.
-func IndexSlice[T ~[]S, S E](s, substr T) int {
+// IndexSlice returns the index of the first instance of substr in s, or -1 if not present.
+func IndexSlice[S E](s, substr []S) int {
 	n := len(substr)
 	switch {
 	case n == 0:
@@ -195,34 +167,29 @@ func IndexSlice[T ~[]S, S E](s, substr T) int {
 }
 
 // InsertWith inserts v into s at the first index where fn(a, b) is true.
-func InsertWith[T ~[]S, S any](s T, v S, fn func(a, b S) bool) T {
-	// Assumes s is sorted according to fn.
-	// sort.Search finds the first index `i` where the function is true.
+func InsertWith[S any](s []S, v S, fn func(a, b S) bool) []S {
 	pos := sort.Search(len(s), func(i int) bool { return fn(s[i], v) })
-
-	// Efficiently insert the element.
-	s = append(s, *new(S))   // Grow slice by one (zero value).
-	copy(s[pos+1:], s[pos:]) // Shift elements from pos onwards to the right.
-	s[pos] = v               // Insert the new element at pos.
+	s = append(s, *new(S))
+	copy(s[pos+1:], s[pos:])
+	s[pos] = v
 	return s
 }
 
-// Join concatenates the elements of its first argument to create a single Array[S]. The separator
-// Array[S] sep is placed between elements in the resulting Array[S].
-func Join[T ~[]S, S any](s []T, sep T) T {
+// Join concatenates the elements of s to create a single slice.
+// The separator sep is placed between elements in the resulting slice.
+func Join[S any](s [][]S, sep []S) []S {
 	if len(s) == 0 {
-		return make(T, 0)
+		return make([]S, 0)
 	}
 	if len(s) == 1 {
-		// Just return a copy.
-		return append(T(nil), s[0]...)
+		return clone(s[0])
 	}
 	n := len(sep) * (len(s) - 1)
 	for _, v := range s {
 		n += len(v)
 	}
 
-	b := make(T, n)
+	b := make([]S, n)
 	bp := copy(b, s[0])
 	for _, v := range s[1:] {
 		bp += copy(b[bp:], sep)
@@ -231,8 +198,8 @@ func Join[T ~[]S, S any](s []T, sep T) T {
 	return b
 }
 
-// LastIndexSlice returns the index of the last instance of substr in s, or -1 if substr is not present in s.
-func LastIndexSlice[T ~[]S, S E](s, sep T) int {
+// LastIndexSlice returns the index of the last instance of sep in s, or -1 if not present.
+func LastIndexSlice[S E](s, sep []S) int {
 	n := len(sep)
 	switch {
 	case n == 0:
@@ -255,21 +222,19 @@ func LastIndexSlice[T ~[]S, S E](s, sep T) int {
 	return -1
 }
 
-// Map transforms a slice of one type to a slice of another type by applying a function to each element.
+// Map transforms a slice of one type to a slice of another type using a mapping function.
 func Map[S, T any](s []S, f func(S) T) []T {
 	if s == nil {
-		return make([]T, 0)
+		return nil
 	}
-	result := make([]T, len(s))
-	for i, v := range s {
-		result[i] = f(v)
+	result := make([]T, 0, len(s))
+	for _, v := range s {
+		result = append(result, f(v))
 	}
 	return result
 }
 
 // OverWithError returns an iterator function for a slice that may have an associated error.
-// The returned iterator will only yield values if the provided error is nil and the slice is not empty.
-// This is useful for chaining operations that can fail.
 func OverWithError[S any](s []S, err error) func(func(int, S) bool) {
 	return func(yield func(int, S) bool) {
 		if err != nil || len(s) == 0 {
@@ -283,9 +248,8 @@ func OverWithError[S any](s []S, err error) func(func(int, S) bool) {
 	}
 }
 
-// Read returns a slice of the Array[S] s beginning at offset and length limit.
-// If offset or limit is negative, it is treated as if it were zero.
-func Read[T ~[]S, S any](arr T, offset int, limit int) T {
+// Read returns a slice of s beginning at offset and with a length of limit.
+func Read[S any](arr []S, offset int, limit int) []S {
 	if offset < 0 || limit < 0 {
 		return nil
 	}
@@ -296,7 +260,6 @@ func Read[T ~[]S, S any](arr T, offset int, limit int) T {
 }
 
 // Reduce aggregates all elements of a slice into a single value by applying a function.
-// It iterates through the slice, applying the function 'f' to an accumulator and the current element.
 func Reduce[S, T any](s []S, initial T, f func(T, S) T) T {
 	accumulator := initial
 	for _, v := range s {
@@ -305,8 +268,8 @@ func Reduce[S, T any](s []S, initial T, f func(T, S) T) T {
 	return accumulator
 }
 
-// RemoveWith removes the first index where fn(a, b) is true.
-func RemoveWith[T ~[]S, S any](s T, fn func(a S) bool) T {
+// RemoveWith removes elements from a slice based on a predicate function.
+func RemoveWith[S any](s []S, fn func(a S) bool) []S {
 	ret := s[:0]
 	for i := range s {
 		if !fn(s[i]) {
@@ -316,25 +279,18 @@ func RemoveWith[T ~[]S, S any](s T, fn func(a S) bool) T {
 	return ret
 }
 
-// Repeat returns a new Array[S] consisting of count copies of the Array[S] s.
-//
-// It panics if count is negative or if
-// the result of (len(s) * count) overflows.
-func Repeat[T ~[]S, S any](b T, count int) T {
+// Repeat returns a new slice consisting of count copies of the slice s.
+func Repeat[S any](b []S, count int) []S {
 	if count == 0 {
-		return make(T, 0)
+		return make([]S, 0)
 	}
-	// Since we cannot return an error on overflow,
-	// we should panic if the repeat will generate
-	// an overflow.
-	// See Issue golang.org/issue/16237.
 	if count < 0 {
-		panic("bytes: negative Repeat count")
+		panic("slices: negative Repeat count")
 	} else if len(b)*count/count != len(b) {
-		panic("bytes: Repeat count causes overflow")
+		panic("slices: Repeat count causes overflow")
 	}
 
-	nb := make(T, len(b)*count)
+	nb := make([]S, len(b)*count)
 	bp := copy(nb, b)
 	for bp < len(nb) {
 		copy(nb[bp:], nb[:bp])
@@ -343,21 +299,18 @@ func Repeat[T ~[]S, S any](b T, count int) T {
 	return nb
 }
 
-// Split slices s into all subslices separated by sep and returns a slice of
-// the subslices between those separators.
-func Split[T ~[]S, S E](s, sep T) []T {
+// Split slices s into all subslices separated by sep.
+func Split[S E](s, sep []S) [][]S {
 	if s == nil {
 		return nil
 	}
 	return genSplit(s, sep, 0, -1)
 }
 
-// Transform combines the behavior of mapping and filtering a slice.
-// It iterates over each element of the input slice `s`, applies the function `f`,
-// and if the function returns `true`, the transformed element is included in the result.
-func Transform[TS ~[]S, S any, T any](s TS, f func(S) (T, bool)) []T {
+// Transform combines mapping and filtering a slice.
+func Transform[S any, T any](s []S, f func(S) (T, bool)) []T {
 	if s == nil {
-		return make([]T, 0)
+		return nil
 	}
 	tt := make([]T, 0, len(s))
 	for _, sv := range s {
@@ -369,13 +322,12 @@ func Transform[TS ~[]S, S any, T any](s TS, f func(S) (T, bool)) []T {
 }
 
 // Unique returns a new slice with duplicate elements removed.
-// The order of the first occurrence of each element is preserved.
-func Unique[T ~[]S, S E](s T) T {
+func Unique[S E](s []S) []S {
 	if len(s) == 0 {
-		return make(T, 0)
+		return make([]S, 0)
 	}
 	seen := make(map[S]struct{})
-	result := make(T, 0, len(s))
+	result := make([]S, 0, len(s))
 	for _, v := range s {
 		if _, ok := seen[v]; !ok {
 			seen[v] = struct{}{}
@@ -385,18 +337,16 @@ func Unique[T ~[]S, S E](s T) T {
 	return result
 }
 
-// clone returns a copy of the slice.
-// The elements are copied using assignment, so this is a shallow clone.
-func clone[T ~[]S, S any](s T) T {
+// clone returns a shallow copy of the slice.
+func clone[S any](s []S) []S {
 	if s == nil {
 		return nil
 	}
-	return append(T(nil), s...)
+	return append([]S(nil), s...)
 }
 
-// equal reports whether two slices are equal: the same length and all
-// elements equal.
-func equal[T ~[]S, S E](s1, s2 T) bool {
+// equal reports whether two slices are equal.
+func equal[S E](s1, s2 []S) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
@@ -408,14 +358,13 @@ func equal[T ~[]S, S E](s1, s2 T) bool {
 	return true
 }
 
-// explode splits s into a slice of slices, each of length 1,
-// up to a maximum of n (n < 0 means no limit).
-func explode[T ~[]S, S E](s T, n int) []T {
+// explode splits s into a slice of slices of length 1.
+func explode[S E](s []S, n int) [][]S {
 	l := len(s)
 	if n < 0 || n > l {
 		n = l
 	}
-	a := make([]T, n)
+	a := make([][]S, n)
 	for i := 0; i < n-1; i++ {
 		a[i] = s[:1]
 		s = s[1:]
@@ -426,9 +375,8 @@ func explode[T ~[]S, S E](s T, n int) []T {
 	return a
 }
 
-// Generic split: splits after each instance of sep,
-// including sepSave bytes of sep in the sub arrays.
-func genSplit[T ~[]S, S E](s, sep T, sepSave, n int) []T {
+// genSplit is the generic split implementation.
+func genSplit[S E](s, sep []S, sepSave, n int) [][]S {
 	if n == 0 {
 		return nil
 	}
@@ -442,7 +390,7 @@ func genSplit[T ~[]S, S E](s, sep T, sepSave, n int) []T {
 		n = len(s) + 1
 	}
 
-	a := make([]T, n)
+	a := make([][]S, n)
 	n--
 	i := 0
 	for i < n {
@@ -459,7 +407,7 @@ func genSplit[T ~[]S, S E](s, sep T, sepSave, n int) []T {
 }
 
 // indexElement returns the index of the first instance of e in s, or -1 if not found.
-func indexElement[T ~[]S, S E](s T, e S) int {
+func indexElement[S E](s []S, e S) int {
 	for i, v := range s {
 		if v == e {
 			return i
@@ -469,7 +417,7 @@ func indexElement[T ~[]S, S E](s T, e S) int {
 }
 
 // lastIndexElement returns the index of the last instance of e in s, or -1 if not found.
-func lastIndexElement[T ~[]S, S E](s T, e S) int {
+func lastIndexElement[S E](s []S, e S) int {
 	for i := len(s) - 1; i >= 0; i-- {
 		if s[i] == e {
 			return i

@@ -3,8 +3,9 @@ package set_test
 import (
 	"testing"
 
-	"github.com/goexts/generic/set"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goexts/generic/set"
 )
 
 func TestContains(t *testing.T) {
@@ -35,6 +36,52 @@ func TestExists(t *testing.T) {
 		assert.True(t, set.Exists([]string{"a", "abcd", "ef"}, func(s string) bool { return len(s) > 3 }))
 		// Check for the specific string "hello"
 		assert.False(t, set.Exists([]string{"a", "bcd", "ef"}, func(s string) bool { return s == "hello" }))
+	})
+}
+
+func TestUnique(t *testing.T) {
+	t.Run("int slice", func(t *testing.T) {
+		// Basic case with duplicates
+		input1 := []int{1, 2, 2, 3, 1, 4}
+		expected1 := []int{1, 2, 3, 4}
+		assert.ElementsMatch(t, expected1, set.Unique(input1))
+
+		// Slice with no duplicates
+		input2 := []int{1, 2, 3, 4}
+		expected2 := []int{1, 2, 3, 4}
+		assert.ElementsMatch(t, expected2, set.Unique(input2))
+
+		// Empty slice
+		input3 := []int{}
+		expected3 := []int{}
+		assert.ElementsMatch(t, expected3, set.Unique(input3))
+
+		// Slice with all elements the same
+		input4 := []int{5, 5, 5, 5, 5}
+		expected4 := []int{5}
+		assert.ElementsMatch(t, expected4, set.Unique(input4))
+	})
+
+	t.Run("string slice", func(t *testing.T) {
+		// Basic case with duplicates
+		input1 := []string{"a", "b", "a", "c", "b"}
+		expected1 := []string{"a", "b", "c"}
+		assert.ElementsMatch(t, expected1, set.Unique(input1))
+
+		// Case sensitivity
+		input2 := []string{"Apple", "apple", "Apple"}
+		expected2 := []string{"Apple", "apple"}
+		assert.ElementsMatch(t, expected2, set.Unique(input2))
+
+		// With empty strings
+		input3 := []string{"", "a", "", "b"}
+		expected3 := []string{"", "a", "b"}
+		assert.ElementsMatch(t, expected3, set.Unique(input3))
+
+		// Empty slice
+		input4 := []string{}
+		expected4 := []string{}
+		assert.ElementsMatch(t, expected4, set.Unique(input4))
 	})
 }
 

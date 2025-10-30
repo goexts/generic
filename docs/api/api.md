@@ -608,7 +608,7 @@ Apply implements the ApplierE\[T\] interface, allowing an OptionE\[T\] to be use
 # maps
 
 ```go
-import "github.com/goexts/generic/maps"
+import "github.com/goexts/generic/maps_test"
 ```
 
 Package maps provides a set of generic functions for common operations on maps.
