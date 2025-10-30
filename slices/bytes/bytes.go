@@ -81,6 +81,10 @@ func (b Bytes) HasSuffix(suffix []byte) bool {
 	return HasSuffix(b, suffix)
 }
 
+func (b Bytes) Clone() Bytes {
+	return slices.Clone(b)
+}
+
 // FromString converts a string to a Bytes slice.
 func FromString(s string) Bytes {
 	return []byte(s)

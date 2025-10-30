@@ -1,9 +1,8 @@
 package runes
 
 import (
+	"slices"
 	"unicode"
-
-	gslices "github.com/goexts/generic/slices"
 )
 
 //go:generate adptool runes.go
@@ -32,7 +31,7 @@ func (r Runes) ReadString(offset int, limit int) string {
 
 // Index returns the index of the first instance of sub in r, or -1 if sub is not present in r.
 func (r Runes) Index(sub []rune) int {
-	return gslices.IndexSlice(r, sub)
+	return Index(r, sub)
 }
 
 // FindString returns the index of the first instance of s in r, or -1 if s is not present in r.
@@ -63,11 +62,11 @@ func (r Runes) ToBytes() []byte {
 func (r Runes) Trim(cutset string) []rune {
 	cutsetRunes := []rune(cutset)
 	start := 0
-	for start < len(r) && gslices.Contains(cutsetRunes, r[start]) {
+	for start < len(r) && slices.Contains(cutsetRunes, r[start]) {
 		start++
 	}
 	end := len(r)
-	for end > start && gslices.Contains(cutsetRunes, r[end-1]) {
+	for end > start && slices.Contains(cutsetRunes, r[end-1]) {
 		end--
 	}
 
@@ -113,15 +112,15 @@ func (r Runes) TrimSuffix(suffix []rune) []rune {
 // Replace returns a copy of the slice with the first n non-overlapping instances of old replaced by replacement.
 func (r Runes) Replace(old, replacement []rune, n int) []rune {
 	if len(old) == 0 || n == 0 {
-		return gslices.Clone(r)
+		return slices.Clone(r)
 	}
 
 	if n < 0 {
-		n = gslices.Count(r, old)
+		n = Count(r, old)
 	}
 
 	if n == 0 {
-		return gslices.Clone(r)
+		return slices.Clone(r)
 	}
 
 	newLen := len(r) + n*(len(replacement)-len(old))
@@ -132,7 +131,7 @@ func (r Runes) Replace(old, replacement []rune, n int) []rune {
 
 	start := 0
 	for i := 0; i < n; i++ {
-		j := gslices.IndexSlice(r[start:], old)
+		j := Index(r[start:], old)
 		if j < 0 {
 			break
 		}
@@ -146,21 +145,104 @@ func (r Runes) Replace(old, replacement []rune, n int) []rune {
 
 // Contains reports whether sub is within r.
 func (r Runes) Contains(sub []rune) bool {
-	return gslices.IndexSlice(r, sub) != -1
+	return Index(r, sub) != -1
 }
 
 // HasPrefix tests whether the Runes slice s begins with prefix.
 func (r Runes) HasPrefix(prefix []rune) bool {
-	return len(r) >= len(prefix) && gslices.Equal(r[0:len(prefix)], prefix)
+	return len(r) >= len(prefix) && slices.Equal(r[0:len(prefix)], prefix)
 }
 
 // HasSuffix tests whether the Runes slice s ends with suffix.
 func (r Runes) HasSuffix(suffix []rune) bool {
-	return len(r) >= len(suffix) && gslices.Equal(r[len(r)-len(suffix):], suffix)
+	return len(r) >= len(suffix) && slices.Equal(r[len(r)-len(suffix):], suffix)
+}
+
+func (r Runes) Clone() Runes {
+	return slices.Clone(r)
 }
 
 // FromString converts a string to a rune slice ([]rune).
 // This is a convenience function that is equivalent to `[]rune(s)`.
 func FromString(s string) Runes {
 	return []rune(s)
+}
+
+func Index(r, sub []rune) int {
+	// Follow bytes.Index semantics: empty pattern returns 0
+	if len(sub) == 0 {
+		return 0
+	}
+	// Optimize single-rune search
+	if len(sub) == 1 {
+		needle := sub[0]
+		for i := 0; i < len(r); i++ {
+			if r[i] == needle {
+				return i
+			}
+		}
+		return -1
+	}
+
+	// KMP (Knuth-Morris-Pratt) for general case
+	// Build longest prefix-suffix (lps) array for pattern `sub`
+	lps := make([]int, len(sub))
+	for i, j := 1, 0; i < len(sub); {
+		if sub[i] == sub[j] {
+			j++
+			lps[i] = j
+			i++
+		} else if j != 0 {
+			j = lps[j-1]
+		} else {
+			lps[i] = 0
+			i++
+		}
+	}
+
+	// Search using KMP
+	for i, j := 0, 0; i < len(r); {
+		if r[i] == sub[j] {
+			i++
+			j++
+			if j == len(sub) {
+				return i - j
+			}
+		} else if j != 0 {
+			j = lps[j-1]
+		} else {
+			i++
+		}
+	}
+	return -1
+}
+
+func Count(r, sub []rune) int {
+	// Follow bytes.Count semantics: non-overlapping occurrences; empty pattern yields len(r)+1
+	if len(sub) == 0 {
+		return len(r) + 1
+	}
+	// Optimize single-rune counting
+	if len(sub) == 1 {
+		c := 0
+		needle := sub[0]
+		for i := 0; i < len(r); i++ {
+			if r[i] == needle {
+				c++
+			}
+		}
+		return c
+	}
+
+	count := 0
+	start := 0
+	for {
+		j := Index(r[start:], sub)
+		if j < 0 {
+			break
+		}
+		count++
+		start += j + len(sub)
+	}
+	return count
 }

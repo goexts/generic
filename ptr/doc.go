@@ -15,14 +15,13 @@ are pointers.
 	}
 
 	// Verbose way without the ptr package:
-	/*
-	timeout := 30
-	name := "default-name"
-	cfg := Config{
-		Timeout: &timeout,
-		Name:    &name,
-	}
-	*/
+	//
+	// timeout := 30
+	// name := "default-name"
+	// cfg := Config{
+	// 	Timeout: &timeout,
+	// 	Name:    &name,
+	// }
 
 	// Concise way with the ptr package:
 	cfg := Config{

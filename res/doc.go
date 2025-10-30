@@ -37,23 +37,23 @@ Consider a sequence of operations:
 
 	// Define helper functions that each return a Result.
 	func getFilename(config map[string]string) res.Result[string] {
-	    if name, ok := config["filename"]; ok {
-	        return res.Ok(name)
-	    }
-	    return res.Err[string](errors.New("filename not found in config"))
+		if name, ok := config["filename"]; ok {
+			return res.Ok(name)
+		}
+		return res.Err[string](errors.New("filename not found in config"))
 	}
 
 	func readContent(filename string) res.Result[string] {
-	    // Simulate reading a file.
-	    if filename == "data.txt" {
-	        return res.Ok("12345")
-	    }
-	    return res.Err[string](fmt.Errorf("file not found: %s", filename))
+		// Simulate reading a file.
+		if filename == "data.txt" {
+			return res.Ok("12345")
+		}
+		return res.Err[string](fmt.Errorf("file not found: %s", filename))
 	}
 
 	func parseNumber(content string) res.Result[int] {
-	    n, err := strconv.Atoi(content)
-	    return res.Of(n, err)
+		n, err := strconv.Atoi(content)
+		return res.Of(n, err)
 	}
 
 	// Now, chain these operations together.
@@ -62,15 +62,15 @@ Consider a sequence of operations:
 	// The `AndThen` method chains functions that return a Result.
 	// The chain stops at the first `Err`.
 	finalResult := getFilename(config).
-	    AndThen(readContent).
-	    AndThen(parseNumber)
+		AndThen(readContent).
+		AndThen(parseNumber)
 
 	// Safely handle the outcome.
 	if finalResult.IsErr() {
-	    fmt.Printf("Pipeline failed: %v\n", finalResult.Err())
+		fmt.Printf("Pipeline failed: %v\n", finalResult.Err())
 	} else {
-	    // No error occurred, we can safely get the value.
-	    fmt.Printf("Pipeline succeeded, result: %d\n", finalResult.Unwrap())
+		// No error occurred, we can safely get the value.
+		fmt.Printf("Pipeline succeeded, result: %d\n", finalResult.Unwrap())
 	}
 */
 package res
