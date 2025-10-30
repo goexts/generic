@@ -1,5 +1,5 @@
-// Package main demonstrates a Logger configured via configure.Option (Report Q5).
-package main
+// Package examples demonstrates a Logger configured via configure.Option (Report Q5).
+package examples
 
 import (
 	"fmt"
@@ -21,22 +21,28 @@ func WithOutput(w *os.File) configure.Option[Logger] {
 	return func(l *Logger) { l.out = w }
 }
 
-func NewLogger(options ...configure.Option[Logger]) (*Logger, error) { // Q5
-	l := &Logger{level: "info", out: os.Stdout}
-	configure.Apply(l, options)
-	if l.level == "" {
-		return nil, fmt.Errorf("log level cannot be empty")
+func NewLogger(opts ...configure.Option[Logger]) (*Logger, error) {
+	logger := &Logger{level: "info", out: os.Stdout}
+	for _, opt := range opts {
+		opt(logger)
 	}
-	return l, nil
+	return logger, nil
 }
 
-func main() {
+func ExampleNewLogger() {
 	logger1, _ := NewLogger()
-	fmt.Println("default:", logger1.level)
+	fmt.Println("Default logger level:", logger1.level)
+
 	logger2, _ := NewLogger(WithLevel("debug"))
-	fmt.Println("debug:", logger2.level)
+	fmt.Println("Custom logger level:", logger2.level)
+
 	f, _ := os.CreateTemp("", "log")
 	defer os.Remove(f.Name())
 	logger3, _ := NewLogger(WithLevel("error"), WithOutput(f))
 	fmt.Println("error+file:", logger3.level, logger3.out != nil)
+
+	// Output:
+	// Default logger level: info
+	// Custom logger level: debug
+	// error+file: error true
 }

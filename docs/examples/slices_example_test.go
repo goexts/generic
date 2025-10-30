@@ -1,6 +1,6 @@
-// Package main provides comprehensive examples for using the slices package.
+// Package examples provides comprehensive examples for using the slices package.
 // This file expands previous examples and includes solutions mapped to report.log Q1, Q2, Q7, Q8.
-package main
+package examples
 
 import (
 	"fmt"
@@ -30,8 +30,17 @@ type Summary struct {
 	Len   int
 }
 
-func GetUserNames(users []User) []string { // Q1
-	return slices.Map(users, func(u User) string { return u.Name })
+func SlicesHelpers() {
+	users := []User{{1, "Alice"}, {2, "Bob"}}
+	names := slices.Map(users, func(u User) string { return u.Name })
+	fmt.Println("User names:", names)
+}
+
+func ExampleSlicesHelpers() {
+	SlicesHelpers()
+
+	// Output:
+	// User names: [Alice Bob]
 }
 
 func FilterExpensiveProducts(products []Product, minPrice float64) []Product { // Q2
@@ -57,42 +66,13 @@ func Summaries(entries []LogEntry) []Summary {
 	return res
 }
 
-func main() {
-	// Example: Basic Map/Filter/Reduce
-	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	doubled := slices.Map(nums, func(x int) int { return x * 2 })
-	fmt.Println("Doubled:", doubled)
-	evens := slices.Filter(doubled, func(x int) bool { return x%2 == 0 })
-	fmt.Println("Even numbers:", evens)
-	sum := slices.Reduce(nums, 0, func(acc, x int) int { return acc + x })
-	fmt.Println("Sum:", sum)
-
-	// Example: Strings transform
-	names := []string{"alice", "bob", "charlie", "dave"}
-	capitalized := slices.Map(names, func(s string) string {
-		if len(s) == 0 {
-			return s
-		}
-		return string(append([]byte{s[0] - 32}, s[1:]...))
-	})
-	fmt.Println("Capitalized:", capitalized)
-
-	// Example: FilterIncluded / FilterExcluded
-	allNumbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	evensOnly := slices.FilterIncluded(allNumbers, []int{2, 4, 6, 8, 10})
-	fmt.Println("Even numbers (FilterIncluded):", evensOnly)
-	oddsOnly := slices.FilterExcluded(allNumbers, []int{2, 4, 6, 8, 10})
-	fmt.Println("Odd numbers (FilterExcluded):", oddsOnly)
-
-	// Q1 demo
-	users := []User{{1, "Alice"}, {2, "Bob"}}
-	fmt.Println("User names:", GetUserNames(users))
-
-	// Q2 demo
-	products := []Product{{"A", 10.0}, {"B", 99.5}, {"C", 100.0}}
-	fmt.Println("Expensive products:", FilterExpensiveProducts(products, 99.5))
-
-	// Q7 demo
+// ExampleGetCompletedTaskTitles demonstrates how to use GetCompletedTaskTitles and Summaries functions.
+// It shows filtering completed tasks and summarizing log entries.
+//
+// Output:
+// Completed task titles: [Write Ship]
+// Summaries: [{INFO 2} {WARN 1}]
+func ExampleGetCompletedTaskTitles() {
 	tasks := []Task{{1, "Write", true}, {2, "Test", false}, {3, "Ship", true}}
 	fmt.Println("Completed task titles:", GetCompletedTaskTitles(tasks))
 

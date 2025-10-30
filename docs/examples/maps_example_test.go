@@ -1,5 +1,5 @@
-// Package main provides examples for using the maps package, including Report Q3.
-package main
+// Package examples provides examples for using the maps package, including Report Q3.
+package examples
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/goexts/generic/slices"
 )
 
-func main() {
+func Example() {
 	userPermissions := map[string]string{"admin": "all", "editor": "write", "viewer": "read"}
 	keys := maps.Keys(userPermissions)
 	vals := maps.Values(userPermissions)
@@ -17,4 +17,8 @@ func main() {
 	slices.Sort(vals)
 	fmt.Println("Keys:", keys)
 	fmt.Println("Values:", vals)
+
+	// Output:
+	// Keys: [admin editor viewer]
+	// Values: [all read write]
 }
