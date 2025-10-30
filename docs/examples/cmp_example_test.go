@@ -14,15 +14,27 @@ type Employee struct {
 	Name       string
 }
 
-// MultiLevelSort demonstrates sorting with multiple criteria
+// MultiLevelSort sorts employees by department (ascending), seniority (descending), and name (ascending).
+// It uses the generic/cmp package for type-safe comparisons.
+//
+// Example:
+//
+//	employees := []Employee{
+//	    {"Engineering", 3, "Alice"},
+//	    {"Engineering", 5, "Bob"},
+//	    {"HR", 1, "Carol"},
+//	    {"Engineering", 5, "Aaron"},
+//	}
+//	MultiLevelSort(employees)
 func MultiLevelSort(es []Employee) {
+	// Implementation remains the same
 	slices.SortFunc(es, func(a, b Employee) int {
 		if res := cmp.Compare(a.Department, b.Department); res != 0 {
 			return res
 		}
 		if res := cmp.Compare(b.Seniority, a.Seniority); res != 0 {
 			return res
-		} // desc
+		}
 		return cmp.Compare(a.Name, b.Name)
 	})
 }
