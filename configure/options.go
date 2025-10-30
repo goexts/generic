@@ -49,20 +49,28 @@ type OptionFuncAny[T any] interface {
 
 // OptionSet bundles multiple options into a single option.
 // This allows for creating reusable and modular sets of configurations.
+//
+// Deprecated: Use Chain instead for more generic and flexible option chaining.
 func OptionSet[T any](opts ...Option[T]) Option[T] {
 	return func(t *T) {
 		Apply(t, opts)
 	}
 }
 
+// Chain combines multiple options (of any type satisfying OptionFunc[S]) into a single option.
+// The returned option will apply all provided options in sequence.
 func Chain[S any, T OptionFunc[S]](opts ...T) T {
 	return func(t *S) {
-		Apply(t, opts)
+		for _, opt := range opts {
+			opt(t)
+		}
 	}
 }
 
 // OptionSetE bundles multiple error-returning options into a single option.
 // If any option in the set returns an error, the application stops and the error is returned.
+//
+// Deprecated: Use ChainE instead for more generic and flexible error-returning option chaining.
 func OptionSetE[T any](opts ...OptionE[T]) OptionE[T] {
 	return func(t *T) error {
 		_, err := ApplyE(t, opts)
@@ -70,9 +78,16 @@ func OptionSetE[T any](opts ...OptionE[T]) OptionE[T] {
 	}
 }
 
+// ChainE combines multiple error-returning options (of any type satisfying OptionFuncE[S]) into a single option.
+// The returned option will apply all provided options in sequence. If any option returns an error,
+// the chain stops and that error is returned.
 func ChainE[S any, T OptionFuncE[S]](opts ...T) T {
 	return func(t *S) error {
-		_, err := ApplyE(t, opts)
-		return err
+		for _, opt := range opts {
+			if err := opt(t); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 }

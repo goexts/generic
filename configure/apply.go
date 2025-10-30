@@ -107,10 +107,13 @@ func applyAny[T any](target *T, opt any) error {
 	return err
 }
 
-// Apply applies a slice of options to the target.
+// Apply applies a slice of options to the target object.
 // It is the core, high-performance function for applying a homogeneous set of
 // type-safe options. Its generic constraint allows for custom-defined option
 // types, such as `type MyOption func(*T)`.
+//
+// The `opts` parameter is a slice of options. If you have a variadic list of
+// options (e.g., `WithFoo(), WithBar()`), use the `ApplyWith` convenience wrapper instead.
 //
 // For handling mixed option types, see ApplyAny.
 func Apply[T any, O OptionFunc[T]](target *T, opts []O) *T {
@@ -124,14 +127,22 @@ func Apply[T any, O OptionFunc[T]](target *T, opts []O) *T {
 }
 
 // ApplyWith is the variadic convenience wrapper for Apply.
+// It is useful for applying a short, explicit list of options.
+//
+// Example:
+//
+//	ApplyWith(config, WithTimeout(5*time.Second), WithPort(8080))
 func ApplyWith[T any](target *T, opts ...Option[T]) *T {
 	return Apply(target, opts)
 }
 
-// ApplyE applies a slice of error-returning options to the target.
+// ApplyE applies a slice of error-returning options to the target object.
 // It is the core, high-performance function for applying a homogeneous set of
 // type-safe, error-returning options. Its generic constraint allows for
 // custom-defined option types.
+//
+// The `opts` parameter is a slice of options. If you have a variadic list of
+// options (e.g., `WithFoo(), WithBar()`), use the `ApplyWithE` convenience wrapper instead.
 //
 // For handling mixed option types, see ApplyAny.
 func ApplyE[T any, O OptionFuncE[T]](target *T, opts []O) (*T, error) {
@@ -147,14 +158,18 @@ func ApplyE[T any, O OptionFuncE[T]](target *T, opts []O) (*T, error) {
 }
 
 // ApplyWithE is the variadic convenience wrapper for ApplyE.
+// It is useful for applying a short, explicit list of options.
 func ApplyWithE[T any](target *T, opts ...OptionE[T]) (*T, error) {
 	return ApplyE(target, opts)
 }
 
-// ApplyAny applies a slice of options of various types (any).
+// ApplyAny applies a slice of options of various types (any) to the target object.
 // This function provides flexibility by using reflection to handle
 // heterogeneous options, at the cost of compile-time type safety and a minor
 // performance overhead.
+//
+// The `opts` parameter is a slice of options. If you have a variadic list of
+// options (e.g., `WithFoo(), WithBar()`), use the `ApplyAnyWith` convenience wrapper instead.
 //
 // For type-safe, high-performance application, see Apply or ApplyE.
 func ApplyAny[T any](target *T, opts []any) (*T, error) {

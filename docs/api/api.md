@@ -368,7 +368,7 @@ For more advanced usage, including stateful builders and compilation, refer to t
 - [func ApplyWithE\[T any\]\(target \*T, opts ...OptionE\[T\]\) \(\*T, error\)](<#ApplyWithE>)
 - [func Chain\[S any, T OptionFunc\[S\]\]\(opts ...T\) T](<#Chain>)
 - [func ChainE\[S any, T OptionFuncE\[S\]\]\(opts ...T\) T](<#ChainE>)
-- [func Compile\[C any, P any\]\(builder \*Builder\[C\], factory func\(c \*C\) \(\*P, error\)\) \(\*P, error\)](<#Compile>)
+- [func Compile\[C any, P any\]\(factory func\(c \*C\) \(\*P, error\), builder \*Builder\[C\]\) \(\*P, error\)](<#Compile>)
 - [func IsConfigError\(err error\) bool](<#IsConfigError>)
 - [func IsEmptyTargetValueError\(err error\) bool](<#IsEmptyTargetValueError>)
 - [func IsExecutionFailedError\(err error\) bool](<#IsExecutionFailedError>)
@@ -381,11 +381,10 @@ For more advanced usage, including stateful builders and compilation, refer to t
 - [type Applier](<#Applier>)
 - [type ApplierE](<#ApplierE>)
 - [type Builder](<#Builder>)
-  - [func NewBuilder\[C any\]\(\) \*Builder\[C\]](<#NewBuilder>)
+  - [func NewBuilder\[C any\]\(base ...\*C\) \*Builder\[C\]](<#NewBuilder>)
   - [func \(b \*Builder\[C\]\) Add\(opts ...any\) \*Builder\[C\]](<#Builder[C].Add>)
-  - [func \(b \*Builder\[C\]\) AddWhen\(condition bool, opt any\) \*Builder\[C\]](<#Builder[C].AddWhen>)
+  - [func \(b \*Builder\[C\]\) AddWhen\(condition bool, optIfTrue any, optIfFalse ...any\) \*Builder\[C\]](<#Builder[C].AddWhen>)
   - [func \(b \*Builder\[C\]\) Apply\(target \*C\) error](<#Builder[C].Apply>)
-  - [func \(b \*Builder\[C\]\) ApplyTo\(target \*C\) \(\*C, error\)](<#Builder[C].ApplyTo>)
   - [func \(b \*Builder\[C\]\) Build\(\) \(\*C, error\)](<#Builder[C].Build>)
 - [type ConfigError](<#ConfigError>)
   - [func \(e \*ConfigError\) Error\(\) string](<#ConfigError.Error>)
@@ -404,29 +403,33 @@ For more advanced usage, including stateful builders and compilation, refer to t
 
 
 <a name="Apply"></a>
-## func [Apply](<https://github.com/goexts/generic/blob/main/configure/apply.go#L116>)
+## func [Apply](<https://github.com/goexts/generic/blob/main/configure/apply.go#L119>)
 
 ```go
 func Apply[T any, O OptionFunc[T]](target *T, opts []O) *T
 ```
 
-Apply applies a slice of options to the target. It is the core, high\-performance function for applying a homogeneous set of type\-safe options. Its generic constraint allows for custom\-defined option types, such as \`type MyOption func\(\*T\)\`.
+Apply applies a slice of options to the target object. It is the core, high\-performance function for applying a homogeneous set of type\-safe options. Its generic constraint allows for custom\-defined option types, such as \`type MyOption func\(\*T\)\`.
+
+The \`opts\` parameter is a slice of options. If you have a variadic list of options \(e.g., \`WithFoo\(\), WithBar\(\)\`\), use the \`ApplyWith\` convenience wrapper instead.
 
 For handling mixed option types, see ApplyAny.
 
 <a name="ApplyAny"></a>
-## func [ApplyAny](<https://github.com/goexts/generic/blob/main/configure/apply.go#L160>)
+## func [ApplyAny](<https://github.com/goexts/generic/blob/main/configure/apply.go#L175>)
 
 ```go
 func ApplyAny[T any](target *T, opts []any) (*T, error)
 ```
 
-ApplyAny applies a slice of options of various types \(any\). This function provides flexibility by using reflection to handle heterogeneous options, at the cost of compile\-time type safety and a minor performance overhead.
+ApplyAny applies a slice of options of various types \(any\) to the target object. This function provides flexibility by using reflection to handle heterogeneous options, at the cost of compile\-time type safety and a minor performance overhead.
+
+The \`opts\` parameter is a slice of options. If you have a variadic list of options \(e.g., \`WithFoo\(\), WithBar\(\)\`\), use the \`ApplyAnyWith\` convenience wrapper instead.
 
 For type\-safe, high\-performance application, see Apply or ApplyE.
 
 <a name="ApplyAnyWith"></a>
-## func [ApplyAnyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L173>)
+## func [ApplyAnyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L188>)
 
 ```go
 func ApplyAnyWith[T any](target *T, opts ...any) (*T, error)
@@ -435,60 +438,68 @@ func ApplyAnyWith[T any](target *T, opts ...any) (*T, error)
 ApplyAnyWith is the variadic convenience wrapper for ApplyAny.
 
 <a name="ApplyE"></a>
-## func [ApplyE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L137>)
+## func [ApplyE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L148>)
 
 ```go
 func ApplyE[T any, O OptionFuncE[T]](target *T, opts []O) (*T, error)
 ```
 
-ApplyE applies a slice of error\-returning options to the target. It is the core, high\-performance function for applying a homogeneous set of type\-safe, error\-returning options. Its generic constraint allows for custom\-defined option types.
+ApplyE applies a slice of error\-returning options to the target object. It is the core, high\-performance function for applying a homogeneous set of type\-safe, error\-returning options. Its generic constraint allows for custom\-defined option types.
+
+The \`opts\` parameter is a slice of options. If you have a variadic list of options \(e.g., \`WithFoo\(\), WithBar\(\)\`\), use the \`ApplyWithE\` convenience wrapper instead.
 
 For handling mixed option types, see ApplyAny.
 
 <a name="ApplyWith"></a>
-## func [ApplyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L127>)
+## func [ApplyWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L135>)
 
 ```go
 func ApplyWith[T any](target *T, opts ...Option[T]) *T
 ```
 
-ApplyWith is the variadic convenience wrapper for Apply.
+ApplyWith is the variadic convenience wrapper for Apply. It is useful for applying a short, explicit list of options.
+
+Example:
+
+```
+ApplyWith(config, WithTimeout(5*time.Second), WithPort(8080))
+```
 
 <a name="ApplyWithE"></a>
-## func [ApplyWithE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L150>)
+## func [ApplyWithE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L162>)
 
 ```go
 func ApplyWithE[T any](target *T, opts ...OptionE[T]) (*T, error)
 ```
 
-ApplyWithE is the variadic convenience wrapper for ApplyE.
+ApplyWithE is the variadic convenience wrapper for ApplyE. It is useful for applying a short, explicit list of options.
 
 <a name="Chain"></a>
-## func [Chain](<https://github.com/goexts/generic/blob/main/configure/options.go#L58>)
+## func [Chain](<https://github.com/goexts/generic/blob/main/configure/options.go#L62>)
 
 ```go
 func Chain[S any, T OptionFunc[S]](opts ...T) T
 ```
 
-
+Chain combines multiple options \(of any type satisfying OptionFunc\[S\]\) into a single option. The returned option will apply all provided options in sequence.
 
 <a name="ChainE"></a>
-## func [ChainE](<https://github.com/goexts/generic/blob/main/configure/options.go#L73>)
+## func [ChainE](<https://github.com/goexts/generic/blob/main/configure/options.go#L84>)
 
 ```go
 func ChainE[S any, T OptionFuncE[S]](opts ...T) T
 ```
 
-
+ChainE combines multiple error\-returning options \(of any type satisfying OptionFuncE\[S\]\) into a single option. The returned option will apply all provided options in sequence. If any option returns an error, the chain stops and that error is returned.
 
 <a name="Compile"></a>
-## func [Compile](<https://github.com/goexts/generic/blob/main/configure/builder.go#L82>)
+## func [Compile](<https://github.com/goexts/generic/blob/main/configure/builder.go#L95>)
 
 ```go
-func Compile[C any, P any](builder *Builder[C], factory func(c *C) (*P, error)) (*P, error)
+func Compile[C any, P any](factory func(c *C) (*P, error), builder *Builder[C]) (*P, error)
 ```
 
-Compile creates a final product \`P\` by first building a configuration \`C\` using the provided builder, and then passing the result to a factory function. This is the primary top\-level function for the Config \-\> Product workflow, ensuring a clean separation between configuration and compilation.
+Compile creates a final product \`P\` by first building a configuration \`C\` using the provided \`builder\`, and then passing the result to a \`factory\` function. This function acts as the primary top\-level entry point for the Config \-\> Product workflow, emphasizing the factory's role in producing the final product from the configuration.
 
 <a name="IsConfigError"></a>
 ## func [IsConfigError](<https://github.com/goexts/generic/blob/main/configure/errors.go#L71>)
@@ -527,7 +538,7 @@ func IsUnsupportedTypeError(err error) bool
 IsUnsupportedTypeError checks if the error is a ConfigError with the code ErrUnsupportedType.
 
 <a name="New"></a>
-## func [New](<https://github.com/goexts/generic/blob/main/configure/apply.go#L180>)
+## func [New](<https://github.com/goexts/generic/blob/main/configure/apply.go#L195>)
 
 ```go
 func New[T any, O OptionFunc[T]](opts []O) *T
@@ -536,7 +547,7 @@ func New[T any, O OptionFunc[T]](opts []O) *T
 New creates a new instance of T and applies the given options. It is a convenient, type\-safe constructor for creating objects with homogeneous options. For mixed\-type or error\-returning options, see NewAny or NewE.
 
 <a name="NewAny"></a>
-## func [NewAny](<https://github.com/goexts/generic/blob/main/configure/apply.go#L210>)
+## func [NewAny](<https://github.com/goexts/generic/blob/main/configure/apply.go#L225>)
 
 ```go
 func NewAny[T any](opts ...any) (*T, error)
@@ -547,7 +558,7 @@ NewAny creates a new instance of T, applies the given options of any type, and r
 It uses ApplyAny for maximum flexibility in accepting options.
 
 <a name="NewE"></a>
-## func [NewE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L194>)
+## func [NewE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L209>)
 
 ```go
 func NewE[T any, O OptionFuncE[T]](opts []O) (*T, error)
@@ -556,7 +567,7 @@ func NewE[T any, O OptionFuncE[T]](opts []O) (*T, error)
 NewE creates a new instance of T, applies the error\-returning options, and returns the configured instance or an error. It is a convenient, type\-safe constructor for creating objects with homogeneous, error\-returning options.
 
 <a name="NewWith"></a>
-## func [NewWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L186>)
+## func [NewWith](<https://github.com/goexts/generic/blob/main/configure/apply.go#L201>)
 
 ```go
 func NewWith[T any](opts ...Option[T]) *T
@@ -565,7 +576,7 @@ func NewWith[T any](opts ...Option[T]) *T
 NewWith is the variadic convenience wrapper for New.
 
 <a name="NewWithE"></a>
-## func [NewWithE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L200>)
+## func [NewWithE](<https://github.com/goexts/generic/blob/main/configure/apply.go#L215>)
 
 ```go
 func NewWithE[T any](opts ...OptionE[T]) (*T, error)
@@ -596,11 +607,11 @@ type ApplierE[T any] interface {
 ```
 
 <a name="Builder"></a>
-## type [Builder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L15-L17>)
+## type [Builder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L16-L19>)
 
 Builder provides a fluent interface for collecting and applying options. It is ideal for scenarios where configuration options are gathered progressively from different parts of an application.
 
-The generic type C represents the configuration type being built, and is expected to be a struct type. Using a pointer type for C is not recommended as it can lead to unexpected behavior.
+The generic type C represents the configuration type being built, and is expected to be a struct type. Using a pointer type for C as the generic parameter \(e.g., Builder\[\*MyConfig\]\) is not recommended as it can lead to unexpected behavior and double\-pointers.
 
 ```go
 type Builder[C any] struct {
@@ -609,16 +620,18 @@ type Builder[C any] struct {
 ```
 
 <a name="NewBuilder"></a>
-### func [NewBuilder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L20>)
+### func [NewBuilder](<https://github.com/goexts/generic/blob/main/configure/builder.go#L29>)
 
 ```go
-func NewBuilder[C any]() *Builder[C]
+func NewBuilder[C any](base ...*C) *Builder[C]
 ```
 
-NewBuilder creates a new, empty configuration builder.
+NewBuilder creates a new configuration builder. It can optionally take a base configuration object. If provided, this base configuration will be cloned and used as the starting point for applying options when \`Build\` is called. If no base is provided, a zero\-value instance of C will be used.
+
+Panics if the generic type C is itself a pointer type \(e.g., Builder\[\*MyConfig\]\), as this is an unsupported and likely unintended usage pattern that leads to double\-pointers.
 
 <a name="Builder[C].Add"></a>
-### func \(\*Builder\[C\]\) [Add](<https://github.com/goexts/generic/blob/main/configure/builder.go#L25>)
+### func \(\*Builder\[C\]\) [Add](<https://github.com/goexts/generic/blob/main/configure/builder.go#L44>)
 
 ```go
 func (b *Builder[C]) Add(opts ...any) *Builder[C]
@@ -627,16 +640,16 @@ func (b *Builder[C]) Add(opts ...any) *Builder[C]
 Add adds one or more options to the builder. It supports a fluent, chainable API.
 
 <a name="Builder[C].AddWhen"></a>
-### func \(\*Builder\[C\]\) [AddWhen](<https://github.com/goexts/generic/blob/main/configure/builder.go#L32>)
+### func \(\*Builder\[C\]\) [AddWhen](<https://github.com/goexts/generic/blob/main/configure/builder.go#L54>)
 
 ```go
-func (b *Builder[C]) AddWhen(condition bool, opt any) *Builder[C]
+func (b *Builder[C]) AddWhen(condition bool, optIfTrue any, optIfFalse ...any) *Builder[C]
 ```
 
-AddWhen conditionally adds an option to the builder if the condition is true. It supports a fluent, chainable API.
+AddWhen conditionally adds an option to the builder based on a condition. If \`condition\` is true, \`optIfTrue\` is added. If \`condition\` is false and \`optIfFalse\` is provided \(as the first element of the variadic parameter\), then \`optIfFalse\` is added instead. It supports a fluent, chainable API.
 
 <a name="Builder[C].Apply"></a>
-### func \(\*Builder\[C\]\) [Apply](<https://github.com/goexts/generic/blob/main/configure/builder.go#L73>)
+### func \(\*Builder\[C\]\) [Apply](<https://github.com/goexts/generic/blob/main/configure/builder.go#L86>)
 
 ```go
 func (b *Builder[C]) Apply(target *C) error
@@ -644,23 +657,14 @@ func (b *Builder[C]) Apply(target *C) error
 
 Apply implements the ApplierE interface. This allows a Builder instance to be passed directly as an option to other functions like New or ApplyAny, acting as a "super option".
 
-<a name="Builder[C].ApplyTo"></a>
-### func \(\*Builder\[C\]\) [ApplyTo](<https://github.com/goexts/generic/blob/main/configure/builder.go#L52>)
-
-```go
-func (b *Builder[C]) ApplyTo(target *C) (*C, error)
-```
-
-ApplyTo applies all collected options to an existing target object.
-
 <a name="Builder[C].Build"></a>
-### func \(\*Builder\[C\]\) [Build](<https://github.com/goexts/generic/blob/main/configure/builder.go#L62>)
+### func \(\*Builder\[C\]\) [Build](<https://github.com/goexts/generic/blob/main/configure/builder.go#L72>)
 
 ```go
 func (b *Builder[C]) Build() (*C, error)
 ```
 
-Build creates a new, zero\-value instance of the configuration object C and applies all collected options to it. The resulting object can then be used directly or passed to a factory.
+Build creates a new configuration object C and applies all collected options to it. It starts with a clone of the base configuration \(if set via \`NewBuilder\`\), or a zero\-value instance of C if no base is provided.
 
 <a name="ConfigError"></a>
 ## type [ConfigError](<https://github.com/goexts/generic/blob/main/configure/errors.go#L29-L36>)
@@ -733,13 +737,15 @@ type Option[T any] func(*T)
 ```
 
 <a name="OptionSet"></a>
-### func [OptionSet](<https://github.com/goexts/generic/blob/main/configure/options.go#L52>)
+### func [OptionSet](<https://github.com/goexts/generic/blob/main/configure/options.go#L54>)
 
 ```go
 func OptionSet[T any](opts ...Option[T]) Option[T]
 ```
 
 OptionSet bundles multiple options into a single option. This allows for creating reusable and modular sets of configurations.
+
+Deprecated: Use Chain instead for more generic and flexible option chaining.
 
 <a name="Option[T].Apply"></a>
 ### func \(Option\[T\]\) [Apply](<https://github.com/goexts/generic/blob/main/configure/options.go#L9>)
@@ -760,13 +766,15 @@ type OptionE[T any] func(*T) error
 ```
 
 <a name="OptionSetE"></a>
-### func [OptionSetE](<https://github.com/goexts/generic/blob/main/configure/options.go#L66>)
+### func [OptionSetE](<https://github.com/goexts/generic/blob/main/configure/options.go#L74>)
 
 ```go
 func OptionSetE[T any](opts ...OptionE[T]) OptionE[T]
 ```
 
 OptionSetE bundles multiple error\-returning options into a single option. If any option in the set returns an error, the application stops and the error is returned.
+
+Deprecated: Use ChainE instead for more generic and flexible error\-returning option chaining.
 
 <a name="WithValidation"></a>
 ### func [WithValidation](<https://github.com/goexts/generic/blob/main/configure/constructors.go#L6>)
@@ -3630,7 +3638,7 @@ type Bytes []byte
 ```
 
 <a name="FromString"></a>
-### func [FromString](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L89>)
+### func [FromString](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L90>)
 
 ```go
 func FromString(s string) Bytes
@@ -3639,13 +3647,13 @@ func FromString(s string) Bytes
 FromString converts a string to a Bytes slice.
 
 <a name="Bytes.Clone"></a>
-### func \(Bytes\) [Clone](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L84>)
+### func \(Bytes\) [Clone](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L85>)
 
 ```go
 func (b Bytes) Clone() Bytes
 ```
 
-
+Clone returns a copy of the Bytes slice.
 
 <a name="Bytes.Contains"></a>
 ### func \(Bytes\) [Contains](<https://github.com/goexts/generic/blob/main/slices/bytes/bytes.go#L70>)
@@ -3821,13 +3829,13 @@ Package runes contains generated code by adptool.
 
 
 <a name="Count"></a>
-## func [Count](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L220>)
+## func [Count](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L225>)
 
 ```go
 func Count(r, sub []rune) int
 ```
 
-
+Count counts the number of non\-overlapping instances of sub in r.
 
 <a name="If"></a>
 ## func [If](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L20>)
@@ -3848,13 +3856,13 @@ func In(rt *unicode.RangeTable) runes.Set
 
 
 <a name="Index"></a>
-## func [Index](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L171>)
+## func [Index](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L173>)
 
 ```go
 func Index(r, sub []rune) int
 ```
 
-
+Index returns the index of the first instance of sub in r, or \-1 if sub is not present in r.
 
 <a name="Map"></a>
 ## func [Map](<https://github.com/goexts/generic/blob/main/slices/runes/runes.adapter.go#L28>)
@@ -3911,7 +3919,7 @@ type Runes []rune
 ```
 
 <a name="FromString"></a>
-### func [FromString](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L167>)
+### func [FromString](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L168>)
 
 ```go
 func FromString(s string) Runes
@@ -3920,13 +3928,13 @@ func FromString(s string) Runes
 FromString converts a string to a rune slice \(\[\]rune\). This is a convenience function that is equivalent to \`\[\]rune\(s\)\`.
 
 <a name="Runes.Clone"></a>
-### func \(Runes\) [Clone](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L161>)
+### func \(Runes\) [Clone](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L162>)
 
 ```go
 func (r Runes) Clone() Runes
 ```
 
-
+Clone returns a copy of the Runes slice.
 
 <a name="Runes.Contains"></a>
 ### func \(Runes\) [Contains](<https://github.com/goexts/generic/blob/main/slices/runes/runes.go#L147>)

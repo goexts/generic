@@ -12,9 +12,10 @@ import (
 // Ship is a simple struct used for basic tests.
 
 type Ship struct {
-	Name  string
-	Speed int
-	Crew  int
+	Name   string
+	Speed  int
+	Crew   int
+	Status string // Added for testing ChainE
 }
 
 // MegaShip is a large struct used in TestApplyAny_Variations to ensure each option

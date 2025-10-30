@@ -41,5 +41,4 @@ func ExamplePtrHelpers() {
 	// ptr.To[string](anyValue): hello
 	// ptr.ToVal[string](anyPtr): world
 	// ptr.Val(nilPtr): 0
-
 }

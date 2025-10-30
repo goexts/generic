@@ -158,6 +158,7 @@ func (r Runes) HasSuffix(suffix []rune) bool {
 	return len(r) >= len(suffix) && slices.Equal(r[len(r)-len(suffix):], suffix)
 }
 
+// Clone returns a copy of the Runes slice.
 func (r Runes) Clone() Runes {
 	return slices.Clone(r)
 }
@@ -168,6 +169,7 @@ func FromString(s string) Runes {
 	return []rune(s)
 }
 
+// Index returns the index of the first instance of sub in r, or -1 if sub is not present in r.
 func Index(r, sub []rune) int {
 	// Follow bytes.Index semantics: empty pattern returns 0
 	if len(sub) == 0 {
@@ -188,13 +190,14 @@ func Index(r, sub []rune) int {
 	// Build longest prefix-suffix (lps) array for pattern `sub`
 	lps := make([]int, len(sub))
 	for i, j := 1, 0; i < len(sub); {
-		if sub[i] == sub[j] {
+		switch {
+		case sub[i] == sub[j]:
 			j++
 			lps[i] = j
 			i++
-		} else if j != 0 {
+		case j != 0:
 			j = lps[j-1]
-		} else {
+		default:
 			lps[i] = 0
 			i++
 		}
@@ -202,21 +205,23 @@ func Index(r, sub []rune) int {
 
 	// Search using KMP
 	for i, j := 0, 0; i < len(r); {
-		if r[i] == sub[j] {
+		switch {
+		case r[i] == sub[j]:
 			i++
 			j++
 			if j == len(sub) {
 				return i - j
 			}
-		} else if j != 0 {
+		case j != 0:
 			j = lps[j-1]
-		} else {
+		default:
 			i++
 		}
 	}
 	return -1
 }
 
+// Count counts the number of non-overlapping instances of sub in r.
 func Count(r, sub []rune) int {
 	// Follow bytes.Count semantics: non-overlapping occurrences; empty pattern yields len(r)+1
 	if len(sub) == 0 {

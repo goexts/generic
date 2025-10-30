@@ -81,6 +81,7 @@ func (b Bytes) HasSuffix(suffix []byte) bool {
 	return HasSuffix(b, suffix)
 }
 
+// Clone returns a copy of the Bytes slice.
 func (b Bytes) Clone() Bytes {
 	return slices.Clone(b)
 }

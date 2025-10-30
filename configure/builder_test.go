@@ -23,9 +23,9 @@ func TestBuilder(t *testing.T) {
 			AddWhen(true, func(s *Ship) { s.Speed = 15 }).
 			AddWhen(false, func(s *Ship) { s.Name = "Should not be applied" })
 
-		// Test ApplyTo method
+		// Test Apply method (replaces ApplyTo)
 		targetShip := &Ship{}
-		_, err := builder.ApplyTo(targetShip)
+		err := builder.Apply(targetShip)
 		assert.NoError(t, err)
 		assert.Equal(t, "Argo", targetShip.Name)
 		assert.Equal(t, 50, targetShip.Crew)
@@ -44,8 +44,8 @@ func TestBuilder(t *testing.T) {
 		builder := configure.NewBuilder[Ship]().
 			Add(func(_ *Ship) error { return testErr })
 
-		// Test ApplyTo method with error
-		_, err := builder.ApplyTo(&Ship{})
+		// Test Apply method with error (replaces ApplyTo)
+		err := builder.Apply(&Ship{})
 		assert.Error(t, err)
 
 		// Test Build method with error
@@ -69,20 +69,11 @@ func TestBuilder(t *testing.T) {
 		assert.Equal(t, 99, ship.Speed)
 	})
 
-	t.Run("builder with pointer type should fail", func(t *testing.T) {
-		// Using a pointer type for the builder is not allowed.
-		builder := configure.NewBuilder[*Ship]()
-
-		// Test Build method
-		_, err := builder.Build()
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "configure: Builder does not support pointer types for C")
-
-		// Test ApplyTo method
-		var ship *Ship
-		_, err = builder.ApplyTo(&ship)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "configure: Builder does not support pointer types for C")
+	t.Run("builder with pointer type should panic", func(t *testing.T) {
+		// Using a pointer type for the builder is not allowed and should panic at NewBuilder.
+		assert.Panics(t, func() {
+			configure.NewBuilder[*Ship]()
+		}, "NewBuilder should panic when C is a pointer type")
 	})
 }
 
@@ -109,7 +100,8 @@ func TestCompile(t *testing.T) {
 			Add(func(c *EngineConfig) { c.Horsepower = 500 }).
 			Add(func(c *EngineConfig) { c.Fuel = "Gasoline" })
 
-		engine, err := configure.Compile(builder, factory)
+		// Parameter order changed: factory, builder
+		engine, err := configure.Compile(factory, builder)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, engine)
@@ -121,7 +113,8 @@ func TestCompile(t *testing.T) {
 		builder := configure.NewBuilder[EngineConfig]().
 			Add(func(_ *EngineConfig) error { return testErr })
 
-		_, err := configure.Compile(builder, factory)
+		// Parameter order changed: factory, builder
+		_, err := configure.Compile(factory, builder)
 		assert.Error(t, err)
 	})
 
@@ -129,7 +122,71 @@ func TestCompile(t *testing.T) {
 		builder := configure.NewBuilder[EngineConfig]().
 			Add(func(c *EngineConfig) { c.Horsepower = 100 }) // Fuel is missing
 
-		_, err := configure.Compile(builder, factory)
+		// Parameter order changed: factory, builder
+		_, err := configure.Compile(factory, builder)
 		assert.EqualError(t, err, "fuel type cannot be empty")
+	})
+}
+
+// TestChainFunctions tests the Chain and ChainE functions from options.go
+func TestChainFunctions(t *testing.T) {
+	// Define custom option types for testing with Chain/ChainE
+	type MyShipOption func(*Ship)
+	type MyShipOptionE func(*Ship) error
+
+	t.Run("Chain combines non-error options", func(t *testing.T) {
+		ship := &Ship{}
+
+		// All options must be of the same concrete type for Chain's type inference
+		opt1 := MyShipOption(func(s *Ship) { s.Name = "Voyager" })
+		opt2 := MyShipOption(func(s *Ship) { s.Crew = 100 })
+		opt3 := MyShipOption(func(s *Ship) { s.Speed = 20 })
+
+		chainedOpt := configure.Chain(opt1, opt2, opt3)
+
+		// Apply the chained option directly
+		chainedOpt(ship)
+
+		assert.Equal(t, "Voyager", ship.Name)
+		assert.Equal(t, 100, ship.Crew)
+		assert.Equal(t, 20, ship.Speed)
+	})
+
+	t.Run("ChainE combines error-returning options and stops on error", func(t *testing.T) {
+		ship := &Ship{}
+		expectedErr := errors.New("engine failure")
+
+		// All options must be of the same concrete type for ChainE's type inference
+		optE1 := MyShipOptionE(func(s *Ship) error { s.Name = "Enterprise"; return nil })
+		optE2 := MyShipOptionE(func(s *Ship) error { s.Status = "Damaged"; return expectedErr })
+		optE3 := MyShipOptionE(func(s *Ship) error { s.Speed = 5; return nil }) // Should not be applied
+
+		chainedOptE := configure.ChainE(optE1, optE2, optE3)
+
+		// Apply the chained option directly
+		err := chainedOptE(ship)
+
+		assert.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		assert.Equal(t, "Enterprise", ship.Name)
+		assert.Equal(t, "Damaged", ship.Status)
+		assert.Equal(t, 0, ship.Speed) // Speed should not be updated as optE3 was skipped
+	})
+
+	t.Run("ChainE combines error-returning options successfully", func(t *testing.T) {
+		ship := &Ship{}
+
+		// All options must be of the same concrete type for ChainE's type inference
+		optE1 := MyShipOptionE(func(s *Ship) error { s.Name = "Discovery"; return nil })
+		optE2 := MyShipOptionE(func(s *Ship) error { s.Crew = 200; return nil })
+
+		chainedOptE := configure.ChainE(optE1, optE2)
+
+		// Apply the chained option directly
+		err := chainedOptE(ship)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "Discovery", ship.Name)
+		assert.Equal(t, 200, ship.Crew)
 	})
 }
