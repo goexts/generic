@@ -1,6 +1,6 @@
 //go:build generate
 
-//go:generate go run github.com/princjef/gomarkdoc/cmd/gomarkdoc --output docs/api.md ./...
+//go:generate go run github.com/princjef/gomarkdoc/cmd/gomarkdoc --output docs/api/api.md ./...
 
 // Package main provides tools for generating project documentation.
 // This file is used with 'go generate' to update project documentation.

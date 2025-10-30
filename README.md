@@ -62,7 +62,8 @@ func main() {
 
 For complete documentation, please visit:
 
-- [API Documentation](https://pkg.go.dev/github.com/goexts/generic)
+- [API Documentation (pkg.go.dev)](https://pkg.go.dev/github.com/goexts/generic)
+- [API Reference (gomarkdoc, auto-generated)](docs/api/api.md)
 - [Examples](docs/examples/)
 - [Contributing Guide](.github/CONTRIBUTING.md)
 
@@ -83,17 +84,83 @@ This project provides a rich set of independent, generic packages:
 *   **`slices`**: A comprehensive suite of generic functions for common slice operations, with specialized sub-packages for `bytes` and `runes`.
 *   **`strings`**: Generic utilities for string manipulation and conversion.
 
-## Installation
+## Examples Index
 
-```shell
-go get github.com/goexts/generic
+- Slices basics and chaining: [docs/examples/slices_example.go](docs/examples/slices_example.go)
+- More examples are documented inside each package’s `doc.go` and will appear on pkg.go.dev.
+
+### Selected Examples
+
+#### 1. Chaining Slice Operations (Filter & Map)
+
+Cleanly chain functions from the `slices` package to create powerful data processing pipelines.
+
+```go
+import "github.com/goexts/generic/slices"
+
+type Task struct {
+	Title     string
+	Completed bool
+}
+
+func GetCompletedTaskTitles(tasks []Task) []string {
+	return slices.Map(
+		slices.Filter(tasks, func(t Task) bool { return t.Completed }),
+		func(t Task) string { return t.Title },
+	)
+}
+```
+
+#### 2. Safe Type Casting with `cast.As`
+
+Use `cast.As` to safely handle variables of type `any` for event handlers or plugin systems.
+
+```go
+import "github.com/goexts/generic/cast"
+
+type UserCreatedEvent struct{ UserID int }
+type OrderPlacedEvent struct{ OrderID string }
+
+func HandleEvent(event any) {
+	if e, ok := cast.As[UserCreatedEvent](event); ok { /* processUserCreated(e) */ return }
+	if e, ok := cast.As[OrderPlacedEvent](event); ok { /* processOrderPlaced(e) */ return }
+	// Ignore other event types
+}
+```
+
+#### 3. Multi-Level Sorting (Stable)
+
+```go
+import "sort"
+
+type Employee struct{ Department string; Seniority int; Name string }
+
+func SortEmployees(employees []Employee) {
+	sort.SliceStable(employees, func(i, j int) bool {
+		if employees[i].Department != employees[j].Department {
+			return employees[i].Department < employees[j].Department
+		}
+		if employees[i].Seniority != employees[j].Seniority {
+			return employees[i].Seniority > employees[j].Seniority
+		}
+		return employees[i].Name < employees[j].Name
+	})
+}
+```
+
+#### 4. Conditional Logic with `cond.If`
+
+```go
+import "github.com/goexts/generic/cond"
+
+func GetStatusMessage(err error) string {
+	return cond.If(err == nil, "Status: OK", "Status: Failed")
+}
 ```
 
 ## Featured Package: `configure`
 
-To showcase the design philosophy of this library, here is a quick look at the `configure` package. It provides a best-in-class toolset for object creation, enabling a clean separation of concerns between building a configuration object and compiling a final product.
-
-The following example demonstrates how to create a fully configured `*http.Client` from a dedicated `ClientConfig` object:
+The `configure` package provides a robust toolset for object creation and option application.
 
 ```go
 package main
@@ -106,7 +173,6 @@ import (
 	"github.com/goexts/generic/configure"
 )
 
-// 1. Define your configuration object and its options.
 type ClientConfig struct {
 	Timeout   time.Duration
 	Transport http.RoundTripper
@@ -114,46 +180,25 @@ type ClientConfig struct {
 
 type Option = configure.Option[ClientConfig]
 
-func WithTimeout(d time.Duration) Option {
-	return func(c *ClientConfig) { c.Timeout = d }
-}
+func WithTimeout(d time.Duration) Option { return func(c *ClientConfig) { c.Timeout = d } }
+func WithTransport(rt http.RoundTripper) Option { return func(c *ClientConfig) { c.Transport = rt } }
 
-func WithTransport(rt http.RoundTripper) Option {
-	return func(c *ClientConfig) { c.Transport = rt }
-}
-
-// 2. Define your factory function (the "compiler").
-func NewHttpClient(c *ClientConfig) (*http.Client, error) {
-	return &http.Client{
-		Timeout:   c.Timeout,
-		Transport: c.Transport,
-	}, nil
-}
+func NewHttpClient(c *ClientConfig) (*http.Client, error) { return &http.Client{Timeout: c.Timeout, Transport: c.Transport}, nil }
 
 func main() {
-	// 3. Use the Builder to collect options, then use Compile to create the final product.
 	configBuilder := configure.NewBuilder[ClientConfig]().
 		Add(WithTimeout(20 * time.Second)).
 		Add(WithTransport(http.DefaultTransport))
 
 	httpClient, err := configure.Compile(configBuilder, NewHttpClient)
-	if err != nil {
-		panic(err)
-	}
-
+	if err != nil { panic(err) }
 	fmt.Printf("Successfully created http.Client with timeout: %s\n", httpClient.Timeout)
 }
 ```
 
 ## Contributing
 
-We welcome all contributions! Here's how you can help:
-
-1. Report bugs by [opening an issue](https://github.com/goexts/generic/issues/new/choose)
-2. Suggest new features or improvements
-3. Submit pull requests
-
-Please read our [Contributing Guide](.github/CONTRIBUTING.md) and [Code of Conduct](.github/CODE_OF_CONDUCT.md) for details on the process for submitting pull requests and how we work together.
+We welcome all contributions! Please read our [Contributing Guide](.github/CONTRIBUTING.md) and [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ### Development Setup
 
@@ -166,16 +211,6 @@ Please read our [Contributing Guide](.github/CONTRIBUTING.md) and [Code of Condu
 
 - **Issues**: [GitHub Issues](https://github.com/goexts/generic/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/goexts/generic/discussions)
-- **Chat**: [Gitter](https://gitter.im/goexts/community) (coming soon)
-
-## Related Projects
-
-- [GoExts](https://github.com/goexts) - Collection of Go extensions and utilities
-- [Go Standard Library](https://pkg.go.dev/std) - The Go standard library that this project extends
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/goexts/generic.svg)](https://starchart.cc/goexts/generic)
 
 ## License
 

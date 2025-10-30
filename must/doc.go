@@ -1,35 +1,52 @@
 /*
-Package must provides helper functions that wrap calls returning an error and
-panic if the error is non-nil. This is intended to reduce boilerplate in specific,
-controlled contexts.
+Package must provides helper functions that wrap calls returning `(T, error)`
+and panic if the error is non-nil. This is intended to reduce boilerplate code
+in specific, controlled contexts where an error should never happen.
 
-WARNING: The functions in this package should be used with extreme care. They
-intentionally convert a recoverable error into a non-recoverable panic. This is
-only appropriate in specific situations where an error is considered a bug in
-the program, not a predictable runtime failure.
+# Warning: Use with Extreme Care
 
-Appropriate Use Cases:
+The functions in this package intentionally convert a recoverable error into a
+non-recoverable panic. This is an anti-pattern in normal Go application code.
+It should only be used in situations where an error is truly unexpected and
+indicates a critical, unrecoverable programmer error (e.g., a bug).
 
-  - Program initialization (e.g., in `init` functions or `main`):
-    parsing hardcoded configuration, compiling essential regular expressions,
-    or setting up database connections that are required for the application
-    to start.
+# Appropriate Use Cases
 
-  - Test setup: When setting up test fixtures where a failure indicates a
-    broken test, not a feature to be tested.
+1.  **Program Initialization:** During startup (e.g., in `init` functions or at
+    the top of `main`), when a failure means the application cannot run at all.
 
-Example:
+2.  **Test Setup:** When preparing test fixtures, where a failure indicates a
+    broken test environment, not a feature to be tested.
 
-	// Instead of:
-	// re, err := regexp.Compile(`\w+`)
-	// if err != nil {
-	// 	panic(err)
-	// }
+## Example: Compiling a Regular Expression
 
-	// Use must.Must for cleaner initialization code:
-	re := must.Must(regexp.Compile(`\w+`))
+It is common to compile regular expressions at the package level. Since the
+pattern is hardcoded, a compilation failure is a programmer error, not a
+runtime error. `must.Must` simplifies this.
 
-DO NOT use these functions for regular application logic where errors are
-expected (e.g., handling user input, network requests, file I/O).
+	// Before: Verbose error handling for a panic-worthy error.
+	/*
+	var wordRegexp *regexp.Regexp
+
+	func init() {
+		var err error
+		wordRegexp, err = regexp.Compile(`\w+`)
+		if err != nil {
+			panic(fmt.Sprintf("failed to compile word regexp: %v", err))
+		}
+	}
+	*/
+
+	// After: Using must.Must for concise, clear initialization.
+	var wordRegexp = must.Must(regexp.Compile(`\w+`))
+
+# Inappropriate Use Cases
+
+NEVER use these functions for regular application logic where errors are
+expected and should be handled gracefully. This includes, but is not limited to:
+
+- Handling user input.
+- Processing network requests or responses.
+- Reading from or writing to files.
 */
 package must

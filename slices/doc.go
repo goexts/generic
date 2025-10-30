@@ -2,27 +2,56 @@
 Package slices provides a rich set of generic functions for common operations on
 slices of any element type.
 
-This package is a generated adapter and mirrors the public API of the standard
+This package is a generated adapter that mirrors the public API of the standard
 Go experimental package `golang.org/x/exp/slices`. It offers a convenient way
-to access these common utilities for searching, sorting, comparing, and
-manipulating slices.
+to access common utilities for searching, sorting, and manipulating slices.
+
+# Usage
+
+## Mapping
+
+`Map` creates a new slice by applying a function to each element of an original slice.
+
+	type User struct{ ID int; Name string }
+
+	func GetUserNames(users []User) []string {
+		return slices.Map(users, func(u User) string { return u.Name })
+	}
+
+## Filtering
+
+`Filter` creates a new slice containing only the elements that satisfy a predicate.
+
+	type Product struct{ ID string; Price float64 }
+
+	func FilterExpensiveProducts(products []Product, minPrice float64) []Product {
+		return slices.Filter(products, func(p Product) bool { return p.Price >= minPrice })
+	}
+
+## Chaining Operations
+
+You can chain operations like `Filter` and `Map` to build powerful data processing
+pipelines.
+
+	type Task struct{ ID int; Title string; Completed bool }
+
+	func GetCompletedTaskTitles(tasks []Task) []string {
+		// First, filter for completed tasks.
+		completedTasks := slices.Filter(tasks, func(t Task) bool { return t.Completed })
+		// Then, map the results to their titles.
+		return slices.Map(completedTasks, func(t Task) string { return t.Title })
+	}
+
+## Performance Considerations
+
+Functions like `Map` and `Filter` allocate new slices. To minimize allocations,
+especially in performance-sensitive code, consider these strategies:
+
+  - **Filter then Map**: Filtering first reduces the number of elements to be mapped.
+  - **In-place modification**: For very large slices, you might modify the slice
+    in-place instead of creating a new one, though this is often more complex.
 
 For detailed information on the behavior of specific functions, please refer to
-the official Go documentation for the `slices` package.
-
-Example (Sorting and Searching):
-
-	numbers := []int{3, 1, 4, 1, 5, 9}
-
-	// Check if a slice contains a value
-	_ = slices.Contains(numbers, 5) // true
-
-	// Sort the slice in place
-	slices.Sort(numbers)
-	// numbers is now [1, 1, 3, 4, 5, 9]
-
-	// Find the index of a value in a sorted slice
-	idx, found := slices.BinarySearch(numbers, 4)
-	// idx is 3, found is true
+the pkg.go.dev documentation for the `slices` package.
 */
 package slices

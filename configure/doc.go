@@ -1,74 +1,76 @@
 /*
 Package configure provides a robust, type-safe, and flexible implementation
-of the Functional Options Pattern for Go. It is designed to handle a wide
-range of configuration scenarios, from simple object initialization to complex,
-multi-stage product compilation.
+of the Functional Options Pattern for Go. It is designed to simplify the
+initialization of complex objects by allowing optional parameters to be passed
+in a clean and readable way.
 
-# Core Concepts
+This pattern is ideal for constructors where many parameters are optional, have
+sensible defaults, or where you want to avoid a large number of arguments.
 
-The package is built around a few core ideas:
+# Usage
 
-  - **Type-Safe Application**: For the highest performance and compile-time safety,
-    use the `Apply` and `ApplyE` functions. They are ideal when all options
-    are of the same, known type.
+The core of the pattern involves defining an `Option` type and functions that
+return these options.
 
-    // Example of simple, type-safe configuration:
-    type Server struct {
-    Port int
-    Host string
-    }
-    type Option func(*Server)
-    func WithPort(p int) Option {
-    return func(s *Server) { s.Port = p }
-    }
-    func WithHost(h string) Option {
-    return func(s *Server) { s.Host = h }
-    }
+## Basic Example: Configuring a Logger
 
-    server := &Server{}
-    configure.Apply(server, []Option{
-    WithPort(8080),
-    WithHost("localhost"),
-    })
+Imagine you are creating a `Logger` that can be configured with different logging
+levels and output writers. The default is to log at the "info" level to standard
+output.
 
-  - **Flexible Application**: When you need to handle a mix of different option
-    types, use `ApplyAny`. This function uses type assertions to provide
-    flexibility, at the cost of compile-time safety and a minor performance overhead.
+	// 1. Define the object to be configured.
+	type Logger struct {
+		level string
+		out   io.Writer
+	}
 
-    opts := []any{
-    WithPort(8080),
-    func(s *Server) { s.Host = "example.com" }, // A raw function
-    }
-    server, err := configure.New[Server](opts...)
+	// 2. Create functions that return an `Option` for each configurable field.
+	func WithLevel(level string) configure.Option[Logger] {
+		return configure.OptionFunc[Logger](func(l *Logger) error {
+			l.level = level
+			return nil
+		})
+	}
 
-  - **Stateful Builder**: For scenarios where options are collected progressively
-    from different parts of your application, use the `Builder`. It provides a
-    fluent, chainable API.
+	func WithOutput(w io.Writer) configure.Option[Logger] {
+		return configure.OptionFunc[Logger](func(l *Logger) error {
+			l.out = w
+			return nil
+		})
+	}
 
-    builder := configure.NewBuilder[Server]().
-    Add(WithPort(443)).
-    AddWhen(isProduction, WithHost("prod.server.com"))
+	// 3. Create a constructor that applies the options to a default instance.
+	func NewLogger(options ...configure.Option[Logger]) (*Logger, error) {
+		// Start with default values.
+		l := &Logger{
+			level: "info",
+			out:   os.Stdout,
+		}
 
-    server, err := builder.Build()
+		// Apply any provided options.
+		configure.ApplyWith(l, options...)
 
-  - **Compilation**: For the advanced use case of transforming a configuration
-    object `C` into a final product `P`, use the top-level `Compile` function.
-    This separates the configuration logic from the product creation logic.
+		// You can also perform validation after applying options.
+		if l.level == "" {
+			return nil, fmt.Errorf("log level cannot be empty")
+		}
 
-    // Example: Using a `ClientConfig` to create an `*http.Client`
-    type ClientConfig struct {
-    Timeout time.Duration
-    }
-    factory := func(c *ClientConfig) (*http.Client, error) {
-    return &http.Client{Timeout: c.Timeout}, nil
-    }
+		return l, nil
+	}
 
-    configBuilder := configure.NewBuilder[ClientConfig]().
-    Add(func(c *ClientConfig) { c.Timeout = 20 * time.Second })
+Now, you can create loggers with different configurations easily:
 
-    httpClient, err := configure.Compile(configBuilder, factory)
+	// A default logger (info level, stdout).
+	logger1, _ := NewLogger()
 
-By combining these tools, developers can choose the right approach for their
-specific needs, ensuring code remains clean, maintainable, and robust.
+	// A debug-level logger.
+	logger2, _ := NewLogger(WithLevel("debug"))
+
+	// A logger that writes to a file.
+	file, _ := os.Create("app.log")
+	logger3, _ := NewLogger(WithLevel("error"), WithOutput(file))
+
+For more advanced usage, including stateful builders and compilation, refer to the
+function-specific documentation.
 */
 package configure
