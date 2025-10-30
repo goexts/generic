@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/goexts/generic/compare/v0.8.0...v0.9.0) (2025-10-30)
+
+
+### Features
+
+* **examples:** add String method to Product struct for better string representation ([305428a](https://github.com/goexts/generic/commit/305428a014e8f319a5858a2cc0c5cb81944bcb66))
+
 ## [0.8.0](https://github.com/goexts/generic/compare/v0.7.0...v0.8.0) (2025-10-20)
 
 
