@@ -523,9 +523,13 @@ FodyWeavers.xsd
 !go.mod
 
 !README.md
+!README.ja-JP.md
+!README.zh-CN.md
 !LICENSE
 !Makefile
 !release-please-config.json
+!CHANGELOG.md
+!.golangci.yml
 
 # ...even if they are in subdirectories
 !*/
