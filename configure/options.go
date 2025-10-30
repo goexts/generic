@@ -25,24 +25,54 @@ func (o OptionE[T]) Apply(target *T) error {
 	return nil
 }
 
-// FuncOption is a generic constraint that permits any function type
+// OptionFunc is a generic constraint that permits any function type
 // whose underlying type is func(*T). This enables the top-level Apply function
 // to accept custom-defined option types, such as `type MyOption func(*T)`.
-type FuncOption[T any] interface {
+type OptionFunc[T any] interface {
 	~func(*T)
 }
 
-// FuncOptionE is a generic constraint that permits any function type
+// OptionFuncE is a generic constraint that permits any function type
 // whose underlying type is func(*T) error. This enables the top-level ApplyE
 // function to accept custom-defined, error-returning option types.
-type FuncOptionE[T any] interface {
+type OptionFuncE[T any] interface {
 	~func(*T) error
 }
 
-// FuncOptionAny is a generic constraint that permits any function type
+// OptionFuncAny is a generic constraint that permits any function type
 // whose underlying type is either func(*T) or func(*T) error.
 // This provides a convenient way to create functions that can accept
 // both error-returning and non-error-returning function options.
-type FuncOptionAny[T any] interface {
-	FuncOptionE[T] | FuncOption[T] | any
+type OptionFuncAny[T any] interface {
+	OptionFuncE[T] | OptionFunc[T] | any
+}
+
+// OptionSet bundles multiple options into a single option.
+// This allows for creating reusable and modular sets of configurations.
+func OptionSet[T any](opts ...Option[T]) Option[T] {
+	return func(t *T) {
+		Apply(t, opts)
+	}
+}
+
+func Chain[S any, T OptionFunc[S]](opts ...T) T {
+	return func(t *S) {
+		Apply(t, opts)
+	}
+}
+
+// OptionSetE bundles multiple error-returning options into a single option.
+// If any option in the set returns an error, the application stops and the error is returned.
+func OptionSetE[T any](opts ...OptionE[T]) OptionE[T] {
+	return func(t *T) error {
+		_, err := ApplyE(t, opts)
+		return err
+	}
+}
+
+func ChainE[S any, T OptionFuncE[S]](opts ...T) T {
+	return func(t *S) error {
+		_, err := ApplyE(t, opts)
+		return err
+	}
 }

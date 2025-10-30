@@ -113,7 +113,7 @@ func applyAny[T any](target *T, opt any) error {
 // types, such as `type MyOption func(*T)`.
 //
 // For handling mixed option types, see ApplyAny.
-func Apply[T any, O FuncOption[T]](target *T, opts []O) *T {
+func Apply[T any, O OptionFunc[T]](target *T, opts []O) *T {
 	if target == nil {
 		return nil
 	}
@@ -134,7 +134,7 @@ func ApplyWith[T any](target *T, opts ...Option[T]) *T {
 // custom-defined option types.
 //
 // For handling mixed option types, see ApplyAny.
-func ApplyE[T any, O FuncOptionE[T]](target *T, opts []O) (*T, error) {
+func ApplyE[T any, O OptionFuncE[T]](target *T, opts []O) (*T, error) {
 	if target == nil {
 		return nil, newConfigError(ErrEmptyTargetValue, nil, nil)
 	}
@@ -174,27 +174,10 @@ func ApplyAnyWith[T any](target *T, opts ...any) (*T, error) {
 	return ApplyAny(target, opts)
 }
 
-// OptionSet bundles multiple options into a single option.
-// This allows for creating reusable and modular sets of configurations.
-func OptionSet[T any](opts ...Option[T]) Option[T] {
-	return func(t *T) {
-		Apply(t, opts)
-	}
-}
-
-// OptionSetE bundles multiple error-returning options into a single option.
-// If any option in the set returns an error, the application stops and the error is returned.
-func OptionSetE[T any](opts ...OptionE[T]) OptionE[T] {
-	return func(t *T) error {
-		_, err := ApplyE(t, opts)
-		return err
-	}
-}
-
 // New creates a new instance of T and applies the given options.
 // It is a convenient, type-safe constructor for creating objects with
 // homogeneous options. For mixed-type or error-returning options, see NewAny or NewE.
-func New[T any, O FuncOption[T]](opts []O) *T {
+func New[T any, O OptionFunc[T]](opts []O) *T {
 	var zero T
 	return Apply(&zero, opts)
 }
@@ -208,7 +191,7 @@ func NewWith[T any](opts ...Option[T]) *T {
 // NewE creates a new instance of T, applies the error-returning options, and
 // returns the configured instance or an error. It is a convenient, type-safe
 // constructor for creating objects with homogeneous, error-returning options.
-func NewE[T any, O FuncOptionE[T]](opts []O) (*T, error) {
+func NewE[T any, O OptionFuncE[T]](opts []O) (*T, error) {
 	var zero T
 	return ApplyE(&zero, opts)
 }
