@@ -16,6 +16,12 @@ type Product struct {
 	ID    string
 	Price float64
 }
+
+// String returns a string representation of the Product in the format "ID:$Price"
+func (p Product) String() string {
+	return fmt.Sprintf("%s:$%.2f", p.ID, p.Price)
+}
+
 type Task struct {
 	ID        int
 	Title     string
