@@ -47,10 +47,10 @@ docs: docs-tools ## Generate API documentation.
 	@echo "Generating documentation..."
 ifeq ($(OS),Windows_NT)
 	@if not exist .\docs\api mkdir .\docs\api
-	@gomarkdoc ./... > .\docs\api\api.md
+	@gomarkdoc --exclude-dirs ./docs/... ./... > .\docs\api\api.md
 else
 	@mkdir -p docs/api
-	@gomarkdoc ./... > docs/api/api.md
+	@gomarkdoc --exclude-dirs ./docs/... ./... > docs/api/api.md
 endif
 	@echo "Documentation generated in docs/api/api.md"
 
