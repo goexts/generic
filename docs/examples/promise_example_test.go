@@ -10,16 +10,21 @@ import (
 )
 
 func ExampleNew() {
+	// Create a new promise. The executor function is run in a new goroutine.
 	p := promise.New(func(resolve func(string), reject func(error)) {
-		go func() {
-			time.Sleep(100 * time.Millisecond)
-			resolve("done")
-		}()
+		// Simulate an asynchronous operation like a network call.
+		time.Sleep(100 * time.Millisecond)
+		resolve("done")
 	})
+
+	// Await blocks until the promise is settled (fulfilled or rejected).
 	res, err := p.Await()
 	fmt.Println("res:", res, "err:", err)
 
-	p2 := promise.New(func(resolve func(int), reject func(error)) { reject(errors.New("fail")) })
+	// Create a promise that immediately rejects.
+	p2 := promise.New(func(resolve func(int), reject func(error)) {
+		reject(errors.New("fail"))
+	})
 	_, err2 := p2.Await()
 	fmt.Println("err2 != nil:", err2 != nil)
 
