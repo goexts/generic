@@ -75,6 +75,30 @@ type KeyValue[K comparable, V any] struct {
 	Val V
 }
 
+// KV creates a new KeyValue pair with type inference.
+// This is a convenience function that allows type inference when creating a KeyValue.
+// Example:
+//
+//	kv := KV("a", 1) // returns KeyValue[string, int]{Key: "a", Val: 1}
+func KV[K comparable, V any](key K, value V) KeyValue[K, V] {
+	return KeyValue[K, V]{
+		Key: key,
+		Val: value,
+	}
+}
+
+// KVs creates a slice of KeyValue pairs from the given key-value pairs.
+// This is a convenience function that allows creating slices of KeyValue with type inference.
+// Example:
+//
+//	kvs := KVs(
+//	  KV(1, "one"),
+//	  KV(2, "two"),
+//	) // returns []KeyValue[int, string]
+func KVs[K comparable, V any](kvs ...KeyValue[K, V]) []KeyValue[K, V] {
+	return kvs
+}
+
 // ToKVs converts a map to a slice of key-value pairs.
 func ToKVs[M ~map[K]V, K comparable, V any](m M) []KeyValue[K, V] {
 	kvs := make([]KeyValue[K, V], 0, len(m))
@@ -85,8 +109,8 @@ func ToKVs[M ~map[K]V, K comparable, V any](m M) []KeyValue[K, V] {
 }
 
 // FromKVs converts a slice of key-value pairs to a map.
-func FromKVs[K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M {
-	m := make(M, len(kvs))
+func FromKVs[K comparable, V any](kvs ...KeyValue[K, V]) map[K]V {
+	m := make(map[K]V, len(kvs))
 	for _, kv := range kvs {
 		m[kv.Key] = kv.Val
 	}
@@ -114,8 +138,8 @@ func ToSliceWith[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) (T, b
 }
 
 // FromSlice converts a slice of types to a map.
-func FromSlice[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M {
-	m := make(M, len(ts))
+func FromSlice[T any, K comparable, V any](ts []T, f func(T) (K, V)) map[K]V {
+	m := make(map[K]V, len(ts))
 	for _, t := range ts {
 		k, v := f(t)
 		m[k] = v
@@ -124,8 +148,8 @@ func FromSlice[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V))
 }
 
 // FromSliceWithIndex converts a slice of types to a map, using the provided function to extract the key and value.
-func FromSliceWithIndex[T any, M ~map[K]V, K comparable, V any](ts []T, f func(int, T) (K, V)) M {
-	m := make(M, len(ts))
+func FromSliceWithIndex[T any, K comparable, V any](ts []T, f func(int, T) (K, V)) map[K]V {
+	m := make(map[K]V, len(ts))
 	for i, t := range ts {
 		k, v := f(i, t)
 		m[k] = v

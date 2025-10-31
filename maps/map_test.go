@@ -26,21 +26,21 @@ func TestToKVs(t *testing.T) {
 		{
 			name: "empty map",
 			m:    map[int]string{},
-			want: []maps.KeyValue[int, string]{},
+			want: maps.KVs[int, string](),
 		},
 		{
 			name: "single element",
 			m:    map[int]string{1: "a"},
-			want: []maps.KeyValue[int, string]{{Key: 1, Val: "a"}},
+			want: maps.KVs(maps.KV(1, "a")),
 		},
 		{
 			name: "multiple elements",
 			m:    map[int]string{1: "a", 2: "b", 3: "c"},
-			want: []maps.KeyValue[int, string]{
-				{Key: 1, Val: "a"},
-				{Key: 2, Val: "b"},
-				{Key: 3, Val: "c"},
-			},
+			want: maps.KVs(
+				maps.KV(1, "a"),
+				maps.KV(2, "b"),
+				maps.KV(3, "c"),
+			),
 		},
 	}
 
@@ -80,7 +80,9 @@ func TestFromKVs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := maps.FromKVs[string, int, map[string]int](tt.kvs)
+			// By assigning the result to a declared variable, we allow the compiler
+			// to infer the generic types K, V, and M.
+			var got = maps.FromKVs(tt.kvs...)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -208,7 +210,7 @@ func TestFromSliceWithIndex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := maps.FromSliceWithIndex[string, map[string]int, string, int](tt.s, tt.f)
+			var got = maps.FromSliceWithIndex(tt.s, tt.f)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -216,7 +218,7 @@ func TestFromSliceWithIndex(t *testing.T) {
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
 		assert.Panics(t, func() {
-			maps.FromSliceWithIndex[any, map[string]int, string, int]([]any{"test"}, nil)
+			maps.FromSliceWithIndex[any, string, int]([]any{"test"}, nil)
 		})
 	})
 }
@@ -248,7 +250,7 @@ func TestFromSlice(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := maps.FromSlice[string, map[string]int, string, int](tt.s, tt.f)
+			var got = maps.FromSlice(tt.s, tt.f)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -256,9 +258,31 @@ func TestFromSlice(t *testing.T) {
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
 		assert.Panics(t, func() {
-			maps.FromSlice[string, map[string]int, string, int]([]string{"a"}, nil)
+			maps.FromSlice[string, string, int]([]string{"a"}, nil)
 		})
 	})
+}
+
+func TestFromSlice_ComplexType(t *testing.T) {
+	type User struct {
+		ID int
+	}
+	users := []*User{
+		{ID: 1},
+		{ID: 2},
+	}
+
+	// By assigning the result to a declared variable, we allow the compiler
+	// to infer the generic types K, V, and M.
+	var got = maps.FromSlice(users, func(u *User) (int, *User) {
+		return u.ID, u
+	})
+
+	expected := map[int]*User{
+		1: users[0],
+		2: users[1],
+	}
+	assert.Equal(t, expected, got)
 }
 
 func TestMerge(t *testing.T) {
