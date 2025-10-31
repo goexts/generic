@@ -3,6 +3,7 @@ package examples
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/goexts/generic/set"
 )
@@ -20,6 +21,7 @@ func ExampleContains() {
 func ExampleUnique() {
 	s := []int{1, 2, 2, 3, 3, 3}
 	unique := set.Unique(s)
+	sort.Ints(unique) // Sort the result for consistent output
 	fmt.Println("unique elements:", unique)
 
 	// Output:
