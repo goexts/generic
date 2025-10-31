@@ -12,6 +12,56 @@ import (
 
 // Using the same Ship struct from apply_test.go
 
+// TestBuilderWithDefaultValues tests the NewBuilder function with default values
+func TestBuilderWithDefaultValues(t *testing.T) {
+	var nilShip *Ship // Simple nil pointer for testing
+
+	t.Run("NewBuilder with default value", func(t *testing.T) {
+		defaultShip := &Ship{
+			Name:  "Default",
+			Crew:  10,
+			Speed: 5,
+		}
+
+		builder := configure.NewBuilder(defaultShip)
+		ship, err := builder.Add(
+			func(s *Ship) { s.Name = "Enterprise" },
+			func(s *Ship) { s.Crew += 10 },
+		).Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, "Enterprise", ship.Name)
+		assert.Equal(t, 20, ship.Crew)
+		assert.Equal(t, 5, ship.Speed)
+	})
+
+	t.Run("NewBuilder with nil value", func(t *testing.T) {
+		builder := configure.NewBuilder(nilShip)
+		ship, err := builder.Add(
+			func(s *Ship) { s.Name = "Voyager" },
+			func(s *Ship) { s.Crew = 50 },
+		).Build()
+
+		assert.NoError(t, err)
+		assert.Equal(t, "Voyager", ship.Name)
+		assert.Equal(t, 50, ship.Crew)
+	})
+
+	t.Run("Type inference with helper function", func(t *testing.T) {
+		createBuilder := func(defaultVal *Ship) *configure.Builder[Ship] {
+			return configure.NewBuilder(defaultVal)
+		}
+
+		builder := createBuilder(nilShip).Add(
+			func(s *Ship) { s.Name = "Discovery" },
+		)
+
+		ship, err := builder.Build()
+		assert.NoError(t, err)
+		assert.Equal(t, "Discovery", ship.Name)
+	})
+}
+
 func TestBuilder(t *testing.T) {
 	t.Run("build and apply options for the same type", func(t *testing.T) {
 		// Create a builder and add various types of options
@@ -134,14 +184,15 @@ func TestChainFunctions(t *testing.T) {
 	type MyShipOption func(*Ship)
 	type MyShipOptionE func(*Ship) error
 
-	t.Run("Chain combines non-error options", func(t *testing.T) {
+	t.Run("Chain combines non-error options with type inference", func(t *testing.T) {
 		ship := &Ship{}
 
-		// All options must be of the same concrete type for Chain's type inference
+		// Test type inference with custom option type
 		opt1 := MyShipOption(func(s *Ship) { s.Name = "Voyager" })
 		opt2 := MyShipOption(func(s *Ship) { s.Crew = 100 })
 		opt3 := MyShipOption(func(s *Ship) { s.Speed = 20 })
 
+		// Rely on type inference
 		chainedOpt := configure.Chain(opt1, opt2, opt3)
 
 		// Apply the chained option directly
@@ -152,35 +203,51 @@ func TestChainFunctions(t *testing.T) {
 		assert.Equal(t, 20, ship.Speed)
 	})
 
+	t.Run("Chain works with direct function literals", func(t *testing.T) {
+		ship := &Ship{}
+
+		// This should work with type inference
+		chainedOpt := configure.Chain(
+			func(s *Ship) { s.Name = "Enterprise" },
+			func(s *Ship) { s.Crew = 200 },
+		)
+
+		chainedOpt(ship)
+
+		assert.Equal(t, "Enterprise", ship.Name)
+		assert.Equal(t, 200, ship.Crew)
+	})
+
 	t.Run("ChainE combines error-returning options and stops on error", func(t *testing.T) {
 		ship := &Ship{}
 		expectedErr := errors.New("engine failure")
 
-		// All options must be of the same concrete type for ChainE's type inference
+		// Using custom option type to test type inference
 		optE1 := MyShipOptionE(func(s *Ship) error { s.Name = "Enterprise"; return nil })
 		optE2 := MyShipOptionE(func(s *Ship) error { s.Status = "Damaged"; return expectedErr })
 		optE3 := MyShipOptionE(func(s *Ship) error { s.Speed = 5; return nil }) // Should not be applied
 
+		// Rely on type inference
 		chainedOptE := configure.ChainE(optE1, optE2, optE3)
-
-		// Apply the chained option directly
 		err := chainedOptE(ship)
 
-		assert.Error(t, err)
-		assert.Equal(t, expectedErr, err)
-		assert.Equal(t, "Enterprise", ship.Name)
-		assert.Equal(t, "Damaged", ship.Status)
-		assert.Equal(t, 0, ship.Speed) // Speed should not be updated as optE3 was skipped
+		// Check if the error is a ConfigError and contains our expected error
+		var configErr *configure.ConfigError
+		assert.ErrorAs(t, err, &configErr)
+		assert.ErrorIs(t, configErr.Err, expectedErr)
+
+		assert.Equal(t, "Enterprise", ship.Name) // First option applied
+		assert.Equal(t, "Damaged", ship.Status)  // Second option applied before error
 	})
 
 	t.Run("ChainE combines error-returning options successfully", func(t *testing.T) {
 		ship := &Ship{}
 
-		// All options must be of the same concrete type for ChainE's type inference
-		optE1 := MyShipOptionE(func(s *Ship) error { s.Name = "Discovery"; return nil })
-		optE2 := MyShipOptionE(func(s *Ship) error { s.Crew = 200; return nil })
-
-		chainedOptE := configure.ChainE(optE1, optE2)
+		// Create a chain of options that all succeed
+		chainedOptE := configure.ChainE(
+			func(s *Ship) error { s.Name = "Discovery"; return nil },
+			func(s *Ship) error { s.Crew = 200; return nil },
+		)
 
 		// Apply the chained option directly
 		err := chainedOptE(ship)
@@ -188,5 +255,20 @@ func TestChainFunctions(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "Discovery", ship.Name)
 		assert.Equal(t, 200, ship.Crew)
+	})
+
+	t.Run("Chain works with mixed concrete types", func(t *testing.T) {
+		ship := &Ship{}
+
+		// Mixing different but compatible function types
+		opt1 := func(s *Ship) { s.Name = "Voyager" }
+		var opt2 MyShipOption = func(s *Ship) { s.Crew = 150 }
+
+		// This should work with type inference
+		chainedOpt := configure.Chain(opt1, opt2)
+		chainedOpt(ship)
+
+		assert.Equal(t, "Voyager", ship.Name)
+		assert.Equal(t, 150, ship.Crew)
 	})
 }

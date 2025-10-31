@@ -60,20 +60,20 @@ func TestFromKVs(t *testing.T) {
 	}{
 		{
 			name: "empty slice",
-			kvs:  []maps.KeyValue[string, int]{},
+			kvs:  maps.KVs[string, int](),
 			want: map[string]int{},
 		},
 		{
 			name: "single element",
-			kvs:  []maps.KeyValue[string, int]{{Key: "a", Val: 1}},
+			kvs:  maps.KVs(maps.KV("a", 1)),
 			want: map[string]int{"a": 1},
 		},
 		{
 			name: "multiple elements",
-			kvs: []maps.KeyValue[string, int]{
-				{Key: "a", Val: 1},
-				{Key: "b", Val: 2},
-			},
+			kvs: maps.KVs(
+				maps.KV("a", 1),
+				maps.KV("b", 2),
+			),
 			want: map[string]int{"a": 1, "b": 2},
 		},
 	}
@@ -129,8 +129,9 @@ func TestToSliceWith(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
+		var fn func(string, int) (string, bool) = nil
 		assert.Panics(t, func() {
-			maps.ToSliceWith[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
+			maps.ToSliceWith(map[string]int{"a": 1}, fn)
 		})
 	})
 }
@@ -165,8 +166,9 @@ func TestToSlice(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
+		var fn func(string, int) string = nil
 		assert.Panics(t, func() {
-			maps.ToSlice[map[string]int, string, int, string](map[string]int{"a": 1}, nil)
+			maps.ToSlice(map[string]int{"a": 1}, fn)
 		})
 	})
 }
@@ -217,8 +219,9 @@ func TestFromSliceWithIndex(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
+		var fn func(int, any) (string, int) = nil
 		assert.Panics(t, func() {
-			maps.FromSliceWithIndex[any, string, int]([]any{"test"}, nil)
+			maps.FromSliceWithIndex([]any{"test"}, fn)
 		})
 	})
 }
@@ -257,8 +260,9 @@ func TestFromSlice(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
+		var fn func(string) (string, int) = nil
 		assert.Panics(t, func() {
-			maps.FromSlice[string, string, int]([]string{"a"}, nil)
+			maps.FromSlice([]string{"a"}, fn)
 		})
 	})
 }

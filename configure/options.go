@@ -61,9 +61,7 @@ func OptionSet[T any](opts ...Option[T]) Option[T] {
 // The returned option will apply all provided options in sequence.
 func Chain[S any, T OptionFunc[S]](opts ...T) T {
 	return func(t *S) {
-		for _, opt := range opts {
-			opt(t)
-		}
+		Apply(t, opts)
 	}
 }
 
@@ -83,11 +81,7 @@ func OptionSetE[T any](opts ...OptionE[T]) OptionE[T] {
 // the chain stops and that error is returned.
 func ChainE[S any, T OptionFuncE[S]](opts ...T) T {
 	return func(t *S) error {
-		for _, opt := range opts {
-			if err := opt(t); err != nil {
-				return err
-			}
-		}
-		return nil
+		_, err := ApplyE(t, opts)
+		return err
 	}
 }
