@@ -260,7 +260,7 @@ func TestFromSlice(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
-		var fn func(string) (string, int) = nil
+		var fn func(string) (string, int)
 		assert.Panics(t, func() {
 			maps.FromSlice([]string{"a"}, fn)
 		})
