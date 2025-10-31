@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/goexts/generic/compare/v0.9.0...v0.10.0) (2025-10-31)
+
+
+### Features
+
+* **maps:** Add KV and KVs convenient functions and simplify type inference ([9569432](https://github.com/goexts/generic/commit/956943284d50d2feac4d01ccd0aa3f5e7f10d974))
+
 ## [0.9.0](https://github.com/goexts/generic/compare/v0.8.0...v0.9.0) (2025-10-30)
 
 
