@@ -129,7 +129,7 @@ func TestToSliceWith(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
-		var fn func(string, int) (string, bool) = nil
+		var fn func(string, int) (string, bool)
 		assert.Panics(t, func() {
 			maps.ToSliceWith(map[string]int{"a": 1}, fn)
 		})
@@ -166,7 +166,7 @@ func TestToSlice(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
-		var fn func(string, int) string = nil
+		var fn func(string, int) string
 		assert.Panics(t, func() {
 			maps.ToSlice(map[string]int{"a": 1}, fn)
 		})
@@ -219,7 +219,7 @@ func TestFromSliceWithIndex(t *testing.T) {
 
 	// Test with nil function
 	t.Run("nil function", func(t *testing.T) {
-		var fn func(int, any) (string, int) = nil
+		var fn func(int, any) (string, int)
 		assert.Panics(t, func() {
 			maps.FromSliceWithIndex([]any{"test"}, fn)
 		})
