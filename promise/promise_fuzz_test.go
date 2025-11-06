@@ -20,7 +20,7 @@ func FuzzPromisePanic(f *testing.F) {
 	//    The parameter types must match those provided in f.Add().
 	f.Fuzz(func(t *testing.T, panicMsg string) {
 		// Create a new Promise whose executor immediately panics with the fuzzed message.
-		p := New[int](func(resolve func(int), reject func(error)) {
+		p := New[int](func(_ func(int), _ func(error)) {
 			panic(panicMsg)
 		})
 

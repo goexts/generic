@@ -37,7 +37,6 @@ func ResultHelpers() {
 	r5 := res.Of(42, nil)
 	v5, err5 := r5.Unpack()
 	fmt.Println("v5:", v5, "err5:", err5)
-
 }
 
 func ExampleResultHelpers() {
