@@ -27,7 +27,7 @@ go get github.com/goexts/generic@latest
 
 For a complete guide, API reference, and usage examples for all packages, please visit the official Go documentation:
 
-**[pkg.go.dev/github.com/goexts/generic](https://pkg.go.dev/github.go.dev/github.com/goexts/generic)**
+**[pkg.go.dev/github.com/goexts/generic](https://pkg.go.dev/github.com/goexts/generic)**
 
 ## Packages
 
