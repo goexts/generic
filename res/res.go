@@ -61,6 +61,18 @@ func (r Result[T]) UnwrapOr(defaultValue T) T {
 	return r.value
 }
 
+// Unpack unpacks the Result into the original value and error pair.
+//
+// Return:
+// - T: Included value (if Result is Ok)
+// - error: Contains an error (if Result is Err)
+//
+// This method provides a way to convert the Result type back to a standard Go (value, error) pair,
+// Facilitate interaction with existing code or APIs that expect this form of return.
+func (r Result[T]) Unpack() (T, error) {
+	return r.value, r.err
+}
+
 // Expect returns the contained Ok value. It panics with a custom message if
 // the result is an Err.
 // This is similar to Unwrap but provides a more context-specific panic message.

@@ -28,18 +28,82 @@ func New[T any](executor func(resolve func(T), reject func(error))) *Promise[T] 
 		defer func() {
 			if r := recover(); r != nil {
 				// Automatically reject if the executor panics.
-				p.Reject(fmt.Errorf("promise executor panicked: %v", r))
+				p.reject(fmt.Errorf("promise executor panicked: %v", r))
 			}
 		}()
-		executor(p.Resolve, p.Reject)
+		executor(p.resolve, p.reject)
 	}()
 
 	return p
 }
 
-// Resolve fulfills the promise with a value. If the promise is already settled,
+// Then chains a transformation to the result of a Promise.
+//
+// Parameters:
+//
+//	p1: the input Promise object
+//	f: transformation function that takes p1's result and returns a new value or error
+//
+// Returns:
+//
+//	A new Promise object with the result of the transformation function f
+//
+// Notes:
+//  1. If p1 returns an error, it is directly propagated
+//  2. If a panic occurs in the transformation function f, it is caught and converted to an error
+//  3. If the transformation function f returns an error, it is propagated
+func Then[T, K any](p1 *Promise[T], f func(val T) (K, error)) *Promise[K] {
+	return New(func(resolve func(K), reject func(error)) {
+		defer func() {
+			if r := recover(); r != nil {
+				reject(fmt.Errorf("panic in Then: %v", r))
+			}
+		}()
+		val, err := p1.Await()
+		if err != nil {
+			reject(err)
+			return
+		}
+		k, err := f(val)
+		if err != nil {
+			reject(err)
+		} else {
+			resolve(k)
+		}
+	})
+}
+
+// All creates a new Promise that resolves when all the provided promises have resolved.
+//
+// Parameters:
+//
+//	ps: a slice of Promise objects to be resolved
+//
+// Returns:
+//
+//	A new Promise object that resolves with a slice of values from the input promises
+//
+// Notes:
+//  1. If any of the input promises is rejected, the returned promise is immediately rejected with the same error
+//  2. The order of the values in the resolved slice corresponds to the order of the input promises
+func All[T any](ps ...*Promise[T]) *Promise[[]T] {
+	return New(func(resolve func([]T), reject func(error)) {
+		vals := make([]T, 0, len(ps))
+		for _, p := range ps {
+			val, err := p.Await()
+			if err != nil {
+				reject(err)
+				return
+			}
+			vals = append(vals, val)
+		}
+		resolve(vals)
+	})
+}
+
+// resolve fulfills the promise with a value. If the promise is already settled,
 // this call is ignored.
-func (p *Promise[T]) Resolve(value T) {
+func (p *Promise[T]) resolve(value T) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -52,9 +116,9 @@ func (p *Promise[T]) Resolve(value T) {
 	close(p.done)
 }
 
-// Reject rejects the promise with an error. If the promise is already settled,
+// reject rejects the promise with an error. If the promise is already settled,
 // this call is ignored.
-func (p *Promise[T]) Reject(err error) {
+func (p *Promise[T]) reject(err error) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -97,16 +161,16 @@ func (p *Promise[T]) Then(onFulfilled func(T) T) *Promise[T] {
 // This allows for chaining of asynchronous operations.
 func (p *Promise[T]) ThenWithPromise(onFulfilled func(T) *Promise[T]) *Promise[T] {
 	return New(func(resolve func(T), reject func(error)) {
-		val, err := p.Await()
-		if err != nil {
-			reject(err)
-			return
-		}
 		defer func() {
 			if r := recover(); r != nil {
 				reject(fmt.Errorf("panic in ThenWithPromise: %v", r))
 			}
 		}()
+		val, err := p.Await()
+		if err != nil {
+			reject(err)
+			return
+		}
 		// Chain the promise
 		newPromise := onFulfilled(val)
 		newVal, newErr := newPromise.Await()
@@ -123,13 +187,13 @@ func (p *Promise[T]) ThenWithPromise(onFulfilled func(T) *Promise[T]) *Promise[T
 // new value to fulfill the promise, or a new error to continue the rejection chain.
 func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T] {
 	return New(func(resolve func(T), reject func(error)) {
+		defer func() {
+			if r := recover(); r != nil {
+				reject(fmt.Errorf("panic in Catch: %v", r))
+			}
+		}()
 		val, err := p.Await()
 		if err != nil {
-			defer func() {
-				if r := recover(); r != nil {
-					reject(fmt.Errorf("panic in Catch: %v", r))
-				}
-			}()
 			newVal, newErr := onRejected(err)
 			if newErr != nil {
 				reject(newErr)
@@ -148,23 +212,15 @@ func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T] {
 // original promise, after onFinally has completed.
 func (p *Promise[T]) Finally(onFinally func()) *Promise[T] {
 	return New(func(resolve func(T), reject func(error)) {
-		val, err := p.Await()
-
-		var panicErr error
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					panicErr = fmt.Errorf("panic in Finally: %v", r)
-				}
-			}()
+		defer func() {
+			if r := recover(); r != nil {
+				panicErr := fmt.Errorf("panic in Finally: %v", r)
+				reject(panicErr)
+			}
 			onFinally()
 		}()
 
-		if panicErr != nil {
-			reject(panicErr)
-			return
-		}
-
+		val, err := p.Await()
 		if err != nil {
 			reject(err)
 		} else {

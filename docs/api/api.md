@@ -484,7 +484,7 @@ func Chain[S any, T OptionFunc[S]](opts ...T) T
 Chain combines multiple options \(of any type satisfying OptionFunc\[S\]\) into a single option. The returned option will apply all provided options in sequence.
 
 <a name="ChainE"></a>
-## func [ChainE](<https://github.com/goexts/generic/blob/main/configure/options.go#L84>)
+## func [ChainE](<https://github.com/goexts/generic/blob/main/configure/options.go#L82>)
 
 ```go
 func ChainE[S any, T OptionFuncE[S]](opts ...T) T
@@ -766,7 +766,7 @@ type OptionE[T any] func(*T) error
 ```
 
 <a name="OptionSetE"></a>
-### func [OptionSetE](<https://github.com/goexts/generic/blob/main/configure/options.go#L74>)
+### func [OptionSetE](<https://github.com/goexts/generic/blob/main/configure/options.go#L72>)
 
 ```go
 func OptionSetE[T any](opts ...OptionE[T]) OptionE[T]
@@ -855,9 +855,9 @@ Package maps contains generated code by adptool.
 - [func EqualFunc\[M1 \~map\[K\]V1, M2 \~map\[K\]V2, K comparable, V1, V2 any\]\(m1 M1, m2 M2, eq func\(V1, V2\) bool\) bool](<#EqualFunc>)
 - [func Exclude\[M \~map\[K\]V, K comparable, V any\]\(m M, keys ...K\)](<#Exclude>)
 - [func Filter\[M \~map\[K\]V, K comparable, V any\]\(m M, f func\(K, V\) bool\)](<#Filter>)
-- [func FromKVs\[K comparable, V any, M \~map\[K\]V\]\(kvs \[\]KeyValue\[K, V\]\) M](<#FromKVs>)
-- [func FromSlice\[T any, M \~map\[K\]V, K comparable, V any\]\(ts \[\]T, f func\(T\) \(K, V\)\) M](<#FromSlice>)
-- [func FromSliceWithIndex\[T any, M \~map\[K\]V, K comparable, V any\]\(ts \[\]T, f func\(int, T\) \(K, V\)\) M](<#FromSliceWithIndex>)
+- [func FromKVs\[K comparable, V any\]\(kvs ...KeyValue\[K, V\]\) map\[K\]V](<#FromKVs>)
+- [func FromSlice\[T any, K comparable, V any\]\(ts \[\]T, f func\(T\) \(K, V\)\) map\[K\]V](<#FromSlice>)
+- [func FromSliceWithIndex\[T any, K comparable, V any\]\(ts \[\]T, f func\(int, T\) \(K, V\)\) map\[K\]V](<#FromSliceWithIndex>)
 - [func Keys\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]K](<#Keys>)
 - [func Merge\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, overlay bool\)](<#Merge>)
 - [func MergeWith\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, cmp func\(key K, src V, val V\) V\)](<#MergeWith>)
@@ -867,6 +867,8 @@ Package maps contains generated code by adptool.
 - [func Transform\[M \~map\[K\]V, K comparable, V any, TK comparable, TV any\]\(m M, f func\(K, V\) \(TK, TV, bool\)\) map\[TK\]TV](<#Transform>)
 - [func Values\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]V](<#Values>)
 - [type KeyValue](<#KeyValue>)
+  - [func KV\[K comparable, V any\]\(key K, value V\) KeyValue\[K, V\]](<#KV>)
+  - [func KVs\[K comparable, V any\]\(kvs ...KeyValue\[K, V\]\) \[\]KeyValue\[K, V\]](<#KVs>)
   - [func ToKVs\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]KeyValue\[K, V\]](<#ToKVs>)
 
 
@@ -961,28 +963,28 @@ func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
 Filter keeps only the key\-value pairs in the map for which the provided function returns true.
 
 <a name="FromKVs"></a>
-## func [FromKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L88>)
+## func [FromKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L112>)
 
 ```go
-func FromKVs[K comparable, V any, M ~map[K]V](kvs []KeyValue[K, V]) M
+func FromKVs[K comparable, V any](kvs ...KeyValue[K, V]) map[K]V
 ```
 
 FromKVs converts a slice of key\-value pairs to a map.
 
 <a name="FromSlice"></a>
-## func [FromSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L117>)
+## func [FromSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L141>)
 
 ```go
-func FromSlice[T any, M ~map[K]V, K comparable, V any](ts []T, f func(T) (K, V)) M
+func FromSlice[T any, K comparable, V any](ts []T, f func(T) (K, V)) map[K]V
 ```
 
 FromSlice converts a slice of types to a map.
 
 <a name="FromSliceWithIndex"></a>
-## func [FromSliceWithIndex](<https://github.com/goexts/generic/blob/main/maps/map.go#L127>)
+## func [FromSliceWithIndex](<https://github.com/goexts/generic/blob/main/maps/map.go#L151>)
 
 ```go
-func FromSliceWithIndex[T any, M ~map[K]V, K comparable, V any](ts []T, f func(int, T) (K, V)) M
+func FromSliceWithIndex[T any, K comparable, V any](ts []T, f func(int, T) (K, V)) map[K]V
 ```
 
 FromSliceWithIndex converts a slice of types to a map, using the provided function to extract the key and value.
@@ -1015,7 +1017,7 @@ func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, s
 MergeWith merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
 
 <a name="ToSlice"></a>
-## func [ToSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L97>)
+## func [ToSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L121>)
 
 ```go
 func ToSlice[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
@@ -1024,7 +1026,7 @@ func ToSlice[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
 ToSlice converts a map to a slice of types.
 
 <a name="ToSliceWith"></a>
-## func [ToSliceWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L106>)
+## func [ToSliceWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L130>)
 
 ```go
 func ToSliceWith[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) (T, bool)) []T
@@ -1033,7 +1035,7 @@ func ToSliceWith[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) (T, b
 ToSliceWith converts a map to a slice of types, filtering out values that return false.
 
 <a name="ToStruct"></a>
-## func [ToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L137>)
+## func [ToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L161>)
 
 ```go
 func ToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
@@ -1042,7 +1044,7 @@ func ToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) 
 ToStruct converts a map to a struct.
 
 <a name="Transform"></a>
-## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L149>)
+## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L173>)
 
 ```go
 func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV
@@ -1071,8 +1073,37 @@ type KeyValue[K comparable, V any] struct {
 }
 ```
 
+<a name="KV"></a>
+### func [KV](<https://github.com/goexts/generic/blob/main/maps/map.go#L83>)
+
+```go
+func KV[K comparable, V any](key K, value V) KeyValue[K, V]
+```
+
+KV creates a new KeyValue pair with type inference. This is a convenience function that allows type inference when creating a KeyValue. Example:
+
+```
+kv := KV("a", 1) // returns KeyValue[string, int]{Key: "a", Val: 1}
+```
+
+<a name="KVs"></a>
+### func [KVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L98>)
+
+```go
+func KVs[K comparable, V any](kvs ...KeyValue[K, V]) []KeyValue[K, V]
+```
+
+KVs creates a slice of KeyValue pairs from the given key\-value pairs. This is a convenience function that allows creating slices of KeyValue with type inference. Example:
+
+```
+kvs := KVs(
+  KV(1, "one"),
+  KV(2, "two"),
+) // returns []KeyValue[int, string]
+```
+
 <a name="ToKVs"></a>
-### func [ToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L79>)
+### func [ToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L103>)
 
 ```go
 func ToKVs[M ~map[K]V, K comparable, V any](m M) []KeyValue[K, V]
@@ -1227,19 +1258,19 @@ This creates a readable, non\-blocking sequence of dependent operations.
 
 - [func Await\[T any\]\(p \*Promise\[T\]\) \(T, error\)](<#Await>)
 - [type Promise](<#Promise>)
+  - [func All\[T any\]\(ps ...\*Promise\[T\]\) \*Promise\[\[\]T\]](<#All>)
   - [func Async\[T any\]\(f func\(\) \(T, error\)\) \*Promise\[T\]](<#Async>)
   - [func New\[T any\]\(executor func\(resolve func\(T\), reject func\(error\)\)\) \*Promise\[T\]](<#New>)
+  - [func Then\[T, K any\]\(p1 \*Promise\[T\], f func\(val T\) \(K, error\)\) \*Promise\[K\]](<#Then>)
   - [func \(p \*Promise\[T\]\) Await\(\) \(T, error\)](<#Promise[T].Await>)
   - [func \(p \*Promise\[T\]\) Catch\(onRejected func\(error\) \(T, error\)\) \*Promise\[T\]](<#Promise[T].Catch>)
   - [func \(p \*Promise\[T\]\) Finally\(onFinally func\(\)\) \*Promise\[T\]](<#Promise[T].Finally>)
-  - [func \(p \*Promise\[T\]\) Reject\(err error\)](<#Promise[T].Reject>)
-  - [func \(p \*Promise\[T\]\) Resolve\(value T\)](<#Promise[T].Resolve>)
   - [func \(p \*Promise\[T\]\) Then\(onFulfilled func\(T\) T\) \*Promise\[T\]](<#Promise[T].Then>)
   - [func \(p \*Promise\[T\]\) ThenWithPromise\(onFulfilled func\(T\) \*Promise\[T\]\) \*Promise\[T\]](<#Promise[T].ThenWithPromise>)
 
 
 <a name="Await"></a>
-## func [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L192>)
+## func [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L248>)
 
 ```go
 func Await[T any](p *Promise[T]) (T, error)
@@ -1258,8 +1289,34 @@ type Promise[T any] struct {
 }
 ```
 
+<a name="All"></a>
+### func [All](<https://github.com/goexts/generic/blob/main/promise/promise.go#L89>)
+
+```go
+func All[T any](ps ...*Promise[T]) *Promise[[]T]
+```
+
+All creates a new Promise that resolves when all the provided promises have resolved.
+
+Parameters:
+
+```
+ps: a slice of Promise objects to be resolved
+```
+
+Returns:
+
+```
+A new Promise object that resolves with a slice of values from the input promises
+```
+
+Notes:
+
+1. If any of the input promises is rejected, the returned promise is immediately rejected with the same error
+2. The order of the values in the resolved slice corresponds to the order of the input promises
+
 <a name="Async"></a>
-### func [Async](<https://github.com/goexts/generic/blob/main/promise/promise.go#L179>)
+### func [Async](<https://github.com/goexts/generic/blob/main/promise/promise.go#L235>)
 
 ```go
 func Async[T any](f func() (T, error)) *Promise[T]
@@ -1276,8 +1333,36 @@ func New[T any](executor func(resolve func(T), reject func(error))) *Promise[T]
 
 New creates a new Promise. The provided executor function is executed in a new goroutine. The executor receives \`resolve\` and \`reject\` functions to control the promise's outcome.
 
+<a name="Then"></a>
+### func [Then](<https://github.com/goexts/generic/blob/main/promise/promise.go#L55>)
+
+```go
+func Then[T, K any](p1 *Promise[T], f func(val T) (K, error)) *Promise[K]
+```
+
+Then chains a transformation to the result of a Promise.
+
+Parameters:
+
+```
+p1: the input Promise object
+f: transformation function that takes p1's result and returns a new value or error
+```
+
+Returns:
+
+```
+A new Promise object with the result of the transformation function f
+```
+
+Notes:
+
+1. If p1 returns an error, it is directly propagated
+2. If a panic occurs in the transformation function f, it is caught and converted to an error
+3. If the transformation function f returns an error, it is propagated
+
 <a name="Promise[T].Await"></a>
-### func \(\*Promise\[T\]\) [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L72>)
+### func \(\*Promise\[T\]\) [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L136>)
 
 ```go
 func (p *Promise[T]) Await() (T, error)
@@ -1286,7 +1371,7 @@ func (p *Promise[T]) Await() (T, error)
 Await blocks until the promise is settled and returns the resulting value and error. It is the primary way to get the result of a promise.
 
 <a name="Promise[T].Catch"></a>
-### func \(\*Promise\[T\]\) [Catch](<https://github.com/goexts/generic/blob/main/promise/promise.go#L124>)
+### func \(\*Promise\[T\]\) [Catch](<https://github.com/goexts/generic/blob/main/promise/promise.go#L188>)
 
 ```go
 func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T]
@@ -1295,7 +1380,7 @@ func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T]
 Catch attaches a callback that executes when the promise is rejected. It allows for error handling and recovery. The onRejected callback can return a new value to fulfill the promise, or a new error to continue the rejection chain.
 
 <a name="Promise[T].Finally"></a>
-### func \(\*Promise\[T\]\) [Finally](<https://github.com/goexts/generic/blob/main/promise/promise.go#L149>)
+### func \(\*Promise\[T\]\) [Finally](<https://github.com/goexts/generic/blob/main/promise/promise.go#L213>)
 
 ```go
 func (p *Promise[T]) Finally(onFinally func()) *Promise[T]
@@ -1303,26 +1388,8 @@ func (p *Promise[T]) Finally(onFinally func()) *Promise[T]
 
 Finally attaches a callback that executes when the promise is settled \(either fulfilled or rejected\). It is useful for cleanup logic. The returned promise will be settled with the same value or error as the original promise, after onFinally has completed.
 
-<a name="Promise[T].Reject"></a>
-### func \(\*Promise\[T\]\) [Reject](<https://github.com/goexts/generic/blob/main/promise/promise.go#L57>)
-
-```go
-func (p *Promise[T]) Reject(err error)
-```
-
-Reject rejects the promise with an error. If the promise is already settled, this call is ignored.
-
-<a name="Promise[T].Resolve"></a>
-### func \(\*Promise\[T\]\) [Resolve](<https://github.com/goexts/generic/blob/main/promise/promise.go#L42>)
-
-```go
-func (p *Promise[T]) Resolve(value T)
-```
-
-Resolve fulfills the promise with a value. If the promise is already settled, this call is ignored.
-
 <a name="Promise[T].Then"></a>
-### func \(\*Promise\[T\]\) [Then](<https://github.com/goexts/generic/blob/main/promise/promise.go#L80>)
+### func \(\*Promise\[T\]\) [Then](<https://github.com/goexts/generic/blob/main/promise/promise.go#L144>)
 
 ```go
 func (p *Promise[T]) Then(onFulfilled func(T) T) *Promise[T]
@@ -1331,7 +1398,7 @@ func (p *Promise[T]) Then(onFulfilled func(T) T) *Promise[T]
 Then attaches a callback that executes when the promise is fulfilled. It returns a new promise that resolves with the result of the onFulfilled callback. If the original promise is rejected, the new promise is rejected with the same error.
 
 <a name="Promise[T].ThenWithPromise"></a>
-### func \(\*Promise\[T\]\) [ThenWithPromise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L98>)
+### func \(\*Promise\[T\]\) [ThenWithPromise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L162>)
 
 ```go
 func (p *Promise[T]) ThenWithPromise(onFulfilled func(T) *Promise[T]) *Promise[T]
@@ -1541,12 +1608,13 @@ if finalResult.IsErr() {
   - [func \(r Result\[T\]\) IsErr\(\) bool](<#Result[T].IsErr>)
   - [func \(r Result\[T\]\) IsOk\(\) bool](<#Result[T].IsOk>)
   - [func \(r Result\[T\]\) Ok\(\) \(T, bool\)](<#Result[T].Ok>)
+  - [func \(r Result\[T\]\) Unpack\(\) \(T, error\)](<#Result[T].Unpack>)
   - [func \(r Result\[T\]\) Unwrap\(\) T](<#Result[T].Unwrap>)
   - [func \(r Result\[T\]\) UnwrapOr\(defaultValue T\) T](<#Result[T].UnwrapOr>)
 
 
 <a name="Or"></a>
-## func [Or](<https://github.com/goexts/generic/blob/main/res/res.go#L87>)
+## func [Or](<https://github.com/goexts/generic/blob/main/res/res.go#L99>)
 
 ```go
 func Or[T any](v T, err error, defaultValue T) T
@@ -1555,7 +1623,7 @@ func Or[T any](v T, err error, defaultValue T) T
 Or is a utility function that simplifies handling of \(value, error\) returns. It returns the value if err is nil, otherwise it returns the provided default value.
 
 <a name="OrZero"></a>
-## func [OrZero](<https://github.com/goexts/generic/blob/main/res/res.go#L96>)
+## func [OrZero](<https://github.com/goexts/generic/blob/main/res/res.go#L108>)
 
 ```go
 func OrZero[T any](v T, err error) T
@@ -1602,7 +1670,7 @@ func Ok[T any](value T) Result[T]
 Ok creates a new successful Result containing the given value.
 
 <a name="Result[T].Err"></a>
-### func \(Result\[T\]\) [Err](<https://github.com/goexts/generic/blob/main/res/res.go#L81>)
+### func \(Result\[T\]\) [Err](<https://github.com/goexts/generic/blob/main/res/res.go#L93>)
 
 ```go
 func (r Result[T]) Err() error
@@ -1611,7 +1679,7 @@ func (r Result[T]) Err() error
 Err returns the contained error, or nil if the result is Ok.
 
 <a name="Result[T].Expect"></a>
-### func \(Result\[T\]\) [Expect](<https://github.com/goexts/generic/blob/main/res/res.go#L67>)
+### func \(Result\[T\]\) [Expect](<https://github.com/goexts/generic/blob/main/res/res.go#L79>)
 
 ```go
 func (r Result[T]) Expect(message string) T
@@ -1638,13 +1706,26 @@ func (r Result[T]) IsOk() bool
 IsOk returns true if the result is Ok \(i.e., does not contain an error\).
 
 <a name="Result[T].Ok"></a>
-### func \(Result\[T\]\) [Ok](<https://github.com/goexts/generic/blob/main/res/res.go#L76>)
+### func \(Result\[T\]\) [Ok](<https://github.com/goexts/generic/blob/main/res/res.go#L88>)
 
 ```go
 func (r Result[T]) Ok() (T, bool)
 ```
 
 Ok returns the contained value and a boolean indicating if the result was Ok. This provides a safe, idiomatic Go way to access the value.
+
+<a name="Result[T].Unpack"></a>
+### func \(Result\[T\]\) [Unpack](<https://github.com/goexts/generic/blob/main/res/res.go#L72>)
+
+```go
+func (r Result[T]) Unpack() (T, error)
+```
+
+Unpack unpacks the Result into the original value and error pair.
+
+Return: \- T: Included value \(if Result is Ok\) \- error: Contains an error \(if Result is Err\)
+
+This method provides a way to convert the Result type back to a standard Go \(value, error\) pair, Facilitate interaction with existing code or APIs that expect this form of return.
 
 <a name="Result[T].Unwrap"></a>
 ### func \(Result\[T\]\) [Unwrap](<https://github.com/goexts/generic/blob/main/res/res.go#L48>)
