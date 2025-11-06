@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/goexts/generic/compare/v0.10.0...v0.11.0) (2025-11-06)
+
+
+### Features
+
+* **promise:** add All and Then helper functions and improve error handling ([8dddb64](https://github.com/goexts/generic/commit/8dddb64386f43a89005d85398e9eaf6b9a3317fb))
+
 ## [0.10.0](https://github.com/goexts/generic/compare/v0.9.0...v0.10.0) (2025-10-31)
 
 
