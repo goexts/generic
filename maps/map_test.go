@@ -4,7 +4,6 @@ package maps_test
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 	"testing"
 
