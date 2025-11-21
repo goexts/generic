@@ -1,10 +1,5 @@
 //go:build !race
 
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
-// Package maps_test implements the functions, types, and interfaces for the module.
 package maps_test
 
 import (

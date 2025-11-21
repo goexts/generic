@@ -1,9 +1,5 @@
 //go:build !race
 
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 package cond_test
 
 import (

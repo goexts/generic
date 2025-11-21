@@ -86,3 +86,54 @@ func ExampleFirstKeyBy() {
 	// FirstKeyBy("Orange", "Lemon"): key="", found=false
 	// FirstKeyBy(int keys): key=10, found=true
 }
+
+// ExampleFirstValue demonstrates the usage of the FirstValue function.
+func ExampleFirstValue() {
+	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
+
+	// Example 1: Key exists at the beginning of the list
+	val, found := maps.FirstValue(m, "apple", "grape")
+	fmt.Printf("FirstValue(\"apple\", \"grape\"): value=%d, found=%t\n", val, found)
+
+	// Example 2: Key exists later in the list
+	val, found = maps.FirstValue(m, "grape", "banana", "kiwi")
+	fmt.Printf("FirstValue(\"grape\", \"banana\", \"kiwi\"): value=%d, found=%t\n", val, found)
+
+	// Example 3: No key exists
+	val, found = maps.FirstValue(m, "orange", "lemon")
+	fmt.Printf("FirstValue(\"orange\", \"lemon\"): value=%d, found=%t\n", val, found)
+
+	// Example 4: Empty key list
+	val, found = maps.FirstValue(m)
+	fmt.Printf("FirstValue(): value=%d, found=%t\n", val, found)
+
+	// Output:
+	// FirstValue("apple", "grape"): value=1, found=true
+	// FirstValue("grape", "banana", "kiwi"): value=2, found=true
+	// FirstValue("orange", "lemon"): value=0, found=false
+	// FirstValue(): value=0, found=false
+}
+
+func ExampleFirstValueBy() {
+	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
+	toLowerCase := func(s string) string {
+		return strings.ToLower(s)
+	}
+
+	// Example 1: Case-insensitive match
+	val, found := maps.FirstValueBy(m, toLowerCase, "Apple", "Grape")
+	fmt.Printf("FirstValueBy(\"Apple\", \"Grape\"): value=%d, found=%t\n", val, found)
+
+	// Example 2: Case-insensitive match later in the list
+	val, found = maps.FirstValueBy(m, toLowerCase, "Grape", "BANANA", "Kiwi")
+	fmt.Printf("FirstValueBy(\"Grape\", \"BANANA\", \"Kiwi\"): value=%d, found=%t\n", val, found)
+
+	// Example 3: No match
+	val, found = maps.FirstValueBy(m, toLowerCase, "Orange", "Lemon")
+	fmt.Printf("FirstValueBy(\"Orange\", \"Lemon\"): value=%d, found=%t\n", val, found)
+
+	// Output:
+	// FirstValueBy("Apple", "Grape"): value=1, found=true
+	// FirstValueBy("Grape", "BANANA", "Kiwi"): value=2, found=true
+	// FirstValueBy("Orange", "Lemon"): value=0, found=false
+}
