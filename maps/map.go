@@ -13,10 +13,10 @@ func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool) {
 
 // MergeWith merges the values of src into dest using the provided merge function.
 // If a key exists in both maps, the merge function will be called to determine the final value.
-func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V) {
+func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, merge func(key K, destVal, srcVal V) V) {
 	for k, v := range src {
 		if existing, ok := dest[k]; ok {
-			dest[k] = cmp(k, existing, v)
+			dest[k] = merge(k, existing, v)
 		} else {
 			dest[k] = v
 		}
@@ -38,7 +38,7 @@ func Concat[M ~map[K]V, K comparable, V any](m M, ms ...M) {
 
 // ConcatWith merges multiple maps into a single map using a custom merge function.
 // If a key exists in multiple maps, the merge function will be called to determine the final value.
-func ConcatWith[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M) {
+func ConcatWith[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M) { // Note: The merge function receives (key, value_from_m, value_from_ms_element)
 	if len(ms) == 0 {
 		return
 	}
@@ -49,7 +49,7 @@ func ConcatWith[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms 
 	}
 }
 
-// Exclude removes all key/value pairs from m for which f returns false.
+// Exclude removes the specified keys from the map m.
 func Exclude[M ~map[K]V, K comparable, V any](m M, keys ...K) {
 	for i := range keys {
 		delete(m, keys[i])
@@ -238,6 +238,18 @@ func FirstKeyBy[ListK any, MapK comparable, V any](m map[MapK]V, transform func(
 	return zeroListK, false
 }
 
+// FirstKeyOrRandom searches for the first key from a list of keys that exists in the map.
+// If a key is found, it returns that key. If no key from the list is found in the map,
+// it returns a random key from the map. If the map is empty, it returns the zero value for the key type.
+func FirstKeyOrRandom[K comparable, V any](m map[K]V, keys ...K) K {
+	if key, ok := FirstKey(m, keys...); ok {
+		return key
+	}
+	// RandomKey returns (zero, false) for an empty map, which is the desired fallback.
+	key, _ := RandomKey(m)
+	return key
+}
+
 // FirstValue searches for the first value from the provided list that exists in the given map.
 // It returns the found value and true if a value is found, otherwise it returns the zero value of V and false.
 //
@@ -281,6 +293,67 @@ func FirstValueBy[ListK any, MapK comparable, V any](m map[MapK]V, transform fun
 		if value, ok := m[transformedKey]; ok {
 			return value, true
 		}
+	}
+	var zeroV V
+	return zeroV, false
+}
+
+// FirstValueOrRandom searches for the value of the first key from a list that exists in the map.
+// If a key is found, it returns its corresponding value. If no key from the list is found in the map,
+// it returns a random value from the map. If the map is empty, it returns the zero value for the value type.
+func FirstValueOrRandom[K comparable, V any](m map[K]V, keys ...K) V {
+	if value, ok := FirstValue(m, keys...); ok {
+		return value
+	}
+	// RandomValue returns (zero, false) for an empty map, which is the desired fallback.
+	value, _ := RandomValue(m)
+	return value
+}
+
+// Random returns a random key-value pair from the map.
+// It leverages the random iteration order of maps in Go.
+// If the map is empty, it returns the zero values for the key and value, and false.
+//
+// Returns:
+//
+//	A random key, its corresponding value, and true if the map is not empty.
+//	The zero values for the key and value, and false if the map is empty.
+func Random[K comparable, V any](m map[K]V) (K, V, bool) {
+	for k, v := range m {
+		return k, v, true
+	}
+	var zeroK K
+	var zeroV V
+	return zeroK, zeroV, false
+}
+
+// RandomKey returns a random key from the map.
+// It leverages the random iteration order of maps in Go.
+// If the map is empty, it returns the zero value for the key type and false.
+//
+// Returns:
+//
+//	A random key and true if the map is not empty.
+//	The zero value for the key type and false if the map is empty.
+func RandomKey[K comparable, V any](m map[K]V) (K, bool) {
+	for k := range m {
+		return k, true
+	}
+	var zeroK K
+	return zeroK, false
+}
+
+// RandomValue returns a random value from the map.
+// It leverages the random iteration order of maps in Go.
+// If the map is empty, it returns the zero value for the value type and false.
+//
+// Returns:
+//
+//	A random value and true if the map is not empty.
+//	The zero value for the value type and false if the map is empty.
+func RandomValue[K comparable, V any](m map[K]V) (V, bool) {
+	for _, v := range m {
+		return v, true
 	}
 	var zeroV V
 	return zeroV, false

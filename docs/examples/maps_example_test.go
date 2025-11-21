@@ -137,3 +137,40 @@ func ExampleFirstValueBy() {
 	// FirstValueBy("Grape", "BANANA", "Kiwi"): value=2, found=true
 	// FirstValueBy("Orange", "Lemon"): value=0, found=false
 }
+
+// ExampleRandom demonstrates getting a random key-value pair from a map.
+func ExampleRandom() {
+	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
+
+	// Get a random element
+	k, v, ok := maps.Random(m)
+	if ok {
+		fmt.Printf("Random element found: %s -> %d\n", k, v)
+	}
+
+	// Get from an empty map
+	_, _, ok = maps.Random(map[string]int{})
+	fmt.Printf("Random from empty map: found=%t\n", ok)
+
+	// Unordered output:
+	// Random element found: apple -> 1
+	// Random from empty map: found=false
+}
+
+// ExampleRandomKey demonstrates getting a random key from a map.
+func ExampleRandomKey() {
+	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
+	key, ok := maps.RandomKey(m)
+	fmt.Printf("Random key found: %t (key: %s)\n", ok, key)
+	// Unordered output:
+	// Random key found: true (key: apple)
+}
+
+// ExampleRandomValue demonstrates getting a random value from a map.
+func ExampleRandomValue() {
+	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
+	value, ok := maps.RandomValue(m)
+	fmt.Printf("Random value found: %t (value: %d)\n", ok, value)
+	// Unordered output:
+	// Random value found: true (value: 1)
+}
