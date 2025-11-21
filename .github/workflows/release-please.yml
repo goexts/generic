@@ -1,8 +1,7 @@
 name: Release
 
-# This workflow runs on every push to the main branch.
-# It always runs tests. A release is only triggered if the commit message
-# contains the string "[release]".
+# This workflow runs on every push to the main branch to create a release
+# based on Conventional Commit messages.
 on:
   push:
     branches:
@@ -11,22 +10,13 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: read
-  checks: write
 
 jobs:
   release:
-    # The release job depends on the test job succeeding.
     runs-on: ubuntu-latest
     steps:
       - name: Create Release and Changelog
-        # This action automates the entire release process based on
-        # Conventional Commit messages.
         uses: googleapis/release-please-action@v4
         with:
-          # The release-type for a standard Go module.
-          # It automatically finds the go.mod file, reads the module path,
-          # and creates tags like `v1.2.3`.
           release-type: go
-          # The token is required for release-please to create releases.
           token: ${{ secrets.GITHUB_TOKEN }}
