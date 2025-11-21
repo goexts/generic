@@ -1,4 +1,4 @@
-name: Test and Release
+name: Release
 
 # This workflow runs on every push to the main branch.
 # It always runs tests. A release is only triggered if the commit message
