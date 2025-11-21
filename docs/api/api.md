@@ -843,6 +843,8 @@ Package maps implements the functions, types, and interfaces for the module.
 
 Package maps contains generated code by adptool.
 
+Package maps implements the functions, types, and interfaces for the module.
+
 ## Index
 
 - [func Clear\[M \~map\[K\]V, K comparable, V any\]\(m M\)](<#Clear>)
@@ -855,12 +857,21 @@ Package maps contains generated code by adptool.
 - [func EqualFunc\[M1 \~map\[K\]V1, M2 \~map\[K\]V2, K comparable, V1, V2 any\]\(m1 M1, m2 M2, eq func\(V1, V2\) bool\) bool](<#EqualFunc>)
 - [func Exclude\[M \~map\[K\]V, K comparable, V any\]\(m M, keys ...K\)](<#Exclude>)
 - [func Filter\[M \~map\[K\]V, K comparable, V any\]\(m M, f func\(K, V\) bool\)](<#Filter>)
+- [func FirstKey\[K comparable, V any\]\(m map\[K\]V, keys ...K\) \(K, bool\)](<#FirstKey>)
+- [func FirstKeyBy\[ListK any, MapK comparable, V any\]\(m map\[MapK\]V, transform func\(ListK\) MapK, keys ...ListK\) \(ListK, bool\)](<#FirstKeyBy>)
+- [func FirstKeyOrRandom\[K comparable, V any\]\(m map\[K\]V, keys ...K\) K](<#FirstKeyOrRandom>)
+- [func FirstValue\[K comparable, V any\]\(m map\[K\]V, keys ...K\) \(V, bool\)](<#FirstValue>)
+- [func FirstValueBy\[ListK any, MapK comparable, V any\]\(m map\[MapK\]V, transform func\(ListK\) MapK, keys ...ListK\) \(V, bool\)](<#FirstValueBy>)
+- [func FirstValueOrRandom\[K comparable, V any\]\(m map\[K\]V, keys ...K\) V](<#FirstValueOrRandom>)
 - [func FromKVs\[K comparable, V any\]\(kvs ...KeyValue\[K, V\]\) map\[K\]V](<#FromKVs>)
 - [func FromSlice\[T any, K comparable, V any\]\(ts \[\]T, f func\(T\) \(K, V\)\) map\[K\]V](<#FromSlice>)
 - [func FromSliceWithIndex\[T any, K comparable, V any\]\(ts \[\]T, f func\(int, T\) \(K, V\)\) map\[K\]V](<#FromSliceWithIndex>)
 - [func Keys\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]K](<#Keys>)
 - [func Merge\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, overlay bool\)](<#Merge>)
-- [func MergeWith\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, cmp func\(key K, src V, val V\) V\)](<#MergeWith>)
+- [func MergeWith\[M \~map\[K\]V, K comparable, V any\]\(dest M, src M, merge func\(key K, destVal, srcVal V\) V\)](<#MergeWith>)
+- [func Random\[K comparable, V any\]\(m map\[K\]V\) \(K, V, bool\)](<#Random>)
+- [func RandomKey\[K comparable, V any\]\(m map\[K\]V\) \(K, bool\)](<#RandomKey>)
+- [func RandomValue\[K comparable, V any\]\(m map\[K\]V\) \(V, bool\)](<#RandomValue>)
 - [func ToSlice\[M \~map\[K\]V, K comparable, V any, T any\]\(m M, f func\(K, V\) T\) \[\]T](<#ToSlice>)
 - [func ToSliceWith\[M \~map\[K\]V, K comparable, V any, T any\]\(m M, f func\(K, V\) \(T, bool\)\) \[\]T](<#ToSliceWith>)
 - [func ToStruct\[M \~map\[K\]V, K comparable, V any, S any\]\(m M, f func\(\*S, K, V\) \*S\) \*S](<#ToStruct>)
@@ -891,7 +902,7 @@ func Clone[M ~map[K]V, K comparable, V any](m M) M
 
 
 <a name="Concat"></a>
-## func [Concat](<https://github.com/goexts/generic/blob/main/maps/map.go#L32>)
+## func [Concat](<https://github.com/goexts/generic/blob/main/maps/map.go#L28>)
 
 ```go
 func Concat[M ~map[K]V, K comparable, V any](m M, ms ...M)
@@ -900,7 +911,7 @@ func Concat[M ~map[K]V, K comparable, V any](m M, ms ...M)
 Concat merges multiple maps into a single map. If a key exists in multiple maps, the value from the last map will be used.
 
 <a name="ConcatWith"></a>
-## func [ConcatWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L45>)
+## func [ConcatWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L41>)
 
 ```go
 func ConcatWith[M ~map[K]V, K comparable, V any](merge func(K, V, V) V, m M, ms ...M)
@@ -945,16 +956,16 @@ func EqualFunc[M1 ~map[K]V1, M2 ~map[K]V2, K comparable, V1, V2 any](m1 M1, m2 M
 
 
 <a name="Exclude"></a>
-## func [Exclude](<https://github.com/goexts/generic/blob/main/maps/map.go#L57>)
+## func [Exclude](<https://github.com/goexts/generic/blob/main/maps/map.go#L53>)
 
 ```go
 func Exclude[M ~map[K]V, K comparable, V any](m M, keys ...K)
 ```
 
-Exclude removes all key/value pairs from m for which f returns false.
+Exclude removes the specified keys from the map m.
 
 <a name="Filter"></a>
-## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L64>)
+## func [Filter](<https://github.com/goexts/generic/blob/main/maps/map.go#L60>)
 
 ```go
 func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
@@ -962,8 +973,120 @@ func Filter[M ~map[K]V, K comparable, V any](m M, f func(K, V) bool)
 
 Filter keeps only the key\-value pairs in the map for which the provided function returns true.
 
+<a name="FirstKey"></a>
+## func [FirstKey](<https://github.com/goexts/generic/blob/main/maps/map.go#L203>)
+
+```go
+func FirstKey[K comparable, V any](m map[K]V, keys ...K) (K, bool)
+```
+
+FirstKey searches for the first key from the provided list that exists in the given map. It returns the found key and true if a key is found, otherwise it returns the zero value of K and false.
+
+Parameters:
+
+```
+m: The map to search within.
+keys: A variadic list of keys to look for in the map.
+```
+
+Returns:
+
+```
+The first key from the 'keys' list that exists in 'm', and true.
+If no key from 'keys' exists in 'm', it returns the zero value of K and false.
+```
+
+<a name="FirstKeyBy"></a>
+## func [FirstKeyBy](<https://github.com/goexts/generic/blob/main/maps/map.go#L230>)
+
+```go
+func FirstKeyBy[ListK any, MapK comparable, V any](m map[MapK]V, transform func(ListK) MapK, keys ...ListK) (ListK, bool)
+```
+
+FirstKeyBy searches for the first key from the provided list that, after being transformed by the 'transform' function, exists in the given map. It returns the original key from the list and true if a key is found, otherwise it returns the zero value of ListK and false. This is useful when the keys in the list need a special comparison or normalization before being looked up in the map \(e.g., case\-insensitive string comparison\).
+
+Parameters:
+
+```
+m: The map to search within. The keys of this map are of type MapK.
+transform: A function that converts a key of type ListK to a key of type MapK.
+keys: A variadic list of keys (of type ListK) to look for in the map after transformation.
+```
+
+Returns:
+
+```
+The first key from the 'keys' list (of type ListK) whose transformed value exists in 'm', and true.
+If no transformed key from 'keys' exists in 'm', it returns the zero value of ListK and false.
+```
+
+<a name="FirstKeyOrRandom"></a>
+## func [FirstKeyOrRandom](<https://github.com/goexts/generic/blob/main/maps/map.go#L244>)
+
+```go
+func FirstKeyOrRandom[K comparable, V any](m map[K]V, keys ...K) K
+```
+
+FirstKeyOrRandom searches for the first key from a list of keys that exists in the map. If a key is found, it returns that key. If no key from the list is found in the map, it returns a random key from the map. If the map is empty, it returns the zero value for the key type.
+
+<a name="FirstValue"></a>
+## func [FirstValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L265>)
+
+```go
+func FirstValue[K comparable, V any](m map[K]V, keys ...K) (V, bool)
+```
+
+FirstValue searches for the first value from the provided list that exists in the given map. It returns the found value and true if a value is found, otherwise it returns the zero value of V and false.
+
+Parameters:
+
+```
+m: The map to search within.
+keys: A variadic list of keys to look for in the map.
+```
+
+Returns:
+
+```
+The first value from the 'keys' list that exists in 'm', and true.
+If no value from 'keys' exists in 'm', it returns the zero value of V and false.
+```
+
+<a name="FirstValueBy"></a>
+## func [FirstValueBy](<https://github.com/goexts/generic/blob/main/maps/map.go#L290>)
+
+```go
+func FirstValueBy[ListK any, MapK comparable, V any](m map[MapK]V, transform func(ListK) MapK, keys ...ListK) (V, bool)
+```
+
+FirstValueBy searches for the first value from the provided list that, after being transformed by the 'transform' function, exists in the given map. It returns the found value and true if a value is found, otherwise it returns the zero value of V and false. after being transformed by the 'transform' function.
+
+Parameters:
+
+```
+m: The map to search within. The keys of this map are of type MapK.
+transform: A function that converts a key of type ListK to a key of type MapK.
+keys: A variadic list of keys (of type ListK) to look for in the map after transformation.
+```
+
+Returns:
+
+```
+The first value from the 'keys' list (of type ListK) whose transformed value exists in 'm', and true.
+If no transformed value from 'keys' exists in 'm', it returns the zero value of V and false.
+```
+
+<a name="FirstValueOrRandom"></a>
+## func [FirstValueOrRandom](<https://github.com/goexts/generic/blob/main/maps/map.go#L304>)
+
+```go
+func FirstValueOrRandom[K comparable, V any](m map[K]V, keys ...K) V
+```
+
+FirstValueOrRandom searches for the value of the first key from a list that exists in the map. If a key is found, it returns its corresponding value. If no key from the list is found in the map, it returns a random value from the map. If the map is empty, it returns the zero value for the value type.
+
 <a name="FromKVs"></a>
-## func [FromKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L112>)
+## func [FromKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L108>)
 
 ```go
 func FromKVs[K comparable, V any](kvs ...KeyValue[K, V]) map[K]V
@@ -972,7 +1095,7 @@ func FromKVs[K comparable, V any](kvs ...KeyValue[K, V]) map[K]V
 FromKVs converts a slice of key\-value pairs to a map.
 
 <a name="FromSlice"></a>
-## func [FromSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L141>)
+## func [FromSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L137>)
 
 ```go
 func FromSlice[T any, K comparable, V any](ts []T, f func(T) (K, V)) map[K]V
@@ -981,7 +1104,7 @@ func FromSlice[T any, K comparable, V any](ts []T, f func(T) (K, V)) map[K]V
 FromSlice converts a slice of types to a map.
 
 <a name="FromSliceWithIndex"></a>
-## func [FromSliceWithIndex](<https://github.com/goexts/generic/blob/main/maps/map.go#L151>)
+## func [FromSliceWithIndex](<https://github.com/goexts/generic/blob/main/maps/map.go#L147>)
 
 ```go
 func FromSliceWithIndex[T any, K comparable, V any](ts []T, f func(int, T) (K, V)) map[K]V
@@ -999,7 +1122,7 @@ func Keys[M ~map[K]V, K comparable, V any](m M) []K
 
 
 <a name="Merge"></a>
-## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L10>)
+## func [Merge](<https://github.com/goexts/generic/blob/main/maps/map.go#L6>)
 
 ```go
 func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)
@@ -1008,16 +1131,64 @@ func Merge[M ~map[K]V, K comparable, V any](dest M, src M, overlay bool)
 Merge merges the values of src into dest. If overlay is true, existing values in dest will be overwritten.
 
 <a name="MergeWith"></a>
-## func [MergeWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L20>)
+## func [MergeWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L16>)
 
 ```go
-func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, cmp func(key K, src V, val V) V)
+func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, merge func(key K, destVal, srcVal V) V)
 ```
 
 MergeWith merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
 
+<a name="Random"></a>
+## func [Random](<https://github.com/goexts/generic/blob/main/maps/map.go#L321>)
+
+```go
+func Random[K comparable, V any](m map[K]V) (K, V, bool)
+```
+
+Random returns a random key\-value pair from the map. It leverages the random iteration order of maps in Go. If the map is empty, it returns the zero values for the key and value, and false.
+
+Returns:
+
+```
+A random key, its corresponding value, and true if the map is not empty.
+The zero values for the key and value, and false if the map is empty.
+```
+
+<a name="RandomKey"></a>
+## func [RandomKey](<https://github.com/goexts/generic/blob/main/maps/map.go#L338>)
+
+```go
+func RandomKey[K comparable, V any](m map[K]V) (K, bool)
+```
+
+RandomKey returns a random key from the map. It leverages the random iteration order of maps in Go. If the map is empty, it returns the zero value for the key type and false.
+
+Returns:
+
+```
+A random key and true if the map is not empty.
+The zero value for the key type and false if the map is empty.
+```
+
+<a name="RandomValue"></a>
+## func [RandomValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L354>)
+
+```go
+func RandomValue[K comparable, V any](m map[K]V) (V, bool)
+```
+
+RandomValue returns a random value from the map. It leverages the random iteration order of maps in Go. If the map is empty, it returns the zero value for the value type and false.
+
+Returns:
+
+```
+A random value and true if the map is not empty.
+The zero value for the value type and false if the map is empty.
+```
+
 <a name="ToSlice"></a>
-## func [ToSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L121>)
+## func [ToSlice](<https://github.com/goexts/generic/blob/main/maps/map.go#L117>)
 
 ```go
 func ToSlice[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
@@ -1026,7 +1197,7 @@ func ToSlice[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) T) []T
 ToSlice converts a map to a slice of types.
 
 <a name="ToSliceWith"></a>
-## func [ToSliceWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L130>)
+## func [ToSliceWith](<https://github.com/goexts/generic/blob/main/maps/map.go#L126>)
 
 ```go
 func ToSliceWith[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) (T, bool)) []T
@@ -1035,7 +1206,7 @@ func ToSliceWith[M ~map[K]V, K comparable, V any, T any](m M, f func(K, V) (T, b
 ToSliceWith converts a map to a slice of types, filtering out values that return false.
 
 <a name="ToStruct"></a>
-## func [ToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L161>)
+## func [ToStruct](<https://github.com/goexts/generic/blob/main/maps/map.go#L157>)
 
 ```go
 func ToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) *S
@@ -1044,7 +1215,7 @@ func ToStruct[M ~map[K]V, K comparable, V any, S any](m M, f func(*S, K, V) *S) 
 ToStruct converts a map to a struct.
 
 <a name="Transform"></a>
-## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L173>)
+## func [Transform](<https://github.com/goexts/generic/blob/main/maps/map.go#L169>)
 
 ```go
 func Transform[M ~map[K]V, K comparable, V any, TK comparable, TV any](m M, f func(K, V) (TK, TV, bool)) map[TK]TV
@@ -1062,7 +1233,7 @@ func Values[M ~map[K]V, K comparable, V any](m M) []V
 
 
 <a name="KeyValue"></a>
-## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L73-L76>)
+## type [KeyValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L69-L72>)
 
 KeyValue is a key\-value pair.
 
@@ -1074,7 +1245,7 @@ type KeyValue[K comparable, V any] struct {
 ```
 
 <a name="KV"></a>
-### func [KV](<https://github.com/goexts/generic/blob/main/maps/map.go#L83>)
+### func [KV](<https://github.com/goexts/generic/blob/main/maps/map.go#L79>)
 
 ```go
 func KV[K comparable, V any](key K, value V) KeyValue[K, V]
@@ -1087,7 +1258,7 @@ kv := KV("a", 1) // returns KeyValue[string, int]{Key: "a", Val: 1}
 ```
 
 <a name="KVs"></a>
-### func [KVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L98>)
+### func [KVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L94>)
 
 ```go
 func KVs[K comparable, V any](kvs ...KeyValue[K, V]) []KeyValue[K, V]
@@ -1103,7 +1274,7 @@ kvs := KVs(
 ```
 
 <a name="ToKVs"></a>
-### func [ToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L103>)
+### func [ToKVs](<https://github.com/goexts/generic/blob/main/maps/map.go#L99>)
 
 ```go
 func ToKVs[M ~map[K]V, K comparable, V any](m M) []KeyValue[K, V]
@@ -1599,6 +1770,17 @@ if finalResult.IsErr() {
 
 - [func Or\[T any\]\(v T, err error, defaultValue T\) T](<#Or>)
 - [func OrZero\[T any\]\(v T, err error\) T](<#OrZero>)
+- [type Pair](<#Pair>)
+  - [func NewPair\[A, B any\]\(first A, second B\) Pair\[A, B\]](<#NewPair>)
+  - [func \(p Pair\[A, B\]\) First\(\) A](<#Pair[A, B].First>)
+  - [func \(p Pair\[A, B\]\) Map\(fnA func\(A\) A, fnB func\(B\) B\) Pair\[A, B\]](<#Pair[A, B].Map>)
+  - [func \(p Pair\[A, B\]\) MapFirst\(fn func\(A\) A\) Pair\[A, B\]](<#Pair[A, B].MapFirst>)
+  - [func \(p Pair\[A, B\]\) MapSecond\(fn func\(B\) B\) Pair\[A, B\]](<#Pair[A, B].MapSecond>)
+  - [func \(p Pair\[A, B\]\) Second\(\) B](<#Pair[A, B].Second>)
+  - [func \(p Pair\[A, B\]\) Swap\(\) Pair\[B, A\]](<#Pair[A, B].Swap>)
+  - [func \(p Pair\[A, B\]\) Values\(\) \(A, B\)](<#Pair[A, B].Values>)
+  - [func \(p Pair\[A, B\]\) WithFirst\(first A\) Pair\[A, B\]](<#Pair[A, B].WithFirst>)
+  - [func \(p Pair\[A, B\]\) WithSecond\(second B\) Pair\[A, B\]](<#Pair[A, B].WithSecond>)
 - [type Result](<#Result>)
   - [func Err\[T any\]\(err error\) Result\[T\]](<#Err>)
   - [func Of\[T any\]\(value T, err error\) Result\[T\]](<#Of>)
@@ -1630,6 +1812,107 @@ func OrZero[T any](v T, err error) T
 ```
 
 OrZero is a utility function that simplifies handling of \(value, error\) returns. It returns the value if err is nil, otherwise it returns the zero value of the type.
+
+<a name="Pair"></a>
+## type [Pair](<https://github.com/goexts/generic/blob/main/res/pair.go#L6-L9>)
+
+Pair represents an immutable pair of two different types A and B. It's useful for combining two values of different types into a single value that can be passed around and manipulated as a unit.
+
+```go
+type Pair[A, B any] struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewPair"></a>
+### func [NewPair](<https://github.com/goexts/generic/blob/main/res/pair.go#L12>)
+
+```go
+func NewPair[A, B any](first A, second B) Pair[A, B]
+```
+
+NewPair creates a new Pair with the given values.
+
+<a name="Pair[A, B].First"></a>
+### func \(Pair\[A, B\]\) [First](<https://github.com/goexts/generic/blob/main/res/pair.go#L20>)
+
+```go
+func (p Pair[A, B]) First() A
+```
+
+First returns the first value of the pair.
+
+<a name="Pair[A, B].Map"></a>
+### func \(Pair\[A, B\]\) [Map](<https://github.com/goexts/generic/blob/main/res/pair.go#L36>)
+
+```go
+func (p Pair[A, B]) Map(fnA func(A) A, fnB func(B) B) Pair[A, B]
+```
+
+Map applies the given functions to the pair's values and returns a new pair. This allows transforming both values in the pair in a single operation.
+
+<a name="Pair[A, B].MapFirst"></a>
+### func \(Pair\[A, B\]\) [MapFirst](<https://github.com/goexts/generic/blob/main/res/pair.go#L45>)
+
+```go
+func (p Pair[A, B]) MapFirst(fn func(A) A) Pair[A, B]
+```
+
+MapFirst applies the given function to the first value of the pair. The second value remains unchanged.
+
+<a name="Pair[A, B].MapSecond"></a>
+### func \(Pair\[A, B\]\) [MapSecond](<https://github.com/goexts/generic/blob/main/res/pair.go#L54>)
+
+```go
+func (p Pair[A, B]) MapSecond(fn func(B) B) Pair[A, B]
+```
+
+MapSecond applies the given function to the second value of the pair. The first value remains unchanged.
+
+<a name="Pair[A, B].Second"></a>
+### func \(Pair\[A, B\]\) [Second](<https://github.com/goexts/generic/blob/main/res/pair.go#L25>)
+
+```go
+func (p Pair[A, B]) Second() B
+```
+
+Second returns the second value of the pair.
+
+<a name="Pair[A, B].Swap"></a>
+### func \(Pair\[A, B\]\) [Swap](<https://github.com/goexts/generic/blob/main/res/pair.go#L62>)
+
+```go
+func (p Pair[A, B]) Swap() Pair[B, A]
+```
+
+Swap returns a new Pair with the values swapped.
+
+<a name="Pair[A, B].Values"></a>
+### func \(Pair\[A, B\]\) [Values](<https://github.com/goexts/generic/blob/main/res/pair.go#L30>)
+
+```go
+func (p Pair[A, B]) Values() (A, B)
+```
+
+Values returns both values from the pair.
+
+<a name="Pair[A, B].WithFirst"></a>
+### func \(Pair\[A, B\]\) [WithFirst](<https://github.com/goexts/generic/blob/main/res/pair.go#L70>)
+
+```go
+func (p Pair[A, B]) WithFirst(first A) Pair[A, B]
+```
+
+WithFirst returns a new Pair with the first value replaced by the given value.
+
+<a name="Pair[A, B].WithSecond"></a>
+### func \(Pair\[A, B\]\) [WithSecond](<https://github.com/goexts/generic/blob/main/res/pair.go#L78>)
+
+```go
+func (p Pair[A, B]) WithSecond(second B) Pair[A, B]
+```
+
+WithSecond returns a new Pair with the second value replaced by the given value.
 
 <a name="Result"></a>
 ## type [Result](<https://github.com/goexts/generic/blob/main/res/res.go#L9-L12>)

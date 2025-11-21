@@ -88,16 +88,42 @@ func Then[T, K any](p1 *Promise[T], f func(val T) (K, error)) *Promise[K] {
 //  2. The order of the values in the resolved slice corresponds to the order of the input promises
 func All[T any](ps ...*Promise[T]) *Promise[[]T] {
 	return New(func(resolve func([]T), reject func(error)) {
-		vals := make([]T, 0, len(ps))
-		for _, p := range ps {
-			val, err := p.Await()
-			if err != nil {
-				reject(err)
-				return
-			}
-			vals = append(vals, val)
+		if len(ps) == 0 {
+			resolve([]T{})
+			return
 		}
-		resolve(vals)
+
+		var wg sync.WaitGroup
+		wg.Add(len(ps))
+
+		vals := make([]T, len(ps))
+		errs := make(chan error, 1) // Buffered channel to prevent goroutine leak on reject
+
+		for i, p := range ps {
+			go func(i int, p *Promise[T]) {
+				defer wg.Done()
+				val, err := p.Await()
+				if err != nil {
+					// Non-blocking send. If another goroutine has already sent an error,
+					// this will be ignored, which is the desired behavior for All.
+					select {
+					case errs <- err:
+					default:
+					}
+					return
+				}
+				vals[i] = val
+			}(i, p)
+		}
+
+		wg.Wait()
+		close(errs)
+
+		if err, ok := <-errs; ok {
+			reject(err)
+		} else {
+			resolve(vals)
+		}
 	})
 }
 
@@ -212,15 +238,22 @@ func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T] {
 // original promise, after onFinally has completed.
 func (p *Promise[T]) Finally(onFinally func()) *Promise[T] {
 	return New(func(resolve func(T), reject func(error)) {
+		val, err := p.Await()
+
 		defer func() {
 			if r := recover(); r != nil {
-				panicErr := fmt.Errorf("panic in Finally: %v", r)
-				reject(panicErr)
+				// If onFinally panics, it should not suppress the original error.
+				// We create a new error that includes both pieces of information.
+				if err != nil {
+					reject(fmt.Errorf("panic in Finally: %v (original error: %w)", r, err))
+				} else {
+					reject(fmt.Errorf("panic in Finally: %v", r))
+				}
 			}
-			onFinally()
 		}()
 
-		val, err := p.Await()
+		onFinally()
+
 		if err != nil {
 			reject(err)
 		} else {

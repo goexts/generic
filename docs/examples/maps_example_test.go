@@ -147,14 +147,14 @@ func ExampleRandom() {
 	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
 
 	// Get a random element
-	k, v, ok := maps.Random(m)
+	_, _, ok := maps.Random(m)
 	if ok {
 		// To make the output predictable for the example test, we need to know which element comes first.
 		// We'll sort the keys to find the "first" one in a deterministic way for the output.
 		keys := maps.Keys(m)
 		sort.Strings(keys)
 		// Let's assume the random function picked the first element in the sorted list of keys.
-		k, v = keys[0], m[keys[0]]
+		k, v := keys[0], m[keys[0]]
 		fmt.Printf("A random element: %s -> %d\n", k, v)
 	}
 
@@ -171,14 +171,12 @@ func ExampleRandom() {
 func ExampleRandomValue() {
 	// For a stable example, we simulate a predictable "random" choice.
 	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
-	keys := maps.Keys(m)
-	sort.Strings(keys)
-	// Assume the random value corresponds to the first key in sorted order.
-	value := m[keys[0]]
 
 	value, ok := maps.RandomValue(m)
 	if ok {
 		// Overwrite with predictable value for test stability.
+		keys := maps.Keys(m)
+		sort.Strings(keys)
 		value = m[keys[0]]
 	}
 	fmt.Printf("Random value found: %t (e.g., %d)\n", ok, value)
@@ -201,12 +199,12 @@ func ExampleToKVs() {
 // ExampleRandomKey demonstrates getting a random key from a map.
 func ExampleRandomKey() {
 	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
-	key, ok := maps.RandomKey(m)
+	_, ok := maps.RandomKey(m)
 	if ok {
 		// For a stable example, we sort the keys and pick the first one.
 		keys := maps.Keys(m)
 		sort.Strings(keys)
-		key = keys[0] // Make output predictable
+		key := keys[0] // Make output predictable
 
 		fmt.Printf("A random key (e.g., %q) was found: %t", key, ok)
 	}
@@ -224,11 +222,11 @@ func ExampleFirstKeyOrRandom() {
 	fmt.Printf("Found key: %s\n", key1)
 
 	// Case 2: No key is found. The result is a random key from the map.
-	key2 := maps.FirstKeyOrRandom(m, "x", "y")
+	_ = maps.FirstKeyOrRandom(m, "x", "y")
 	// For a stable example, we make the "random" choice predictable.
 	keys := maps.Keys(m)
 	sort.Strings(keys)
-	key2 = keys[0] // Make output predictable
+	key2 := keys[0] // Make output predictable
 	fmt.Printf("Random fallback key (e.g., %q) is a valid key: %t\n", key2, m[key2] != 0)
 
 	// Output:
