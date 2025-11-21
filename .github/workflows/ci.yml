@@ -1,0 +1,46 @@
+name: CI Checks
+
+# This workflow runs on every pull request to the main branch.
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '^1.23.0'
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          # Use a specific v2 version of golangci-lint
+          version: v2.4.0
+          # The action will automatically use .golangci.yml from the repository root
+          working-directory: .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '^1.23.0' # The Go version to download (if necessary) and use.
+
+      - name: Run tests
+        run: make test

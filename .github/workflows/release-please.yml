@@ -15,41 +15,6 @@ permissions:
   checks: write
 
 jobs:
-  lint:
-    if: "!contains(github.event.head_commit.message, 'chore(main)')"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '^1.23.0'
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          # Use a specific v2 version of golangci-lint
-          version: v2.4.0
-          # The action will automatically use .golangci.yml from the repository root
-          working-directory: .
-
-  test:
-    if: "!contains(github.event.head_commit.message, 'chore(main)')"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '^1.23.0' # The Go version to download (if necessary) and use.
-
-      - name: Run tests
-        run: make test
-
   release:
     # The release job depends on the test job succeeding.
     runs-on: ubuntu-latest
