@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.0](https://github.com/goexts/generic/compare/v0.11.0...v0.12.0) (2025-11-21)
+
+
+### Features
+
+* **ci:** update CI workflows to use go-version-file and simplify release-please config ([58d5b4b](https://github.com/goexts/generic/commit/58d5b4b9d75017d936436464e223a3d9fbee2075))
+* **maps:** add FirstKey and FirstKeyBy functions with comprehensive tests and examples ([2e425c2](https://github.com/goexts/generic/commit/2e425c230523704905260168b3da0d9fcdbac482))
+* **maps:** add FirstValue and FirstValueBy functions with comprehensive tests and examples ([6479945](https://github.com/goexts/generic/commit/6479945907ba055f8eec5aea3a56ffe12e43a872))
+* **maps:** add Random, RandomKey, RandomValue and FirstKeyOrRandom, FirstValueOrRandom functions with tests and examples ([ec6f3e8](https://github.com/goexts/generic/commit/ec6f3e831c62a7d5056900602f1d15955605b211))
+* **maps:** improve random functions test stability by adding predictable outputs in examples ([e3bb3b0](https://github.com/goexts/generic/commit/e3bb3b0208aeac0938b792617b8ceb86cfe28c0d))
+* **promise:** improve All and Finally implementations with concurrent execution and better error handling ([64fe79e](https://github.com/goexts/generic/commit/64fe79e29d1190793fcc8db13b35b485f1dd5659))
+* **res:** add generic Pair type with utility methods and comprehensive tests ([f3b6616](https://github.com/goexts/generic/commit/f3b66168296b52c6ba4280a3cc07ece288cdc981))
+
 ## [0.11.0](https://github.com/goexts/generic/compare/v0.10.0...v0.11.0) (2025-11-06)
 
 
