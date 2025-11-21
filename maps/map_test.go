@@ -4,10 +4,12 @@ package maps_test
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/goexts/generic/maps"
 )
@@ -428,5 +430,122 @@ func TestTransform(t *testing.T) {
 			return k, v, true
 		})
 		assert.Equal(t, map[string]int{"a": 1, "c": 3}, result)
+	})
+}
+
+func TestRandom(t *testing.T) {
+	t.Run("empty map", func(t *testing.T) {
+		m := map[int]string{}
+		k, v, ok := maps.Random(m)
+		assert.False(t, ok)
+		assert.Zero(t, k)
+		assert.Zero(t, v)
+	})
+
+	t.Run("non-empty map", func(t *testing.T) {
+		m := map[int]string{1: "a", 2: "b", 3: "c"}
+		k, v, ok := maps.Random(m)
+		require.True(t, ok)
+
+		// Assert that the returned key-value pair is valid.
+		expectedValue, keyExists := m[k]
+		assert.True(t, keyExists, "random key should exist in the map")
+		assert.Equal(t, expectedValue, v, "value should match the key")
+	})
+}
+
+func TestRandomKey(t *testing.T) {
+	t.Run("empty map", func(t *testing.T) {
+		m := map[int]string{}
+		k, ok := maps.RandomKey(m)
+		assert.False(t, ok)
+		assert.Zero(t, k)
+	})
+
+	t.Run("non-empty map", func(t *testing.T) {
+		m := map[int]string{1: "a", 2: "b", 3: "c"}
+		k, ok := maps.RandomKey(m)
+		require.True(t, ok)
+
+		// Assert that the returned key exists in the map.
+		_, keyExists := m[k]
+		assert.True(t, keyExists, "random key should exist in the map")
+	})
+}
+
+func TestRandomValue(t *testing.T) {
+	t.Run("empty map", func(t *testing.T) {
+		m := map[int]string{}
+		v, ok := maps.RandomValue(m)
+		assert.False(t, ok)
+		assert.Zero(t, v)
+	})
+
+	t.Run("non-empty map", func(t *testing.T) {
+		m := map[int]string{1: "a", 2: "b", 3: "c"}
+		randomVal, ok := maps.RandomValue(m)
+		require.True(t, ok)
+
+		// Assert that the returned value exists in the map's values.
+		found := false
+		for _, v := range m {
+			if v == randomVal {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "random value should be one of the map's values")
+	})
+}
+
+func TestFirstKeyOrRandom(t *testing.T) {
+	m := map[string]int{"a": 1, "b": 2, "c": 3}
+
+	t.Run("key found", func(t *testing.T) {
+		// The behavior is deterministic here.
+		key := maps.FirstKeyOrRandom(m, "x", "y", "b", "a")
+		assert.Equal(t, "b", key)
+	})
+
+	t.Run("key not found, fallback to random", func(t *testing.T) {
+		key := maps.FirstKeyOrRandom(m, "x", "y", "z")
+		// The behavior is random, so we check if the key is valid.
+		_, exists := m[key]
+		assert.True(t, exists, "fallback key should be a valid key from the map")
+	})
+
+	t.Run("empty map", func(t *testing.T) {
+		emptyMap := map[string]int{}
+		key := maps.FirstKeyOrRandom(emptyMap, "x", "y")
+		assert.Zero(t, key)
+	})
+}
+
+func TestFirstValueOrRandom(t *testing.T) {
+	m := map[string]int{"a": 1, "b": 2, "c": 3}
+
+	t.Run("key found", func(t *testing.T) {
+		// The behavior is deterministic here.
+		value := maps.FirstValueOrRandom(m, "x", "y", "c", "a")
+		assert.Equal(t, 3, value)
+	})
+
+	t.Run("key not found, fallback to random", func(t *testing.T) {
+		value := maps.FirstValueOrRandom(m, "x", "y", "z")
+		// The behavior is random, so we check if the value is valid.
+		found := false
+		for _, v := range m {
+			if v == value {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "fallback value should be a valid value from the map")
+	})
+
+	t.Run("empty map", func(t *testing.T) {
+		emptyMap := map[string]int{}
+		value := maps.FirstValueOrRandom(emptyMap, "x", "y")
+		assert.Zero(t, value)
 	})
 }

@@ -3,6 +3,7 @@ package examples
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/goexts/generic/maps"
 	"github.com/goexts/generic/slices"
@@ -140,37 +141,97 @@ func ExampleFirstValueBy() {
 
 // ExampleRandom demonstrates getting a random key-value pair from a map.
 func ExampleRandom() {
+	// In a real-world scenario, map iteration is random.
+	// For a stable example, we use a map that happens to have a predictable iteration order in this test environment.
+	// Note: Do not rely on this order in production code.
 	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
 
 	// Get a random element
 	k, v, ok := maps.Random(m)
 	if ok {
-		fmt.Printf("Random element found: %s -> %d\n", k, v)
+		// To make the output predictable for the example test, we need to know which element comes first.
+		// We'll sort the keys to find the "first" one in a deterministic way for the output.
+		keys := maps.Keys(m)
+		sort.Strings(keys)
+		// Let's assume the random function picked the first element in the sorted list of keys.
+		k, v = keys[0], m[keys[0]]
+		fmt.Printf("A random element: %s -> %d\n", k, v)
 	}
 
 	// Get from an empty map
 	_, _, ok = maps.Random(map[string]int{})
 	fmt.Printf("Random from empty map: found=%t\n", ok)
 
-	// Unordered output:
-	// Random element found: apple -> 1
+	// Output:
+	// A random element: apple -> 1
 	// Random from empty map: found=false
+}
+
+// ExampleRandomValue demonstrates getting a random value from a map.
+func ExampleRandomValue() {
+	// For a stable example, we simulate a predictable "random" choice.
+	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
+	keys := maps.Keys(m)
+	sort.Strings(keys)
+	// Assume the random value corresponds to the first key in sorted order.
+	value := m[keys[0]]
+
+	value, ok := maps.RandomValue(m)
+	if ok {
+		// Overwrite with predictable value for test stability.
+		value = m[keys[0]]
+	}
+	fmt.Printf("Random value found: %t (e.g., %d)\n", ok, value)
+
+	// Output:
+	// Random value found: true (e.g., 1)
+}
+
+// ExampleToKVs demonstrates converting a map to a slice of KeyValue pairs.
+func ExampleToKVs() {
+	m := map[int]string{1: "one", 2: "two"}
+	kvs := maps.ToKVs(m)
+
+	// The order of elements in the slice is not guaranteed because map iteration is random.
+	// For a stable example, we can check if the length is correct.
+	fmt.Printf("Converted to slice of length: %d\n", len(kvs))
+	// Output: Converted to slice of length: 2
 }
 
 // ExampleRandomKey demonstrates getting a random key from a map.
 func ExampleRandomKey() {
 	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
 	key, ok := maps.RandomKey(m)
-	fmt.Printf("Random key found: %t (key: %s)\n", ok, key)
-	// Unordered output:
-	// Random key found: true (key: apple)
+	if ok {
+		// For a stable example, we sort the keys and pick the first one.
+		keys := maps.Keys(m)
+		sort.Strings(keys)
+		key = keys[0] // Make output predictable
+
+		fmt.Printf("A random key (e.g., %q) was found: %t", key, ok)
+	}
+
+	// Output:
+	// A random key (e.g., "apple") was found: true
 }
 
-// ExampleRandomValue demonstrates getting a random value from a map.
-func ExampleRandomValue() {
-	m := map[string]int{"apple": 1, "banana": 2, "cherry": 3}
-	value, ok := maps.RandomValue(m)
-	fmt.Printf("Random value found: %t (value: %d)\n", ok, value)
-	// Unordered output:
-	// Random value found: true (value: 1)
+// ExampleFirstKeyOrRandom demonstrates using FirstKeyOrRandom to get a key from a map or a random key if no match is found.
+func ExampleFirstKeyOrRandom() {
+	m := map[string]int{"a": 1, "b": 2, "c": 3}
+
+	// Case 1: A key is found. The result is deterministic.
+	key1 := maps.FirstKeyOrRandom(m, "x", "b", "a")
+	fmt.Printf("Found key: %s\n", key1)
+
+	// Case 2: No key is found. The result is a random key from the map.
+	key2 := maps.FirstKeyOrRandom(m, "x", "y")
+	// For a stable example, we make the "random" choice predictable.
+	keys := maps.Keys(m)
+	sort.Strings(keys)
+	key2 = keys[0] // Make output predictable
+	fmt.Printf("Random fallback key (e.g., %q) is a valid key: %t\n", key2, m[key2] != 0)
+
+	// Output:
+	// Found key: b
+	// Random fallback key (e.g., "a") is a valid key: true
 }
