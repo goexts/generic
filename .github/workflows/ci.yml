@@ -1,10 +1,7 @@
 name: CI Checks
 
 # This workflow runs on every pull request to the main branch.
-on:
-  pull_request:
-    branches:
-      - '**'
+on: [pull_request]
 
 permissions:
   contents: read
