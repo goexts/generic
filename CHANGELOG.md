@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.0](https://github.com/goexts/generic/compare/v0.12.0...v0.13.0) (2025-11-24)
+
+
+### Features
+
+* **cmp:** migrate to stdlib cmp package and generate adapter code ([c5d8f2e](https://github.com/goexts/generic/commit/c5d8f2ef66de9cd2359786119a4d6507142050cf))
+* **cmp:** update API docs to reflect stdlib cmp package migration and add new functions ([de860a3](https://github.com/goexts/generic/commit/de860a3b2864dca5789127ae481093fa114f227c))
+
 ## [0.12.0](https://github.com/goexts/generic/compare/v0.11.0...v0.12.0) (2025-11-21)
 
 
