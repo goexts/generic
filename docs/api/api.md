@@ -87,6 +87,8 @@ Try attempts to perform a type assertion of v to type T. It is a direct, generic
 import "github.com/goexts/generic/cmp"
 ```
 
+Package cmp contains generated code by adptool.
+
 Package cmp provides generic, type\-safe functions for comparing ordered types.
 
 This package offers fundamental comparison utilities like Min, Max, and Clamp. Its central function, Compare, is designed to be fully compatible with the standard library's \`slices.SortFunc\`, making it easy to sort slices of any ordered type.
@@ -140,35 +142,36 @@ For more details, refer to the function documentation.
 
 ## Index
 
-- [func Clamp\[T constraints.Ordered\]\(v, lo, hi T\) T](<#Clamp>)
-- [func Compare\[T constraints.Ordered\]\(a, b T\) int](<#Compare>)
+- [func Clamp\[T Ordered\]\(v, lo, hi T\) T](<#Clamp>)
+- [func Compare\[T cmp.Ordered\]\(x, y T\) int](<#Compare>)
 - [func IsZero\[T comparable\]\(v T\) bool](<#IsZero>)
-- [func Max\[T constraints.Ordered\]\(a, b T\) T](<#Max>)
-- [func Min\[T constraints.Ordered\]\(a, b T\) T](<#Min>)
+- [func Less\[T cmp.Ordered\]\(x, y T\) bool](<#Less>)
+- [func Max\[T Ordered\]\(a, b T\) T](<#Max>)
+- [func Min\[T Ordered\]\(a, b T\) T](<#Min>)
+- [func Or\[T comparable\]\(vals ...T\) T](<#Or>)
+- [type Ordered](<#Ordered>)
 
 
 <a name="Clamp"></a>
-## func [Clamp](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L41>)
+## func [Clamp](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L26>)
 
 ```go
-func Clamp[T constraints.Ordered](v, lo, hi T) T
+func Clamp[T Ordered](v, lo, hi T) T
 ```
 
 Clamp returns v clamped to the inclusive range \[lo, hi\]. If v is less than lo, it returns lo. If v is greater than hi, it returns hi. Otherwise, it returns v.
 
 <a name="Compare"></a>
-## func [Compare](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L11>)
+## func [Compare](<https://github.com/goexts/generic/blob/main/cmp/cmp.adapter.go#L14>)
 
 ```go
-func Compare[T constraints.Ordered](a, b T) int
+func Compare[T cmp.Ordered](x, y T) int
 ```
 
-Compare returns an integer comparing two values. The result will be 0 if a == b, \-1 if a \< b, and \+1 if a \> b.
 
-This function is designed to be fully compatible with the standard library's \`slices.SortFunc\`, making it a convenient tool for sorting slices of any ordered type.
 
 <a name="IsZero"></a>
-## func [IsZero](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L53>)
+## func [IsZero](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L38>)
 
 ```go
 func IsZero[T comparable](v T) bool
@@ -176,23 +179,50 @@ func IsZero[T comparable](v T) bool
 
 IsZero returns true if v is the zero value for its type. It is a generic\-safe way to check for zero values.
 
-<a name="Max"></a>
-## func [Max](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L30>)
+<a name="Less"></a>
+## func [Less](<https://github.com/goexts/generic/blob/main/cmp/cmp.adapter.go#L18>)
 
 ```go
-func Max[T constraints.Ordered](a, b T) T
+func Less[T cmp.Ordered](x, y T) bool
+```
+
+
+
+<a name="Max"></a>
+## func [Max](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L15>)
+
+```go
+func Max[T Ordered](a, b T) T
 ```
 
 Max returns the larger of a or b.
 
 <a name="Min"></a>
-## func [Min](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L22>)
+## func [Min](<https://github.com/goexts/generic/blob/main/cmp/cmp.go#L7>)
 
 ```go
-func Min[T constraints.Ordered](a, b T) T
+func Min[T Ordered](a, b T) T
 ```
 
 Min returns the smaller of a or b.
+
+<a name="Or"></a>
+## func [Or](<https://github.com/goexts/generic/blob/main/cmp/cmp.adapter.go#L22>)
+
+```go
+func Or[T comparable](vals ...T) T
+```
+
+
+
+<a name="Ordered"></a>
+## type [Ordered](<https://github.com/goexts/generic/blob/main/cmp/cmp.adapter.go#L12>)
+
+
+
+```go
+type Ordered = cmp.Ordered
+```
 
 # cond
 
@@ -1441,7 +1471,7 @@ This creates a readable, non\-blocking sequence of dependent operations.
 
 
 <a name="Await"></a>
-## func [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L248>)
+## func [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L281>)
 
 ```go
 func Await[T any](p *Promise[T]) (T, error)
@@ -1487,7 +1517,7 @@ Notes:
 2. The order of the values in the resolved slice corresponds to the order of the input promises
 
 <a name="Async"></a>
-### func [Async](<https://github.com/goexts/generic/blob/main/promise/promise.go#L235>)
+### func [Async](<https://github.com/goexts/generic/blob/main/promise/promise.go#L268>)
 
 ```go
 func Async[T any](f func() (T, error)) *Promise[T]
@@ -1533,7 +1563,7 @@ Notes:
 3. If the transformation function f returns an error, it is propagated
 
 <a name="Promise[T].Await"></a>
-### func \(\*Promise\[T\]\) [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L136>)
+### func \(\*Promise\[T\]\) [Await](<https://github.com/goexts/generic/blob/main/promise/promise.go#L162>)
 
 ```go
 func (p *Promise[T]) Await() (T, error)
@@ -1542,7 +1572,7 @@ func (p *Promise[T]) Await() (T, error)
 Await blocks until the promise is settled and returns the resulting value and error. It is the primary way to get the result of a promise.
 
 <a name="Promise[T].Catch"></a>
-### func \(\*Promise\[T\]\) [Catch](<https://github.com/goexts/generic/blob/main/promise/promise.go#L188>)
+### func \(\*Promise\[T\]\) [Catch](<https://github.com/goexts/generic/blob/main/promise/promise.go#L214>)
 
 ```go
 func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T]
@@ -1551,7 +1581,7 @@ func (p *Promise[T]) Catch(onRejected func(error) (T, error)) *Promise[T]
 Catch attaches a callback that executes when the promise is rejected. It allows for error handling and recovery. The onRejected callback can return a new value to fulfill the promise, or a new error to continue the rejection chain.
 
 <a name="Promise[T].Finally"></a>
-### func \(\*Promise\[T\]\) [Finally](<https://github.com/goexts/generic/blob/main/promise/promise.go#L213>)
+### func \(\*Promise\[T\]\) [Finally](<https://github.com/goexts/generic/blob/main/promise/promise.go#L239>)
 
 ```go
 func (p *Promise[T]) Finally(onFinally func()) *Promise[T]
@@ -1560,7 +1590,7 @@ func (p *Promise[T]) Finally(onFinally func()) *Promise[T]
 Finally attaches a callback that executes when the promise is settled \(either fulfilled or rejected\). It is useful for cleanup logic. The returned promise will be settled with the same value or error as the original promise, after onFinally has completed.
 
 <a name="Promise[T].Then"></a>
-### func \(\*Promise\[T\]\) [Then](<https://github.com/goexts/generic/blob/main/promise/promise.go#L144>)
+### func \(\*Promise\[T\]\) [Then](<https://github.com/goexts/generic/blob/main/promise/promise.go#L170>)
 
 ```go
 func (p *Promise[T]) Then(onFulfilled func(T) T) *Promise[T]
@@ -1569,7 +1599,7 @@ func (p *Promise[T]) Then(onFulfilled func(T) T) *Promise[T]
 Then attaches a callback that executes when the promise is fulfilled. It returns a new promise that resolves with the result of the onFulfilled callback. If the original promise is rejected, the new promise is rejected with the same error.
 
 <a name="Promise[T].ThenWithPromise"></a>
-### func \(\*Promise\[T\]\) [ThenWithPromise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L162>)
+### func \(\*Promise\[T\]\) [ThenWithPromise](<https://github.com/goexts/generic/blob/main/promise/promise.go#L188>)
 
 ```go
 func (p *Promise[T]) ThenWithPromise(onFulfilled func(T) *Promise[T]) *Promise[T]
