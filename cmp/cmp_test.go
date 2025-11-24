@@ -8,16 +8,6 @@ import (
 	"github.com/goexts/generic/cmp"
 )
 
-func TestCompare(t *testing.T) {
-	assert.Equal(t, -1, cmp.Compare(1, 2))
-	assert.Equal(t, 0, cmp.Compare(2, 2))
-	assert.Equal(t, 1, cmp.Compare(2, 1))
-
-	assert.Equal(t, -1, cmp.Compare("a", "b"))
-	assert.Equal(t, 0, cmp.Compare("b", "b"))
-	assert.Equal(t, 1, cmp.Compare("b", "a"))
-}
-
 func TestMin(t *testing.T) {
 	assert.Equal(t, 1, cmp.Min(1, 2))
 	assert.Equal(t, 1, cmp.Min(2, 1))

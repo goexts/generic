@@ -1,25 +1,10 @@
 package cmp
 
-import "golang.org/x/exp/constraints"
-
-// Compare returns an integer comparing two values.
-// The result will be 0 if a == b, -1 if a < b, and +1 if a > b.
-//
-// This function is designed to be fully compatible with the standard library's
-// `slices.SortFunc`, making it a convenient tool for sorting slices of any
-// ordered type.
-func Compare[T constraints.Ordered](a, b T) int {
-	if a < b {
-		return -1
-	}
-	if a > b {
-		return 1
-	}
-	return 0
-}
+//go:generate adptool .
+//go:adapter:package cmp
 
 // Min returns the smaller of a or b.
-func Min[T constraints.Ordered](a, b T) T {
+func Min[T Ordered](a, b T) T {
 	if a < b {
 		return a
 	}
@@ -27,7 +12,7 @@ func Min[T constraints.Ordered](a, b T) T {
 }
 
 // Max returns the larger of a or b.
-func Max[T constraints.Ordered](a, b T) T {
+func Max[T Ordered](a, b T) T {
 	if a > b {
 		return a
 	}
@@ -38,7 +23,7 @@ func Max[T constraints.Ordered](a, b T) T {
 // If v is less than lo, it returns lo.
 // If v is greater than hi, it returns hi.
 // Otherwise, it returns v.
-func Clamp[T constraints.Ordered](v, lo, hi T) T {
+func Clamp[T Ordered](v, lo, hi T) T {
 	if v < lo {
 		return lo
 	}
