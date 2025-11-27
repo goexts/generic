@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/goexts/generic/compare/v0.13.0...v0.14.0) (2025-11-27)
+
+
+### Features
+
+* **maps:** add FirstEntry and FirstEntryBy functions for key-value pair lookups ([81904c8](https://github.com/goexts/generic/commit/81904c84db47ae116abaa084f1e94cf72f41f038))
+
 ## [0.13.0](https://github.com/goexts/generic/compare/v0.12.0...v0.13.0) (2025-11-24)
 
 
