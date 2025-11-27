@@ -908,6 +908,8 @@ Package maps implements the functions, types, and interfaces for the module.
 - [func Transform\[M \~map\[K\]V, K comparable, V any, TK comparable, TV any\]\(m M, f func\(K, V\) \(TK, TV, bool\)\) map\[TK\]TV](<#Transform>)
 - [func Values\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]V](<#Values>)
 - [type KeyValue](<#KeyValue>)
+  - [func FirstEntry\[K comparable, V any\]\(m map\[K\]V, keys ...K\) \(KeyValue\[K, V\], bool\)](<#FirstEntry>)
+  - [func FirstEntryBy\[ListK comparable, MapK comparable, V any\]\(m map\[MapK\]V, transform func\(ListK\) MapK, keys ...ListK\) \(KeyValue\[ListK, V\], bool\)](<#FirstEntryBy>)
   - [func KV\[K comparable, V any\]\(key K, value V\) KeyValue\[K, V\]](<#KV>)
   - [func KVs\[K comparable, V any\]\(kvs ...KeyValue\[K, V\]\) \[\]KeyValue\[K, V\]](<#KVs>)
   - [func ToKVs\[M \~map\[K\]V, K comparable, V any\]\(m M\) \[\]KeyValue\[K, V\]](<#ToKVs>)
@@ -1107,7 +1109,7 @@ If no transformed value from 'keys' exists in 'm', it returns the zero value of 
 ```
 
 <a name="FirstValueOrRandom"></a>
-## func [FirstValueOrRandom](<https://github.com/goexts/generic/blob/main/maps/map.go#L304>)
+## func [FirstValueOrRandom](<https://github.com/goexts/generic/blob/main/maps/map.go#L357>)
 
 ```go
 func FirstValueOrRandom[K comparable, V any](m map[K]V, keys ...K) V
@@ -1170,7 +1172,7 @@ func MergeWith[M ~map[K]V, K comparable, V any](dest M, src M, merge func(key K,
 MergeWith merges the values of src into dest using the provided merge function. If a key exists in both maps, the merge function will be called to determine the final value.
 
 <a name="Random"></a>
-## func [Random](<https://github.com/goexts/generic/blob/main/maps/map.go#L321>)
+## func [Random](<https://github.com/goexts/generic/blob/main/maps/map.go#L374>)
 
 ```go
 func Random[K comparable, V any](m map[K]V) (K, V, bool)
@@ -1186,7 +1188,7 @@ The zero values for the key and value, and false if the map is empty.
 ```
 
 <a name="RandomKey"></a>
-## func [RandomKey](<https://github.com/goexts/generic/blob/main/maps/map.go#L338>)
+## func [RandomKey](<https://github.com/goexts/generic/blob/main/maps/map.go#L391>)
 
 ```go
 func RandomKey[K comparable, V any](m map[K]V) (K, bool)
@@ -1202,7 +1204,7 @@ The zero value for the key type and false if the map is empty.
 ```
 
 <a name="RandomValue"></a>
-## func [RandomValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L354>)
+## func [RandomValue](<https://github.com/goexts/generic/blob/main/maps/map.go#L407>)
 
 ```go
 func RandomValue[K comparable, V any](m map[K]V) (V, bool)
@@ -1273,6 +1275,59 @@ type KeyValue[K comparable, V any] struct {
     Val V
 }
 ```
+
+<a name="FirstEntry"></a>
+### func [FirstEntry](<https://github.com/goexts/generic/blob/main/maps/map.go#L313>)
+
+```go
+func FirstEntry[K comparable, V any](m map[K]V, keys ...K) (KeyValue[K, V], bool)
+```
+
+FirstEntry searches for the first key from the provided list that exists in the given map. It returns the found key\-value pair and true if a key is found, otherwise it returns zero values and false.
+
+Parameters:
+
+```
+m: The map to search within.
+keys: A variadic list of keys to look for in the map.
+```
+
+Returns:
+
+```
+A KeyValue containing the first key from 'keys' that exists in 'm' and its corresponding value, and true.
+If no key from 'keys' exists in 'm', it returns zero values and false.
+```
+
+<a name="FirstEntryBy"></a>
+### func [FirstEntryBy](<https://github.com/goexts/generic/blob/main/maps/map.go#L344>)
+
+```go
+func FirstEntryBy[ListK comparable, MapK comparable, V any](m map[MapK]V, transform func(ListK) MapK, keys ...ListK) (KeyValue[ListK, V], bool)
+```
+
+FirstEntryBy searches for the first key from the provided list that, after being transformed by the 'transform' function, exists in the given map. It returns the original key from the list, the corresponding value from the map, and true if found. If no matching key is found, it returns zero values and false.
+
+This is useful when the keys in the list need a special comparison or normalization before being looked up in the map \(e.g., case\-insensitive string comparison\).
+
+Parameters:
+
+```
+m: The map to search within. The keys of this map are of type MapK.
+transform: A function that converts a key of type ListK to a key of type MapK.
+keys: A variadic list of keys (of type ListK) to look for in the map after transformation.
+```
+
+Returns:
+
+```
+A KeyValue containing:
+- Key: The original key from the 'keys' list (of type ListK)
+- Val: The corresponding value from the map (of type V)
+- A boolean indicating if a match was found
+```
+
+If no transformed key from 'keys' exists in 'm', it returns zero values and false.
 
 <a name="KV"></a>
 ### func [KV](<https://github.com/goexts/generic/blob/main/maps/map.go#L79>)

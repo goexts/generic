@@ -298,6 +298,59 @@ func FirstValueBy[ListK any, MapK comparable, V any](m map[MapK]V, transform fun
 	return zeroV, false
 }
 
+// FirstEntry searches for the first key from the provided list that exists in the given map.
+// It returns the found key-value pair and true if a key is found, otherwise it returns zero values and false.
+//
+// Parameters:
+//
+//	m: The map to search within.
+//	keys: A variadic list of keys to look for in the map.
+//
+// Returns:
+//
+//	A KeyValue containing the first key from 'keys' that exists in 'm' and its corresponding value, and true.
+//	If no key from 'keys' exists in 'm', it returns zero values and false.
+func FirstEntry[K comparable, V any](m map[K]V, keys ...K) (KeyValue[K, V], bool) {
+	for _, key := range keys {
+		if val, ok := m[key]; ok {
+			return KeyValue[K, V]{Key: key, Val: val}, true
+		}
+	}
+	return KeyValue[K, V]{}, false
+}
+
+// FirstEntryBy searches for the first key from the provided list that,
+// after being transformed by the 'transform' function, exists in the given map.
+// It returns the original key from the list, the corresponding value from the map, and true if found.
+// If no matching key is found, it returns zero values and false.
+//
+// This is useful when the keys in the list need a special comparison or normalization
+// before being looked up in the map (e.g., case-insensitive string comparison).
+//
+// Parameters:
+//
+//	m: The map to search within. The keys of this map are of type MapK.
+//	transform: A function that converts a key of type ListK to a key of type MapK.
+//	keys: A variadic list of keys (of type ListK) to look for in the map after transformation.
+//
+// Returns:
+//
+//	A KeyValue containing:
+//	- Key: The original key from the 'keys' list (of type ListK)
+//	- Val: The corresponding value from the map (of type V)
+//	- A boolean indicating if a match was found
+//
+// If no transformed key from 'keys' exists in 'm', it returns zero values and false.
+func FirstEntryBy[ListK comparable, MapK comparable, V any](m map[MapK]V, transform func(ListK) MapK, keys ...ListK) (KeyValue[ListK, V], bool) {
+	for _, key := range keys {
+		transformedKey := transform(key)
+		if val, ok := m[transformedKey]; ok {
+			return KeyValue[ListK, V]{Key: key, Val: val}, true
+		}
+	}
+	return KeyValue[ListK, V]{}, false
+}
+
 // FirstValueOrRandom searches for the value of the first key from a list that exists in the map.
 // If a key is found, it returns its corresponding value. If no key from the list is found in the map,
 // it returns a random value from the map. If the map is empty, it returns the zero value for the value type.
